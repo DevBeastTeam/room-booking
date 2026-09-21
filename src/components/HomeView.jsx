@@ -136,11 +136,12 @@ export default function HomeView({
   return (
     <div style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)', minHeight: '100vh', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* ── 1. CINEMATIC LUXURY HERO SECTION ── */}
-      <section style={{ position: 'relative', width: '100%', minHeight: '86vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+      <section className="hero-section" style={{ position: 'relative', width: '100%', minHeight: '86vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
         {/* Background Slide Images */}
         {HERO_SLIDES.map((slide, idx) => (
           <div
             key={idx}
+            className="hero-slide-container"
             style={{
               position: 'absolute',
               inset: 0,
@@ -151,6 +152,7 @@ export default function HomeView({
             }}
           >
             <div
+              className="hero-slide-bg"
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -164,23 +166,9 @@ export default function HomeView({
           </div>
         ))}
 
-        {/* Multi-tier Luxury Dark Vignette Overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to right, rgba(8,9,15,0.92) 0%, rgba(8,9,15,0.65) 50%, rgba(8,9,15,0.4) 100%)',
-            zIndex: 1,
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to top, #08090f 0%, rgba(8,9,15,0.2) 40%, transparent 80%)',
-            zIndex: 2,
-          }}
-        />
+        {/* Multi-tier Luxury Vignette Overlay (Adaptive to Dark & Light Themes) */}
+        <div className="hero-overlay-side" />
+        <div className="hero-overlay-bottom" />
 
         {/* Hero Content Box */}
         <div
@@ -252,12 +240,13 @@ export default function HomeView({
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <button
                 onClick={handleFloorPlans}
+                className="btn-hero-plans"
                 style={{
                   padding: '0.9rem 2.25rem',
                   borderRadius: '4px',
                   border: 'none',
                   background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 50%, #b8955a 100%)',
-                  color: '#08090f',
+                  color: '#0b0c12',
                   fontWeight: 700,
                   fontSize: '0.88rem',
                   letterSpacing: '0.08em',
@@ -285,6 +274,7 @@ export default function HomeView({
 
               <button
                 onClick={() => handleSchedule()}
+                className="btn-hero-schedule"
                 style={{
                   padding: '0.85rem 2rem',
                   borderRadius: '4px',
@@ -339,6 +329,7 @@ export default function HomeView({
         <button
           onClick={handlePrevSlide}
           aria-label="Previous slide"
+          className="hero-arrow-btn hero-arrow-prev"
           style={{
             position: 'absolute',
             left: '20px',
@@ -373,6 +364,7 @@ export default function HomeView({
         <button
           onClick={handleNextSlide}
           aria-label="Next slide"
+          className="hero-arrow-btn hero-arrow-next"
           style={{
             position: 'absolute',
             right: '20px',

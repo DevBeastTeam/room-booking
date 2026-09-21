@@ -365,7 +365,95 @@ section { position: relative; }
     rgba(8, 9, 15, 0.55) 50%,
     rgba(8, 9, 15, 0.3) 100%
   );
+  background-color: transparent !important;
   z-index: 1;
+}
+
+/* ── Hero Carousel Vignette Overlays ────────────────────────────── */
+.hero-overlay-side {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(8, 9, 15, 0.92) 0%,
+    rgba(8, 9, 15, 0.62) 50%,
+    rgba(8, 9, 15, 0.35) 100%
+  );
+  background-color: transparent !important;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-overlay-bottom {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(8, 9, 15, 0.95) 0%,
+    rgba(8, 9, 15, 0.25) 40%,
+    transparent 80%
+  );
+  background-color: transparent !important;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Light Theme: retain transparent background & delicate vignette so carousel banner images stay vivid */
+[data-theme="light"] .hero-overlay-side {
+  background: linear-gradient(
+    to right,
+    rgba(8, 9, 15, 0.82) 0%,
+    rgba(8, 9, 15, 0.5) 50%,
+    rgba(8, 9, 15, 0.2) 100%
+  ) !important;
+  background-color: transparent !important;
+}
+
+[data-theme="light"] .hero-overlay-bottom {
+  background: linear-gradient(
+    to top,
+    rgba(251, 249, 245, 0.88) 0%,
+    rgba(251, 249, 245, 0.28) 25%,
+    transparent 60%
+  ) !important;
+  background-color: transparent !important;
+}
+
+/* Ensure all hero carousel containers maintain transparent background-color */
+.hero-overlay,
+.hero-overlay-side,
+.hero-overlay-bottom,
+.hero-slide-container,
+.hero-slide-bg,
+[data-theme="light"] .hero-overlay,
+[data-theme="light"] .hero-overlay-side,
+[data-theme="light"] .hero-overlay-bottom,
+[data-theme="light"] .hero-slide-container,
+[data-theme="light"] .hero-slide-bg {
+  background-color: transparent !important;
+}
+
+.hero-arrow-btn {
+  background-color: rgba(8, 9, 15, 0.65) !important;
+  border: 1px solid rgba(201, 169, 110, 0.3) !important;
+  color: #dfc285 !important;
+}
+
+[data-theme="light"] .hero-arrow-btn {
+  background-color: rgba(8, 9, 15, 0.65) !important;
+  border: 1px solid rgba(201, 169, 110, 0.35) !important;
+  color: #dfc285 !important;
+}
+
+[data-theme="light"] .btn-hero-plans {
+  background: linear-gradient(135deg, #dfc285 0%, #c9a96e 50%, #b8955a 100%) !important;
+  color: #0b0c12 !important;
+}
+
+[data-theme="light"] .btn-hero-schedule {
+  background-color: rgba(10, 12, 20, 0.65) !important;
+  color: #dfc285 !important;
+  border: 1px solid rgba(201, 169, 110, 0.45) !important;
 }
 
 .hero-content {
@@ -758,9 +846,10 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
 [data-theme="light"] .hero-overlay {
   background: linear-gradient(
     to bottom,
-    rgba(251, 249, 245, 0.7) 0%,
-    rgba(251, 249, 245, 0.96) 100%
+    rgba(8, 9, 15, 0.7) 0%,
+    rgba(8, 9, 15, 0.35) 100%
   );
+  background-color: transparent !important;
 }
 
 [data-theme="light"] hr.gold {
@@ -770,10 +859,10 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
 /* ── COMPREHENSIVE LIGHT MODE OVERRIDES ──────────────────────── */
 
 /* 1. Canvas & Page Backgrounds */
-[data-theme="light"] [style*="#08090f"],
+[data-theme="light"] [style*="#08090f"]:not(.hero-overlay-side):not(.hero-overlay-bottom):not(.hero-overlay):not(.btn-hero-plans):not(.hero-arrow-btn):not(.hero-slide-container):not(.hero-slide-bg),
 [data-theme="light"] [style*="#07080e"],
-[data-theme="light"] [style*="rgb(8, 9, 15)"],
-[data-theme="light"] [style*="rgb(8,9,15)"],
+[data-theme="light"] [style*="rgb(8, 9, 15)"]:not(.hero-overlay-side):not(.hero-overlay-bottom):not(.hero-overlay):not(.hero-arrow-btn):not(.hero-slide-container):not(.hero-slide-bg),
+[data-theme="light"] [style*="rgb(8,9,15)"]:not(.hero-overlay-side):not(.hero-overlay-bottom):not(.hero-overlay):not(.hero-arrow-btn):not(.hero-slide-container):not(.hero-slide-bg),
 [data-theme="light"] [style*="rgb(7, 8, 14)"],
 [data-theme="light"] [style*="rgb(7,8,14)"] {
   background-color: var(--bg-page) !important;
