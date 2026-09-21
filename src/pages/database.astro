@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DatabaseManager from '../components/DatabaseManager.jsx';
+---
+
+<Layout
+  title="Database Manager | Monarch Pass Apartments"
+  description="Modular database seed, format, export, and import manager for Monarch Pass Apartments roombookingdb."
+  currentView="database"
+  hideHeaderFooter={true}
+>
+  <DatabaseManager client:only="react" />
+</Layout>

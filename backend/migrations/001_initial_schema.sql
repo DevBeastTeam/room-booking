@@ -157,4 +157,81 @@ CREATE TABLE IF NOT EXISTS `transactions` (
     INDEX `idx_txn_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 10. Residents & Current Tenants Directory
+CREATE TABLE IF NOT EXISTS `residents` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) DEFAULT NULL,
+    `phone` VARCHAR(64) DEFAULT NULL,
+    `unit_number` VARCHAR(32) NOT NULL,
+    `floor_plan_name` VARCHAR(100) DEFAULT 'Two Bedroom',
+    `move_in_date` DATE DEFAULT NULL,
+    `lease_end_date` DATE DEFAULT NULL,
+    `rent` INT NOT NULL DEFAULT 909,
+    `deposit` INT NOT NULL DEFAULT 250,
+    `status` ENUM('current', 'notice', 'past') DEFAULT 'current',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_res_unit` (`unit_number`),
+    INDEX `idx_res_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11. Add-ons & Extra Services
+CREATE TABLE IF NOT EXISTS `addons` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `addon_key` VARCHAR(64) NOT NULL UNIQUE,
+    `name` VARCHAR(191) NOT NULL,
+    `price` INT NOT NULL DEFAULT 0,
+    `active_count` INT NOT NULL DEFAULT 0,
+    `icon` VARCHAR(64) DEFAULT 'Package',
+    `description` VARCHAR(255) DEFAULT NULL,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Automated Email Logs
+CREATE TABLE IF NOT EXISTS `email_logs` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `recipient` VARCHAR(191) NOT NULL,
+    `subject` VARCHAR(255) NOT NULL,
+    `template` VARCHAR(100) DEFAULT 'notification',
+    `status` ENUM('sent', 'failed', 'queued') DEFAULT 'sent',
+    `content_summary` TEXT DEFAULT NULL,
+    `sent_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_email_recipient` (`recipient`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13. Legal CMS Pages
+CREATE TABLE IF NOT EXISTS `legal_pages` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `slug` VARCHAR(64) NOT NULL UNIQUE,
+    `title` VARCHAR(191) NOT NULL,
+    `last_updated` VARCHAR(64) DEFAULT 'September 2026',
+    `content` LONGTEXT NOT NULL,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 14. Resident Documents & Contracts
+CREATE TABLE IF NOT EXISTS `documents` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(191) NOT NULL,
+    `category` VARCHAR(100) DEFAULT 'Lease',
+    `file_size` VARCHAR(32) DEFAULT '1.0 MB',
+    `doc_date` VARCHAR(64) DEFAULT NULL,
+    `file_url` VARCHAR(255) DEFAULT NULL,
+    `unit_number` VARCHAR(32) DEFAULT '2104',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15. Resident Notifications Feed
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_unit` VARCHAR(32) DEFAULT '2104',
+    `type` ENUM('info', 'success', 'warning', 'danger') DEFAULT 'info',
+    `message` TEXT NOT NULL,
+    `time_text` VARCHAR(64) DEFAULT 'Just now',
+    `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

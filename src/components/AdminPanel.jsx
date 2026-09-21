@@ -6,7 +6,8 @@ import {
   Package, Layers, Car, Archive, Search,
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
-  Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw, Wand2
+  Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw, Wand2,
+  Database
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -2514,6 +2515,7 @@ const ADMIN_NAV = [
   { id: 'pages',        label: 'Pages & Legal',      Icon: BookOpen    },
   { id: 'settings',     label: 'Site Settings',      Icon: Sliders     },
   { id: 'theme',        label: 'Theme & Colors',     Icon: Palette     },
+  { id: 'database',     label: 'Database Manager',   Icon: Database    },
 ];
 
 // ── Main Export ────────────────────────────────────────────────────────────────
@@ -2560,7 +2562,32 @@ export default function AdminPanel({
     pages:        <PagesManagementSection legalPages={legalPages} setLegalPages={handleUpdateLegalPages} />,
     settings:     <SiteSettingsSection siteSettings={siteSettings} setSiteSettings={handleUpdateSiteSettings} />,
     theme:        <ThemeConfigSection />,
+    database:     (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400, gap: '1.25rem' }}>
+        <div style={{ width: 72, height: 72, borderRadius: 20, background: '#5ec4b622', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Database size={34} color="#5ec4b6" />
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ color: A.text, fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.4rem' }}>Database Manager</div>
+          <div style={{ color: A.muted, fontSize: '0.87rem', maxWidth: 380, lineHeight: 1.6, marginBottom: '1.5rem' }}>
+            MySQL tables ko seed, format, export ya import karein — dedicated Database Manager page par.
+          </div>
+          <button
+            onClick={() => { window.location.href = '/database'; }}
+            style={{
+              background: 'linear-gradient(135deg, #5ec4b6, #3da89a)',
+              border: 'none', color: '#0f1117', fontWeight: 800, fontSize: '0.95rem',
+              padding: '0.85rem 2rem', borderRadius: 12, cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(94,196,182,0.35)',
+            }}
+          >
+            🗄️ Open Database Manager
+          </button>
+        </div>
+      </div>
+    ),
   };
+
 
   const pendingCount = APPLICATIONS_DATA.filter((a) => a.status === 'pending').length;
   const newSupportCount = supportInquiries.filter((s) => s.status === 'new').length;
