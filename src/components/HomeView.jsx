@@ -134,7 +134,7 @@ export default function HomeView({
   });
 
   return (
-    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)', minHeight: '100vh', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* ── 1. CINEMATIC LUXURY HERO SECTION ── */}
       <section style={{ position: 'relative', width: '100%', minHeight: '86vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
         {/* Background Slide Images */}
@@ -771,7 +771,7 @@ export default function HomeView({
       </section>
 
       {/* ── 5. FEATURED FLOOR PLANS SHOWCASE ── */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: '#07080e', borderTop: '1px solid rgba(201, 169, 110, 0.1)' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-page)', borderTop: '1px solid var(--border-color)' }}>
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '3rem' }}>
             <div>
@@ -1137,7 +1137,7 @@ export default function HomeView({
       </section>
 
       {/* ── 7. INTERACTIVE 3D / VIRTUAL TOUR SHOWCASE ── */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: '#07080e', borderTop: '1px solid rgba(201, 169, 110, 0.1)' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-page)', borderTop: '1px solid var(--border-color)' }}>
         <div className="container">
           <div
             style={{
@@ -1357,7 +1357,7 @@ export default function HomeView({
       </section>
 
       {/* ── 9. RESIDENT REVIEWS & TESTIMONIALS ── */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: '#07080e', borderTop: '1px solid rgba(201, 169, 110, 0.1)' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-page)', borderTop: '1px solid var(--border-color)' }}>
         <div className="container">
           <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 3rem' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#c9a96e', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
@@ -1425,7 +1425,7 @@ export default function HomeView({
       </section>
 
       {/* ── 10. VIP TOUR & INQUIRY FORM ── */}
-      <section style={{ padding: '5rem 0', backgroundColor: 'rgba(12, 16, 28, 0.95)', borderTop: '1px solid rgba(201, 169, 110, 0.15)' }}>
+      <section style={{ padding: '5rem 0', backgroundColor: 'var(--bg-elevated)', borderTop: '1px solid var(--border-color)' }}>
         <div className="container" style={{ maxWidth: '880px' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#c9a96e', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>

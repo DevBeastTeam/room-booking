@@ -94,7 +94,7 @@ export default function IncomeGuidelines({
   ];
 
   return (
-    <div className="animate-fade-in" style={{ paddingBottom: '4rem', color: '#f4efe6' }}>
+    <div className="animate-fade-in" style={{ paddingBottom: '4rem', color: 'var(--text-main)', transition: 'color 0.25s ease' }}>
       {/* ── Page Header / Intro ── */}
       <div style={{ textAlign: 'center', maxWidth: '900px', margin: '0 auto 3rem', padding: '0 1rem' }}>
         <div

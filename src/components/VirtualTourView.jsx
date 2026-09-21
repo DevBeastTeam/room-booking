@@ -48,7 +48,7 @@ export default function VirtualTourView({
   const activeTour = TOURS[activeTourIndex];
 
   return (
-    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)', minHeight: '100vh', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* ── 1. HEADER BANNER ── */}
       <section
         style={{
@@ -151,7 +151,7 @@ export default function VirtualTourView({
       </section>
 
       {/* ── 2. TOUR SELECTION TABS ── */}
-      <section style={{ backgroundColor: '#0c101c', borderBottom: '1px solid rgba(201, 169, 110, 0.15)', padding: '1rem 0' }}>
+      <section style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-color)', padding: '1rem 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           {TOURS.map((tour, idx) => {
             const isActive = idx === activeTourIndex;

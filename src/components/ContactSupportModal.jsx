@@ -87,25 +87,26 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
       <div
         className="animate-fade-in"
         style={{
-          backgroundColor: '#0c101c',
+          backgroundColor: 'var(--modal-bg, var(--bg-surface))',
+          color: 'var(--text-main)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '620px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
           overflow: 'hidden',
-          border: '1px solid rgba(201, 169, 110, 0.35)',
+          border: '1px solid var(--card-border)',
         }}
       >
         {/* Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
-            borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
+            background: 'var(--modal-header-bg, linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%))',
+            borderBottom: '1px solid var(--card-border)',
             padding: '1.5rem 1.75rem',
-            color: '#f8fafc',
+            color: 'var(--text-main)',
             position: 'relative',
             display: 'flex',
             alignItems: 'center',

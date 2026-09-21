@@ -34,28 +34,29 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
       <div
         className="animate-fade-in"
         style={{
-          backgroundColor: '#0c101c',
+          backgroundColor: 'var(--modal-bg, var(--bg-surface))',
+          color: 'var(--text-main)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '720px',
           maxHeight: '85vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
           overflow: 'hidden',
-          border: '1px solid rgba(201, 169, 110, 0.35)',
+          border: '1px solid var(--card-border)',
         }}
       >
         {/* Modal Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
-            color: '#f8fafc',
+            background: 'var(--modal-header-bg, linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%))',
+            color: 'var(--text-main)',
             padding: '1.25rem 1.75rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(201, 169, 110, 0.2)',
+            borderBottom: '1px solid var(--card-border)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

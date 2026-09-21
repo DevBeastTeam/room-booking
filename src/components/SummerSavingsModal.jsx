@@ -37,11 +37,11 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: 'rgba(12, 16, 28, 0.95)',
-          borderTop: '1px solid rgba(201, 169, 110, 0.35)',
+          backgroundColor: 'var(--nav-bg)',
+          borderTop: '1px solid var(--border-color)',
           padding: '0.65rem 1rem',
           zIndex: 990,
-          boxShadow: '0 -8px 25px rgba(0,0,0,0.5)',
+          boxShadow: '0 -8px 25px rgba(0,0,0,0.3)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -89,13 +89,14 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
           <div
             className="animate-scale-up"
             style={{
-              backgroundColor: '#0c101c',
-              border: '1px solid rgba(201, 169, 110, 0.35)',
+              backgroundColor: 'var(--modal-bg, var(--bg-surface))',
+              color: 'var(--text-main)',
+              border: '1px solid var(--card-border)',
               borderRadius: '16px',
               maxWidth: '460px',
               width: '100%',
               overflow: 'hidden',
-              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
               position: 'relative',
               textAlign: 'center',
             }}
@@ -104,11 +105,11 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
             <div
               style={{
                 padding: '1.25rem 1.5rem',
-                borderBottom: '1px solid rgba(201, 169, 110, 0.2)',
+                borderBottom: '1px solid var(--card-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(12, 16, 28, 0.95) 100%)',
+                background: 'var(--modal-header-bg, linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(12, 16, 28, 0.95) 100%))',
               }}
             >
               <h3

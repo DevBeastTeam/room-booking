@@ -117,26 +117,81 @@ const baseApartmentSchema = {
           r.setAttribute('data-theme', mode);
 
           var raw = localStorage.getItem('monarch_theme_palettes');
+          var palettes = null;
           if (raw) {
-            var palettes = JSON.parse(raw);
-            var active = mode === 'light' ? palettes.light : palettes.dark;
-            if (active) {
-              if (active.bgPage) r.style.setProperty('--bg-page', active.bgPage);
-              if (active.bgSurface) r.style.setProperty('--bg-surface', active.bgSurface);
-              if (active.bgElevated) r.style.setProperty('--bg-elevated', active.bgElevated);
-              if (active.cardBg) r.style.setProperty('--card-bg', active.cardBg);
-              if (active.primary) r.style.setProperty('--primary-color', active.primary);
-              if (active.primaryHover) r.style.setProperty('--primary-hover', active.primaryHover);
-              if (active.primaryDark) r.style.setProperty('--primary-dark', active.primaryDark);
-              if (active.primaryLight) r.style.setProperty('--primary-light', active.primaryLight);
-              if (active.primaryBorder) r.style.setProperty('--primary-border', active.primaryBorder);
-              if (active.secondary) r.style.setProperty('--secondary-color', active.secondary);
-              if (active.textMain) r.style.setProperty('--text-main', active.textMain);
-              if (active.textMuted) r.style.setProperty('--text-muted', active.textMuted);
-              if (active.border) r.style.setProperty('--border-color', active.border);
-              if (active.glassBorder) r.style.setProperty('--glass-border', active.glassBorder);
-              if (active.navBg) r.style.setProperty('--nav-bg', active.navBg);
+            try { palettes = JSON.parse(raw); } catch(e){}
+          }
+          var active = palettes ? (mode === 'light' ? palettes.light : palettes.dark) : null;
+          if (!active) {
+            if (mode === 'light') {
+              active = {
+                bgPage: '#fbf9f5',
+                bgSurface: '#ffffff',
+                bgElevated: '#f4efe6',
+                cardBg: 'rgba(255, 255, 255, 0.95)',
+                primary: '#a47c2a',
+                primaryHover: '#876219',
+                primaryDark: '#6b4c10',
+                primaryLight: 'rgba(164, 124, 42, 0.12)',
+                primaryBorder: 'rgba(164, 124, 42, 0.28)',
+                secondary: '#b8860b',
+                textMain: '#181b22',
+                textMuted: '#586072',
+                border: 'rgba(164, 124, 42, 0.22)',
+                glassBorder: 'rgba(164, 124, 42, 0.16)',
+                navBg: 'rgba(251, 249, 245, 0.96)',
+                btnText: '#ffffff'
+              };
+            } else {
+              active = {
+                bgPage: '#08090f',
+                bgSurface: '#0c101c',
+                bgElevated: '#101422',
+                cardBg: 'rgba(16, 20, 34, 0.85)',
+                primary: '#c9a96e',
+                primaryHover: '#dfc285',
+                primaryDark: '#9a7a44',
+                primaryLight: 'rgba(201, 169, 110, 0.15)',
+                primaryBorder: 'rgba(201, 169, 110, 0.3)',
+                secondary: '#dfc285',
+                textMain: '#f4efe6',
+                textMuted: '#b5a999',
+                border: 'rgba(201, 169, 110, 0.25)',
+                glassBorder: 'rgba(201, 169, 110, 0.15)',
+                navBg: 'rgba(8, 9, 15, 0.95)',
+                btnText: '#08090f'
+              };
             }
+          }
+
+          if (active) {
+            r.style.setProperty('--bg-page', active.bgPage);
+            r.style.setProperty('--bg-surface', active.bgSurface);
+            r.style.setProperty('--bg-elevated', active.bgElevated);
+            r.style.setProperty('--card-bg', active.cardBg);
+            r.style.setProperty('--primary-color', active.primary);
+            r.style.setProperty('--primary-hover', active.primaryHover);
+            r.style.setProperty('--primary-dark', active.primaryDark);
+            r.style.setProperty('--primary-light', active.primaryLight);
+            r.style.setProperty('--primary-border', active.primaryBorder);
+            r.style.setProperty('--secondary-color', active.secondary);
+            r.style.setProperty('--text-main', active.textMain);
+            r.style.setProperty('--text-muted', active.textMuted);
+            r.style.setProperty('--border-color', active.border);
+            r.style.setProperty('--card-border', active.border);
+            r.style.setProperty('--glass-border', active.glassBorder);
+            r.style.setProperty('--nav-bg', active.navBg);
+            r.style.setProperty('--footer-bg', mode === 'light' ? active.bgElevated : '#06070c');
+            r.style.setProperty('--modal-bg', active.bgSurface);
+            r.style.setProperty('--input-bg', mode === 'light' ? '#ffffff' : 'rgba(12, 16, 28, 0.9)');
+            r.style.setProperty('--input-border', active.border);
+            r.style.setProperty('--card-inner-bg', mode === 'light' ? 'rgba(244, 239, 230, 0.7)' : 'rgba(12, 16, 28, 0.85)');
+            r.style.setProperty(
+              '--hero-gradient',
+              mode === 'light'
+                ? 'linear-gradient(rgba(251, 249, 245, 0.85), rgba(244, 239, 230, 0.94))'
+                : 'linear-gradient(rgba(8, 9, 15, 0.82), rgba(8, 9, 15, 0.92))'
+            );
           }
         } catch(e){}
       })();

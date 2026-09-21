@@ -156,11 +156,11 @@ export default function PaddleCheckoutModal({
           maxWidth: '580px',
           maxHeight: '92vh',
           overflowY: 'auto',
-          backgroundColor: '#0c101c',
-          color: '#f8fafc',
+          backgroundColor: 'var(--modal-bg, var(--bg-surface))',
+          color: 'var(--text-main)',
           borderRadius: '18px',
-          border: '1px solid rgba(201, 169, 110, 0.35)',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+          border: '1px solid var(--card-border)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
           position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -169,11 +169,11 @@ export default function PaddleCheckoutModal({
         <div
           style={{
             padding: '1.4rem 1.75rem',
-            borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
+            borderBottom: '1px solid var(--card-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
+            background: 'var(--modal-header-bg, linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%))',
             borderTopLeftRadius: '18px',
             borderTopRightRadius: '18px',
           }}
@@ -195,7 +195,7 @@ export default function PaddleCheckoutModal({
               <Lock size={20} />
             </div>
             <div>
-              <div style={{ fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.01em', color: '#f8fafc', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+              <div style={{ fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.01em', color: 'var(--text-main)', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
                 Monarch Pass Secure Checkout
               </div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

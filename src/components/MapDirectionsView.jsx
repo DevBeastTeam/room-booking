@@ -134,7 +134,7 @@ export default function MapDirectionsView({
   };
 
   return (
-    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)', minHeight: '100vh', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* ── 1. HERO HEADER ── */}
       <section
         style={{

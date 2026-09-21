@@ -213,11 +213,24 @@ export function applyThemeToDOM(palettesInput, modeInput) {
   root.style.setProperty('--text-light', active.textLight);
 
   root.style.setProperty('--border-color', active.border);
+  root.style.setProperty('--card-border', active.border);
   root.style.setProperty('--glass-border', active.glassBorder);
 
   root.style.setProperty('--nav-bg', active.navBg);
   root.style.setProperty('--nav-overlay-bg', active.navOverlayBg);
   root.style.setProperty('--nav-text', active.navText);
+
+  root.style.setProperty('--footer-bg', mode === 'light' ? active.bgElevated : '#06070c');
+  root.style.setProperty('--modal-bg', active.bgSurface);
+  root.style.setProperty('--input-bg', mode === 'light' ? '#ffffff' : 'rgba(12, 16, 28, 0.9)');
+  root.style.setProperty('--input-border', active.border);
+  root.style.setProperty('--card-inner-bg', mode === 'light' ? 'rgba(244, 239, 230, 0.7)' : 'rgba(12, 16, 28, 0.85)');
+  root.style.setProperty(
+    '--hero-gradient',
+    mode === 'light'
+      ? 'linear-gradient(rgba(251, 249, 245, 0.85), rgba(244, 239, 230, 0.94))'
+      : 'linear-gradient(rgba(8, 9, 15, 0.82), rgba(8, 9, 15, 0.92))'
+  );
 
   root.style.setProperty('--btn-gold-bg', `linear-gradient(135deg, ${active.primary} 0%, ${active.primaryDark || active.primary} 100%)`);
   root.style.setProperty('--btn-gold-text', active.btnText || (mode === 'light' ? '#ffffff' : '#08090f'));

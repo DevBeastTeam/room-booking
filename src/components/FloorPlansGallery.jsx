@@ -176,8 +176,8 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
       {/* ========================================================================= */}
       <div
         style={{
-          backgroundColor: 'rgba(16, 20, 34, 0.85)',
-          border: '1px solid rgba(201, 169, 110, 0.25)',
+          backgroundColor: 'var(--card-bg)',
+          border: '1px solid var(--border-color)',
           borderRadius: '12px',
           padding: '0.85rem 1.25rem',
           marginBottom: '2.5rem',
@@ -363,9 +363,9 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
           <div
             key={plan.id}
             style={{
-              backgroundColor: 'rgba(16, 20, 34, 0.85)',
+              backgroundColor: 'var(--card-bg)',
               borderRadius: '16px',
-              border: '1px solid rgba(201, 169, 110, 0.25)',
+              border: '1px solid var(--border-color)',
               overflow: 'hidden',
               boxShadow: '0 16px 40px rgba(0, 0, 0, 0.35)',
               display: 'flex',

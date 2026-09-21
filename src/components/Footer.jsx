@@ -31,7 +31,7 @@ export default function Footer({
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer style={{ backgroundColor: '#05060a', color: '#e8e0d4', borderTop: '1px solid rgba(201, 169, 110, 0.16)', marginTop: '4rem' }}>
+    <footer style={{ backgroundColor: 'var(--footer-bg, var(--bg-elevated))', color: 'var(--text-main)', borderTop: '1px solid var(--border-color)', marginTop: '4rem', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* Top Footer Section */}
       <div className="container" style={{ padding: '4rem 1.5rem 2.5rem' }}>
         <div

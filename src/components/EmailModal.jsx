@@ -66,14 +66,15 @@ export default function EmailModal({
     >
       <div
         style={{
-          backgroundColor: '#0c101c',
+          backgroundColor: 'var(--modal-bg, var(--bg-surface))',
+          color: 'var(--text-main)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '820px',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
           position: 'relative',
-          border: '1px solid rgba(201, 169, 110, 0.35)',
+          border: '1px solid var(--card-border)',
         }}
       >
         {/* Modal Header */}
@@ -83,11 +84,11 @@ export default function EmailModal({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '1.25rem 1.75rem',
-            borderBottom: '1px solid rgba(201, 169, 110, 0.2)',
-            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(12, 16, 28, 0.95) 100%)',
+            borderBottom: '1px solid var(--card-border)',
+            background: 'var(--modal-header-bg, linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(12, 16, 28, 0.95) 100%))',
           }}
         >
-          <h2 style={{ fontSize: '1.45rem', fontWeight: 600, color: '#f8fafc', margin: 0, fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 600, color: 'var(--text-main)', margin: 0, fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
             Email Cost Breakdown
           </h2>
           <button

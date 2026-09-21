@@ -155,11 +155,12 @@ export default function ScheduleTourModal({
         style={{
           width: '100%',
           maxWidth: '540px',
-          backgroundColor: '#0c101c',
-          border: '1px solid rgba(201, 169, 110, 0.35)',
+          backgroundColor: 'var(--modal-bg, var(--bg-surface))',
+          color: 'var(--text-main)',
+          border: '1px solid var(--card-border)',
           borderRadius: '16px',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
           position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -167,8 +168,8 @@ export default function ScheduleTourModal({
         {/* ── Luxury Header Banner ── */}
         <div
           style={{
-            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
-            borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
+            background: 'var(--modal-header-bg, linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%))',
+            borderBottom: '1px solid var(--card-border)',
             padding: '1.75rem 1.75rem 1.25rem',
             textAlign: 'center',
             position: 'relative',

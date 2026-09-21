@@ -14,7 +14,11 @@
   --bg-elevated:      #101422;  /* Elevated Navy Card */
   --card-bg:          rgba(16, 20, 34, 0.85);
   --card-border:      rgba(201, 169, 110, 0.25);
+  --border-color:     rgba(201, 169, 110, 0.25);
   --glass-border:     rgba(201, 169, 110, 0.15);
+  --footer-bg:        #06070c;
+  --card-inner-bg:    rgba(12, 16, 28, 0.85);
+  --hero-gradient:    linear-gradient(rgba(8, 9, 15, 0.82), rgba(8, 9, 15, 0.92));
 
   --primary-color:    #c9a96e;  /* Champagne Gold */
   --primary-hover:    #dfc285;
@@ -61,7 +65,11 @@
   --bg-elevated:      #f4efe6;  /* Warm Ivory Elevated */
   --card-bg:          rgba(255, 255, 255, 0.95);
   --card-border:      rgba(164, 124, 42, 0.22);
+  --border-color:     rgba(164, 124, 42, 0.22);
   --glass-border:     rgba(164, 124, 42, 0.16);
+  --footer-bg:        #f4efe6;
+  --card-inner-bg:    rgba(244, 239, 230, 0.7);
+  --hero-gradient:    linear-gradient(rgba(251, 249, 245, 0.85), rgba(244, 239, 230, 0.94));
 
   --primary-color:    #a47c2a;  /* Deep Antique Gold */
   --primary-hover:    #876219;
@@ -759,78 +767,168 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
   border-top-color: var(--border-color);
 }
 
-/* Light mode overrides for sections with hardcoded dark backgrounds */
-[data-theme="light"] [style*="background-color: #08090f"],
-[data-theme="light"] [style*="backgroundColor: '#08090f'"],
-[data-theme="light"] [style*="background-color:#08090f"],
-[data-theme="light"] [style*="background: #08090f"],
-[data-theme="light"] [style*="background:#08090f"] {
+/* ── COMPREHENSIVE LIGHT MODE OVERRIDES ──────────────────────── */
+
+/* 1. Canvas & Page Backgrounds */
+[data-theme="light"] [style*="#08090f"],
+[data-theme="light"] [style*="#07080e"],
+[data-theme="light"] [style*="rgb(8, 9, 15)"],
+[data-theme="light"] [style*="rgb(8,9,15)"],
+[data-theme="light"] [style*="rgb(7, 8, 14)"],
+[data-theme="light"] [style*="rgb(7,8,14)"] {
   background-color: var(--bg-page) !important;
 }
 
-[data-theme="light"] [style*="background-color: #0c101c"],
-[data-theme="light"] [style*="backgroundColor: '#0c101c'"],
-[data-theme="light"] [style*="background-color:#0c101c"],
-[data-theme="light"] [style*="background: #0c101c"],
-[data-theme="light"] [style*="background:#0c101c"] {
+/* 2. Surfaces, Glass & Elevated Containers */
+[data-theme="light"] [style*="#0c101c"],
+[data-theme="light"] [style*="#0a0d16"],
+[data-theme="light"] [style*="#05060a"],
+[data-theme="light"] [style*="rgb(12, 16, 28)"],
+[data-theme="light"] [style*="rgb(12,16,28)"],
+[data-theme="light"] [style*="rgb(10, 13, 22)"],
+[data-theme="light"] [style*="rgb(10,13,22)"],
+[data-theme="light"] [style*="rgb(5, 6, 10)"],
+[data-theme="light"] [style*="rgb(5,6,10)"] {
   background-color: var(--bg-surface) !important;
 }
 
-[data-theme="light"] [style*="background-color: #101422"],
-[data-theme="light"] [style*="backgroundColor: '#101422'"],
-[data-theme="light"] [style*="background-color:#101422"],
-[data-theme="light"] [style*="background: #101422"],
-[data-theme="light"] [style*="background:#101422"] {
+[data-theme="light"] [style*="#101422"],
+[data-theme="light"] [style*="#06070c"],
+[data-theme="light"] [style*="rgb(16, 20, 34)"],
+[data-theme="light"] [style*="rgb(16,20,34)"],
+[data-theme="light"] [style*="rgb(6, 7, 12)"],
+[data-theme="light"] [style*="rgb(6,7,12)"] {
   background-color: var(--bg-elevated) !important;
 }
 
-[data-theme="light"] [style*="background-color: #06070c"],
-[data-theme="light"] [style*="backgroundColor: '#06070c'"],
-[data-theme="light"] [style*="background-color:#06070c"] {
-  background-color: var(--bg-elevated) !important;
-}
-
-[data-theme="light"] [style*="background-color: rgba(16, 20, 34"],
-[data-theme="light"] [style*="backgroundColor: 'rgba(16, 20, 34"],
-[data-theme="light"] [style*="backgroundColor: \"rgba(16, 20, 34"] {
+/* 3. Translucent Card Surfaces & Dark Glass */
+[data-theme="light"] [style*="rgba(16, 20, 34"],
+[data-theme="light"] [style*="rgba(16,20,34"],
+[data-theme="light"] [style*="rgba(12, 16, 28"],
+[data-theme="light"] [style*="rgba(12,16,28"],
+[data-theme="light"] [style*="rgba(14, 18, 30"],
+[data-theme="light"] [style*="rgba(14,18,30"],
+[data-theme="light"] [style*="rgba(13, 17, 30"],
+[data-theme="light"] [style*="rgba(13,17,30"],
+[data-theme="light"] [style*="rgba(8, 10, 18"],
+[data-theme="light"] [style*="rgba(8,10,18"],
+[data-theme="light"] [style*="rgba(10, 12, 20"],
+[data-theme="light"] [style*="rgba(10,12,20"],
+[data-theme="light"] [style*="rgba(15, 23, 42"] {
   background-color: var(--card-bg) !important;
 }
 
-[data-theme="light"] [style*="background-color: rgba(12, 16, 28"],
-[data-theme="light"] [style*="backgroundColor: 'rgba(12, 16, 28"],
-[data-theme="light"] [style*="backgroundColor: \"rgba(12, 16, 28"] {
-  background-color: var(--bg-surface) !important;
+[data-theme="light"] [style*="rgba(8, 9, 15, 0.6)"],
+[data-theme="light"] [style*="rgba(8, 9, 15, 0.5)"],
+[data-theme="light"] [style*="rgba(8, 9, 15, 0.75)"],
+[data-theme="light"] [style*="rgba(8, 9, 15, 0.8)"],
+[data-theme="light"] [style*="rgba(8,9,15,0.6)"],
+[data-theme="light"] [style*="rgba(8,9,15,0.5)"],
+[data-theme="light"] [style*="rgba(8,9,15,0.75)"],
+[data-theme="light"] [style*="rgba(8,9,15,0.8)"] {
+  background-color: rgba(251, 249, 245, 0.85) !important;
 }
 
-/* Light mode text contrast enhancements */
+/* 4. Subtle Dark Overlays & Transparencies */
+[data-theme="light"] [style*="rgba(255, 255, 255, 0.05)"],
+[data-theme="light"] [style*="rgba(255, 255, 255, 0.03)"],
+[data-theme="light"] [style*="rgba(255, 255, 255, 0.08)"],
+[data-theme="light"] [style*="rgba(255, 255, 255, 0.04)"],
+[data-theme="light"] [style*="rgba(255,255,255,0.05)"],
+[data-theme="light"] [style*="rgba(255,255,255,0.03)"] {
+  background-color: rgba(164, 124, 42, 0.06) !important;
+}
+
+/* 5. Gold & Card Borders */
+[data-theme="light"] [style*="rgba(201, 169, 110"],
+[data-theme="light"] [style*="rgba(201,169,110"] {
+  border-color: var(--card-border) !important;
+}
+
+/* 6. Typography & Headings Contrast */
 [data-theme="light"] [style*="color: #f4efe6"],
 [data-theme="light"] [style*="color: '#f4efe6'"],
+[data-theme="light"] [style*="color:#f4efe6"],
 [data-theme="light"] [style*="color: #f0ebe0"],
 [data-theme="light"] [style*="color: '#f0ebe0'"],
+[data-theme="light"] [style*="color:#f0ebe0"],
 [data-theme="light"] [style*="color: #f8fafc"],
 [data-theme="light"] [style*="color: '#f8fafc'"],
+[data-theme="light"] [style*="color:#f8fafc"],
 [data-theme="light"] [style*="color: #e8e0d4"],
-[data-theme="light"] [style*="color: '#e8e0d4'"] {
+[data-theme="light"] [style*="color: '#e8e0d4'"],
+[data-theme="light"] [style*="color:#e8e0d4"],
+[data-theme="light"] [style*="rgb(244, 239, 230)"],
+[data-theme="light"] [style*="rgb(240, 235, 224)"],
+[data-theme="light"] [style*="rgb(248, 250, 252)"],
+[data-theme="light"] [style*="rgb(232, 224, 212)"] {
   color: var(--text-main) !important;
 }
 
 [data-theme="light"] [style*="color: #b5a999"],
 [data-theme="light"] [style*="color: '#b5a999'"],
+[data-theme="light"] [style*="color:#b5a999"],
 [data-theme="light"] [style*="color: #a39886"],
 [data-theme="light"] [style*="color: '#a39886'"],
+[data-theme="light"] [style*="color:#a39886"],
 [data-theme="light"] [style*="color: #9a8c7a"],
 [data-theme="light"] [style*="color: '#9a8c7a'"],
+[data-theme="light"] [style*="color:#9a8c7a"],
 [data-theme="light"] [style*="color: #8c8273"],
-[data-theme="light"] [style*="color: '#8c8273'"] {
+[data-theme="light"] [style*="color: '#8c8273'"],
+[data-theme="light"] [style*="color:#8c8273"],
+[data-theme="light"] [style*="rgb(181, 169, 153)"],
+[data-theme="light"] [style*="rgb(163, 152, 134)"],
+[data-theme="light"] [style*="rgb(154, 140, 122)"],
+[data-theme="light"] [style*="rgb(140, 130, 115)"] {
   color: var(--text-muted) !important;
 }
 
+[data-theme="light"] [style*="color: #dfc285"],
+[data-theme="light"] [style*="color: '#dfc285'"],
+[data-theme="light"] [style*="color:#dfc285"],
+[data-theme="light"] [style*="rgb(223, 194, 133)"] {
+  color: var(--primary-color) !important;
+}
+
+/* 7. Form Controls, Inputs & Options */
 [data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
 [data-theme="light"] select,
 [data-theme="light"] textarea {
-  background-color: var(--input-bg) !important;
+  background-color: #ffffff !important;
+  color: #181b22 !important;
+  border-color: rgba(164, 124, 42, 0.28) !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #7e8799 !important;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #181b22 !important;
+}
+
+/* 8. Structural Overrides: Footer, Hero Overlays & Modals */
+[data-theme="light"] footer {
+  background-color: var(--bg-elevated) !important;
   color: var(--text-main) !important;
-  border-color: var(--input-border) !important;
+  border-top: 1px solid var(--glass-border) !important;
+}
+
+[data-theme="light"] footer a {
+  color: var(--text-muted) !important;
+}
+[data-theme="light"] footer a:hover {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="light"] .modal-content,
+[data-theme="light"] [role="dialog"] {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  border-color: var(--card-border) !important;
 }
 
 
