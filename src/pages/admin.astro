@@ -1,13 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import AdminPanel from '../components/AdminPanel.jsx';
+import AdminGate from '../components/AdminGate.jsx';
 ---
 
 <Layout
-  title="Admin Management Panel | Monarch Pass Apartments"
-  description="Administrative management dashboard for Monarch Pass Apartments. Manage website theme colors, floor plans, inquiries, and property settings."
+  title="Admin Login | Monarch Pass Apartments"
+  description="Secure administrative login for Monarch Pass Apartments property management panel."
   currentView="admin"
   hideHeaderFooter={true}
 >
-  <AdminPanel client:only="react" />
+  <AdminGate client:only="react" />
 </Layout>

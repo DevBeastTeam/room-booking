@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import DatabaseManager from '../components/DatabaseManager.jsx';
+import DatabaseGate from '../components/DatabaseGate.jsx';
 ---
 
 <Layout
@@ -9,5 +9,5 @@ import DatabaseManager from '../components/DatabaseManager.jsx';
   currentView="database"
   hideHeaderFooter={true}
 >
-  <DatabaseManager client:only="react" />
+  <DatabaseGate client:only="react" />
 </Layout>
