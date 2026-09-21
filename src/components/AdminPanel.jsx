@@ -6,7 +6,7 @@ import {
   Package, Layers, Car, Archive, Search,
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
-  Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw
+  Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw, Wand2
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -18,7 +18,14 @@ import {
   saveSupportInquiries,
   addSupportInquiry
 } from '../services/siteDataService';
-import { THEME_CONFIG, applyThemeToDOM } from '../config/themeConfig';
+import {
+  THEME_CONFIG,
+  applyThemeToDOM,
+  getStoredTheme,
+  saveStoredTheme,
+  resetStoredTheme,
+  generateHarmoniousPalette,
+} from '../config/themeConfig';
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
 const A = {
@@ -1814,20 +1821,23 @@ function SiteSettingsSection({ siteSettings, setSiteSettings }) {
 
 // ── Theme & Colors Management Section ──────────────────────────────────────────
 function ThemeConfigSection() {
-  const [colors, setColors] = useState({ ...THEME_CONFIG });
+  const [colors, setColors] = useState(() => getStoredTheme());
+  const [customPrimary, setCustomPrimary] = useState(() => getStoredTheme().primary || '#0f766e');
+  const [customSecondary, setCustomSecondary] = useState(() => getStoredTheme().secondary || '#68c7b7');
   const [copied, setCopied] = useState(false);
-  const [appliedMsg, setAppliedMsg] = useState(false);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+  const [previewActive, setPreviewActive] = useState(false);
 
   const THEME_PRESETS = [
     {
       name: 'Monarch Signature Teal (Default)',
       desc: 'Authentic Monarch Pass deep evergreen with fresh aqua teal accents',
       primary: '#0f766e',
+      secondary: '#68c7b7',
       primaryHover: '#0d6460',
       primaryDark: '#134e4a',
       primaryLight: '#f0fdfa',
       primaryBorder: '#99f6e4',
-      secondary: '#68c7b7',
       secondaryHover: '#52b6a5',
       secondaryDark: '#3d9c8d',
       secondaryLight: '#eef9f7',
@@ -1840,11 +1850,11 @@ function ThemeConfigSection() {
       name: 'Ocean Pacific Blue',
       desc: 'Deep marine royal blue with electric sky accents',
       primary: '#1d4ed8',
+      secondary: '#38bdf8',
       primaryHover: '#1e40af',
       primaryDark: '#172554',
       primaryLight: '#eff6ff',
       primaryBorder: '#bfdbfe',
-      secondary: '#38bdf8',
       secondaryHover: '#0284c7',
       secondaryDark: '#0369a1',
       secondaryLight: '#f0f9ff',
@@ -1857,11 +1867,11 @@ function ThemeConfigSection() {
       name: 'Royal Burgundy & Rose',
       desc: 'Warm luxury burgundy with soft blush rose accents',
       primary: '#881337',
+      secondary: '#fb7185',
       primaryHover: '#9f1239',
       primaryDark: '#4c0519',
       primaryLight: '#fff1f2',
       primaryBorder: '#fecdd3',
-      secondary: '#fb7185',
       secondaryHover: '#f43f5e',
       secondaryDark: '#e11d48',
       secondaryLight: '#fff1f2',
@@ -1874,11 +1884,11 @@ function ThemeConfigSection() {
       name: 'Forest Sage & Emerald',
       desc: 'Earthy organic woodland green with fresh mint highlights',
       primary: '#15803d',
+      secondary: '#22c55e',
       primaryHover: '#166534',
       primaryDark: '#052e16',
       primaryLight: '#f0fdf4',
       primaryBorder: '#bbf7d0',
-      secondary: '#22c55e',
       secondaryHover: '#16a34a',
       secondaryDark: '#15803d',
       secondaryLight: '#f0fdf4',
@@ -1891,11 +1901,11 @@ function ThemeConfigSection() {
       name: 'Modern Charcoal & Amber Gold',
       desc: 'High-contrast modern charcoal with warm amber luxury gold',
       primary: '#1e293b',
+      secondary: '#d97706',
       primaryHover: '#0f172a',
       primaryDark: '#020617',
       primaryLight: '#f8fafc',
       primaryBorder: '#cbd5e1',
-      secondary: '#d97706',
       secondaryHover: '#b45309',
       secondaryDark: '#92400e',
       secondaryLight: '#fffbeb',
@@ -1906,64 +1916,61 @@ function ThemeConfigSection() {
     },
   ];
 
+  // Auto-generate harmonious palette from custom colors
+  const handleAutoGeneratePalette = () => {
+    const generated = generateHarmoniousPalette(customPrimary, customSecondary);
+    const merged = { ...colors, ...generated };
+    setColors(merged);
+    applyThemeToDOM(merged);
+    setPreviewActive(true);
+    setSaveSuccessMsg('preview');
+    setTimeout(() => setSaveSuccessMsg(false), 3500);
+  };
+
+  // Select a pre-crafted theme
   const handleApplyPreset = (preset) => {
     const updated = { ...colors, ...preset };
     setColors(updated);
+    setCustomPrimary(preset.primary);
+    setCustomSecondary(preset.secondary);
     applyThemeToDOM(updated);
-    setAppliedMsg(true);
-    setTimeout(() => setAppliedMsg(false), 3000);
+    setPreviewActive(true);
   };
 
+  // Fine-tune individual color
   const handleColorChange = (key, value) => {
     const updated = { ...colors, [key]: value };
     setColors(updated);
+    applyThemeToDOM(updated);
   };
 
-  const handleApplyLive = () => {
-    applyThemeToDOM(colors);
-    setAppliedMsg(true);
-    setTimeout(() => setAppliedMsg(false), 3000);
+  // Permanent Save: Stores in localStorage so user NEVER needs to edit themeConfig.js
+  const handleSaveTheme = () => {
+    saveStoredTheme(colors);
+    setSaveSuccessMsg('saved');
+    setPreviewActive(false);
+    setTimeout(() => setSaveSuccessMsg(false), 5000);
   };
 
+  // Reset to original Monarch default
   const handleReset = () => {
+    resetStoredTheme();
     setColors({ ...THEME_CONFIG });
-    applyThemeToDOM(THEME_CONFIG);
-    setAppliedMsg(false);
+    setCustomPrimary(THEME_CONFIG.primary);
+    setCustomSecondary(THEME_CONFIG.secondary);
+    setSaveSuccessMsg('reset');
+    setPreviewActive(false);
+    setTimeout(() => setSaveSuccessMsg(false), 4000);
   };
 
   const generateConfigFileCode = () => {
     return `/**
- * MONARCH PASS APARTMENTS - CENTRAL THEME & BRAND COLOR CONFIGURATION
+ * MONARCH PASS APARTMENTS - CENTRAL THEME CONFIGURATION
  * File: src/config/themeConfig.js
  */
-
 export const THEME_CONFIG = ${JSON.stringify(colors, null, 2)};
 
-export function applyThemeToDOM(colors = THEME_CONFIG) {
-  if (typeof document === 'undefined') return;
-  const root = document.documentElement;
-  root.style.setProperty('--primary-color', colors.primary);
-  root.style.setProperty('--primary-hover', colors.primaryHover);
-  root.style.setProperty('--primary-dark', colors.primaryDark);
-  root.style.setProperty('--primary-light', colors.primaryLight);
-  root.style.setProperty('--primary-border', colors.primaryBorder);
-  root.style.setProperty('--secondary-color', colors.secondary);
-  root.style.setProperty('--secondary-hover', colors.secondaryHover);
-  root.style.setProperty('--secondary-dark', colors.secondaryDark);
-  root.style.setProperty('--secondary-light', colors.secondaryLight);
-  root.style.setProperty('--nav-overlay-bg', colors.navOverlayBg);
-  root.style.setProperty('--nav-overlay-bg-rgba', colors.navOverlayBgRgba);
-  root.style.setProperty('--dark-color', colors.dark);
-  root.style.setProperty('--promo-banner', colors.promoBanner);
-  root.style.setProperty('--promo-button', colors.promoButton);
-}
-
-if (typeof window !== 'undefined') {
-  applyThemeToDOM(THEME_CONFIG);
-}
-
-export default THEME_CONFIG;
-`;
+export default THEME_CONFIG;`;
   };
 
   const handleCopyCode = () => {
@@ -1973,38 +1980,38 @@ export default THEME_CONFIG;
   };
 
   const colorFields = [
-    { key: 'primary',          label: 'Primary Brand Color',       desc: 'Main website buttons, active tabs, highlights, CTAs' },
-    { key: 'primaryHover',     label: 'Primary Hover Color',       desc: 'Hover state for primary buttons and interactive items' },
-    { key: 'primaryDark',      label: 'Primary Dark Variant',      desc: 'Dark shade for contrast, deep banners, borders' },
-    { key: 'primaryLight',     label: 'Primary Light Background',  desc: 'Soft background tint for active tabs, badges, icons' },
-    { key: 'primaryBorder',    label: 'Primary Border Outline',    desc: 'Border outline for active tabs and focused cards' },
-    { key: 'secondary',        label: 'Secondary Signature Accent',desc: 'Monarch Pass signature aqua teal, icons, subheadings' },
-    { key: 'secondaryHover',   label: 'Secondary Hover',           desc: 'Hover state for secondary interactive elements' },
-    { key: 'secondaryLight',   label: 'Secondary Light Tint',      desc: 'Soft aqua background tint for notification badges' },
+    { key: 'primary',          label: 'Primary Brand Color',       desc: 'Buttons, active tabs, highlights, CTAs' },
+    { key: 'primaryHover',     label: 'Primary Hover Color',       desc: 'Hover state for primary interactive elements' },
+    { key: 'primaryDark',      label: 'Primary Dark Shade',        desc: 'Dark high-contrast badges and deep borders' },
+    { key: 'primaryLight',     label: 'Primary Light Background',  desc: 'Soft tint for active tabs, badges, icons' },
+    { key: 'primaryBorder',    label: 'Primary Border Outline',    desc: 'Border outline for active tabs' },
+    { key: 'secondary',        label: 'Secondary Signature Accent',desc: 'Aqua teal accent, subheadings, icons' },
+    { key: 'secondaryHover',   label: 'Secondary Hover',           desc: 'Secondary hover state' },
+    { key: 'secondaryLight',   label: 'Secondary Light Tint',      desc: 'Soft tint for cards and tags' },
     { key: 'navOverlayBg',     label: 'Navigation Overlay Menu',   desc: 'Fullscreen navigation drawer background' },
-    { key: 'dark',             label: 'Dark Charcoal Surface',     desc: 'Footer background, dark modals, and text high contrast' },
-    { key: 'promoBanner',      label: 'Summer Savings Banner',     desc: 'Promotional nudge bar and special offer badge banner' },
-    { key: 'promoButton',      label: 'Promo Action Button',       desc: 'Action button inside the promotional modal and nudge' },
+    { key: 'dark',             label: 'Dark Charcoal Surface',     desc: 'Footer background and high-contrast text' },
+    { key: 'promoBanner',      label: 'Summer Savings Banner',     desc: 'Promotional nudge bar and special offer badge' },
+    { key: 'promoButton',      label: 'Promo Action Button',       desc: 'Action button inside promotional modal & nudge' },
   ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', maxWidth: 1100 }}>
-      {/* Header info */}
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: A.text, display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
-            <Palette size={24} style={{ color: A.accent }} /> Brand & Theme Colors Configuration
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: A.text, display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
+            <Palette size={26} style={{ color: A.accent }} /> Custom Theme & Colors Manager
           </h2>
-          <p style={{ color: A.muted, fontSize: '0.88rem', marginTop: '0.4rem' }}>
-            Central color configuration system. Changing any color here updates the Header, Navigation, Modals, Buttons, and Footer dynamically.
+          <p style={{ color: A.muted, fontSize: '0.88rem', marginTop: '0.4rem', lineHeight: 1.5 }}>
+            Pick any custom colors or choose presets. Clicking <strong>Save Theme</strong> permanently applies them to the website — <strong>no manual file editing required!</strong>
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button
             onClick={handleReset}
             style={{
-              padding: '0.6rem 1.1rem',
+              padding: '0.65rem 1.15rem',
               backgroundColor: `${A.muted}22`,
               color: A.text,
               border: `1px solid ${A.border}`,
@@ -2021,51 +2028,307 @@ export default THEME_CONFIG;
           </button>
 
           <button
-            onClick={handleApplyLive}
+            onClick={handleSaveTheme}
             style={{
-              padding: '0.6rem 1.25rem',
+              padding: '0.65rem 1.4rem',
               backgroundColor: A.accent,
               color: '#0a0d14',
               border: 'none',
               borderRadius: 8,
-              fontSize: '0.85rem',
+              fontSize: '0.88rem',
               fontWeight: 800,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
+              gap: '0.5rem',
               boxShadow: `0 4px 14px ${A.accent}44`,
             }}
           >
-            <Sparkles size={16} /> Apply Live Preview
+            <Save size={16} /> Save Theme to Website
           </button>
         </div>
       </div>
 
-      {appliedMsg && (
-        <div style={{ backgroundColor: '#064e3b', border: '1px solid #10b981', borderRadius: 8, padding: '0.75rem 1.25rem', color: '#a7f3d0', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Check size={18} /> Live theme successfully applied across the entire website!
+      {/* Notifications */}
+      {saveSuccessMsg === 'saved' && (
+        <div style={{ backgroundColor: '#064e3b', border: '1px solid #10b981', borderRadius: 8, padding: '0.85rem 1.25rem', color: '#a7f3d0', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <Check size={20} style={{ color: '#34d399', flexShrink: 0 }} />
+          <span>
+            <strong>Theme Successfully Saved!</strong> Your custom colors are now permanently active across the entire website. (No need to touch <code style={{ color: '#ffffff' }}>themeConfig.js</code>).
+          </span>
         </div>
       )}
 
-      {/* File Location Guidance Box */}
-      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, color: A.accent, fontSize: '0.95rem' }}>
-          <span>📁 Central Configuration File Location:</span>
-          <code style={{ backgroundColor: '#0f172a', padding: '3px 8px', borderRadius: 5, color: '#38bdf8', fontSize: '0.88rem' }}>
-            src/config/themeConfig.js
-          </code>
+      {saveSuccessMsg === 'preview' && (
+        <div style={{ backgroundColor: '#1e3a5f', border: '1px solid #3b82f6', borderRadius: 8, padding: '0.85rem 1.25rem', color: '#bfdbfe', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <Sparkles size={20} style={{ color: '#60a5fa', flexShrink: 0 }} />
+          <span>
+            <strong>Live Palette Generated!</strong> You can see the live preview below and across the site. Click <strong>Save Theme to Website</strong> above to keep it permanently.
+          </span>
         </div>
-        <p style={{ color: A.muted, fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
-          Admin ya developer is file (<code style={{ color: '#e2e8f0' }}>themeConfig.js</code>) ke andar koi bhi color change karega toh poori website ka theme automatically woh color ban jayega!
-          All styles connect automatically to CSS Custom Properties and live tokens.
+      )}
+
+      {saveSuccessMsg === 'reset' && (
+        <div style={{ backgroundColor: '#78350f', border: '1px solid #f59e0b', borderRadius: 8, padding: '0.85rem 1.25rem', color: '#fef3c7', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <RotateCcw size={20} style={{ color: '#fbbf24', flexShrink: 0 }} />
+          <span>Restored original default Monarch Pass Teal colors.</span>
+        </div>
+      )}
+
+      {/* ── 1. CUSTOM COLOR GENERATOR ── */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.accent}44`, borderRadius: 12, padding: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+          <Wand2 size={20} style={{ color: A.accent }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: A.text, margin: 0 }}>
+            Custom Color Creator & Instant Palette Generator
+          </h3>
+        </div>
+        <p style={{ color: A.muted, fontSize: '0.85rem', margin: '0 0 1.25rem', lineHeight: 1.5 }}>
+          Yahan se koi bhi custom color choose karein. <strong>Auto-Generate Full Palette</strong> dabane se matching hover, light background tints aur border colors khud-ba-khud calculate ho jayenge!
         </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem', alignItems: 'end' }}>
+          {/* Custom Primary */}
+          <div style={{ backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, padding: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: A.text, marginBottom: '0.5rem' }}>
+              🎨 Choose Custom Primary Brand Color:
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <input
+                type="color"
+                value={customPrimary.startsWith('#') ? customPrimary : '#0f766e'}
+                onChange={(e) => {
+                  setCustomPrimary(e.target.value);
+                  handleColorChange('primary', e.target.value);
+                }}
+                style={{ width: 46, height: 40, border: 'none', borderRadius: 8, cursor: 'pointer', backgroundColor: 'transparent' }}
+              />
+              <input
+                type="text"
+                value={customPrimary}
+                onChange={(e) => {
+                  setCustomPrimary(e.target.value);
+                  if (e.target.value.startsWith('#') && e.target.value.length === 7) {
+                    handleColorChange('primary', e.target.value);
+                  }
+                }}
+                placeholder="#0f766e"
+                style={{
+                  flex: 1,
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  color: A.text,
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: 6,
+                  fontSize: '0.9rem',
+                  fontFamily: 'monospace',
+                  fontWeight: 600,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Custom Secondary */}
+          <div style={{ backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, padding: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: A.text, marginBottom: '0.5rem' }}>
+              ✨ Choose Custom Secondary Accent Color:
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <input
+                type="color"
+                value={customSecondary.startsWith('#') ? customSecondary : '#68c7b7'}
+                onChange={(e) => {
+                  setCustomSecondary(e.target.value);
+                  handleColorChange('secondary', e.target.value);
+                }}
+                style={{ width: 46, height: 40, border: 'none', borderRadius: 8, cursor: 'pointer', backgroundColor: 'transparent' }}
+              />
+              <input
+                type="text"
+                value={customSecondary}
+                onChange={(e) => {
+                  setCustomSecondary(e.target.value);
+                  if (e.target.value.startsWith('#') && e.target.value.length === 7) {
+                    handleColorChange('secondary', e.target.value);
+                  }
+                }}
+                placeholder="#68c7b7"
+                style={{
+                  flex: 1,
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  color: A.text,
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: 6,
+                  fontSize: '0.9rem',
+                  fontFamily: 'monospace',
+                  fontWeight: 600,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Generate Button */}
+          <div>
+            <button
+              onClick={handleAutoGeneratePalette}
+              style={{
+                width: '100%',
+                padding: '0.85rem 1.25rem',
+                backgroundColor: '#3b82f6',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 14px rgba(59, 130, 246, 0.4)',
+                transition: 'all 0.2s',
+              }}
+            >
+              <Wand2 size={16} />
+              <span>Auto-Generate Full Palette</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Theme Presets */}
-      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: A.text, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Sparkles size={16} style={{ color: A.accent }} /> Instant 1-Click Theme Presets
+      {/* ── 2. LIVE INTERACTIVE COMPONENT PREVIEW ── */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 800, color: A.text, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Eye size={18} style={{ color: A.accent }} /> Live Components Preview (Real-time Test)
+        </h3>
+        <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0 0 1.25rem' }}>
+          See how your selected custom colors look on the live website elements right now:
+        </p>
+
+        <div style={{ backgroundColor: '#ffffff', borderRadius: 10, padding: '1.5rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Mock Header Nav Tab */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Active Tab:</span>
+            <div
+              style={{
+                padding: '0.55rem 1.1rem',
+                borderRadius: 6,
+                backgroundColor: colors.primaryLight,
+                color: colors.primary,
+                border: `1px solid ${colors.primaryBorder}`,
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <span>Floor Plans (Active Tab)</span>
+            </div>
+
+            <div
+              style={{
+                padding: '0.55rem 1.1rem',
+                borderRadius: 6,
+                backgroundColor: 'transparent',
+                color: '#64748b',
+                fontWeight: 600,
+                fontSize: '0.88rem',
+              }}
+            >
+              <span>Amenities (Inactive Tab)</span>
+            </div>
+          </div>
+
+          {/* Buttons preview */}
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Buttons:</span>
+            <button
+              style={{
+                backgroundColor: colors.primary,
+                color: '#ffffff',
+                padding: '0.65rem 1.4rem',
+                borderRadius: 6,
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: `0 2px 8px ${colors.primary}44`,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = colors.primaryHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
+            >
+              Primary Button ({colors.primary})
+            </button>
+
+            <button
+              style={{
+                backgroundColor: '#ffffff',
+                color: colors.primary,
+                padding: '0.65rem 1.4rem',
+                borderRadius: 6,
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                border: `1.5px solid ${colors.primary}`,
+                cursor: 'pointer',
+              }}
+            >
+              Secondary Outlined
+            </button>
+
+            <div
+              style={{
+                backgroundColor: colors.secondary,
+                color: '#ffffff',
+                padding: '0.4rem 0.8rem',
+                borderRadius: 20,
+                fontWeight: 700,
+                fontSize: '0.78rem',
+              }}
+            >
+              Accent Badge: {colors.secondary}
+            </div>
+          </div>
+
+          {/* Promo Nudge Bar Strip */}
+          <div
+            style={{
+              backgroundColor: colors.promoBanner,
+              padding: '0.75rem 1.25rem',
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+            }}
+          >
+            <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9rem' }}>
+              Summer Savings Special Offers Strip
+            </span>
+            <button
+              style={{
+                backgroundColor: colors.promoButton,
+                color: '#ffffff',
+                padding: '0.45rem 1rem',
+                borderRadius: 6,
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              View Floor Plans
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3. 1-CLICK CURATED PRESETS ── */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 800, color: A.text, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={16} style={{ color: A.accent }} /> 1-Click Curated Presets
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
           {THEME_PRESETS.map((preset, idx) => (
@@ -2083,23 +2346,23 @@ export default THEME_CONFIG;
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                <div style={{ width: 18, height: 18, borderRadius: '50%', backgroundColor: preset.primary, border: '1px solid rgba(255,255,255,0.3)' }} />
-                <div style={{ width: 18, height: 18, borderRadius: '50%', backgroundColor: preset.secondary, border: '1px solid rgba(255,255,255,0.3)' }} />
-                <span style={{ fontWeight: 700, fontSize: '0.82rem', color: A.text, marginLeft: 'auto' }}>
-                  {colors.primary === preset.primary ? '✓ Active' : ''}
+                <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: preset.primary, border: '1px solid rgba(255,255,255,0.3)' }} />
+                <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: preset.secondary, border: '1px solid rgba(255,255,255,0.3)' }} />
+                <span style={{ fontWeight: 700, fontSize: '0.8rem', color: A.accent, marginLeft: 'auto' }}>
+                  {colors.primary === preset.primary ? 'Active' : ''}
                 </span>
               </div>
               <div style={{ fontWeight: 700, fontSize: '0.85rem', color: A.text }}>{preset.name}</div>
-              <div style={{ fontSize: '0.75rem', color: A.muted, marginTop: '0.2rem', lineHeight: 1.3 }}>{preset.desc}</div>
+              <div style={{ fontSize: '0.74rem', color: A.muted, marginTop: '0.2rem', lineHeight: 1.3 }}>{preset.desc}</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Color Palette Grid */}
-      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: A.text, marginBottom: '1.25rem' }}>
-          Palette Color Tokens
+      {/* ── 4. INDIVIDUAL COLOR TOKENS FINE-TUNER ── */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 800, color: A.text, marginBottom: '1.25rem' }}>
+          Fine-tune Individual Color Tokens
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
           {colorFields.map((field) => (
@@ -2143,17 +2406,56 @@ export default THEME_CONFIG;
             </div>
           ))}
         </div>
+
+        {/* Bottom Save Action */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: `1px solid ${A.border}` }}>
+          <button
+            onClick={handleReset}
+            style={{
+              padding: '0.7rem 1.4rem',
+              backgroundColor: `${A.muted}22`,
+              color: A.text,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              fontSize: '0.88rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Reset Defaults
+          </button>
+
+          <button
+            onClick={handleSaveTheme}
+            style={{
+              padding: '0.7rem 1.85rem',
+              backgroundColor: A.accent,
+              color: '#0a0d14',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: '0.92rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: `0 4px 14px ${A.accent}44`,
+            }}
+          >
+            <Save size={18} /> Save Theme to Website
+          </button>
+        </div>
       </div>
 
-      {/* Code Export Box with Copy */}
-      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem' }}>
+      {/* ── 5. OPTIONAL CODE EXPORT BOX ── */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <div>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: A.text, margin: 0 }}>
-              Generated Config for <code style={{ color: A.accent }}>src/config/themeConfig.js</code>
+              Optional Backup Code (for <code style={{ color: A.accent }}>src/config/themeConfig.js</code>)
             </h3>
             <p style={{ color: A.muted, fontSize: '0.8rem', margin: '0.2rem 0 0' }}>
-              You can copy this code and paste it directly into <code style={{ color: '#e2e8f0' }}>themeConfig.js</code> for permanent persistence.
+              Colors are already saved in the browser, but you can also copy this code if you ever want to update the default file.
             </p>
           </div>
           <button
@@ -2173,7 +2475,7 @@ export default THEME_CONFIG;
             }}
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? 'Copied to Clipboard!' : 'Copy Config Code'}
+            {copied ? 'Copied to Clipboard!' : 'Copy Code'}
           </button>
         </div>
 
@@ -2185,7 +2487,7 @@ export default THEME_CONFIG;
             padding: '1rem',
             fontSize: '0.8rem',
             color: '#93c5fd',
-            maxHeight: 220,
+            maxHeight: 180,
             overflowY: 'auto',
             fontFamily: 'Consolas, Monaco, monospace',
             margin: 0,

@@ -88,20 +88,26 @@ export default function App() {
   const [addOns, setAddOns] = useState(INITIAL_ADDONS);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
-  // Sync settings when modified from anywhere
+  // Sync settings and theme when modified from anywhere
   useEffect(() => {
     const onSettingsUpdate = (e) => setSiteSettings(e.detail);
     const onLegalUpdate = (e) => setLegalPages(e.detail);
     const onSupportUpdate = (e) => setSupportInquiries(e.detail);
+    const onThemeUpdate = () => {
+      // Force trigger state update so all React trees re-render
+      setSiteSettings(prev => ({ ...prev }));
+    };
 
     window.addEventListener('site-settings-updated', onSettingsUpdate);
     window.addEventListener('legal-pages-updated', onLegalUpdate);
     window.addEventListener('support-inquiries-updated', onSupportUpdate);
+    window.addEventListener('theme-updated', onThemeUpdate);
 
     return () => {
       window.removeEventListener('site-settings-updated', onSettingsUpdate);
       window.removeEventListener('legal-pages-updated', onLegalUpdate);
       window.removeEventListener('support-inquiries-updated', onSupportUpdate);
+      window.removeEventListener('theme-updated', onThemeUpdate);
     };
   }, []);
 
