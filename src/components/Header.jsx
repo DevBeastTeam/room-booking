@@ -118,11 +118,12 @@ export default function Header({
       {/* ── 1. Top Luxury Utility Bar ── */}
       <div 
         style={{
-          backgroundColor: '#06070c',
-          borderBottom: '1px solid rgba(201, 169, 110, 0.12)',
+          backgroundColor: 'var(--bg-elevated, #06070c)',
+          borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.12))',
           fontSize: '0.78rem',
           letterSpacing: '0.03em',
-          color: '#a39886',
+          color: 'var(--text-muted, #a39886)',
+          transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
         }}
       >
         <div 
@@ -143,19 +144,19 @@ export default function Header({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.45rem',
-                color: '#e8e0d4',
+                color: 'var(--text-main, #e8e0d4)',
                 fontWeight: 600,
                 textDecoration: 'none',
                 transition: 'color 0.2s',
               }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--primary-color, #c9a96e)'}
-              onMouseLeave={e => e.currentTarget.style.color = '#e8e0d4'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-main, #e8e0d4)'}
             >
               <Phone size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
               <span>{siteSettings?.phone || '(817) 857-8782'}</span>
             </a>
 
-            <div style={{ display: 'none', md: 'flex', alignItems: 'center', gap: '0.4rem', color: '#82786a' }} className="hide-mobile">
+            <div style={{ display: 'none', md: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted, #82786a)' }} className="hide-mobile">
               <MapPin size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
               <span>4500 Campus Dr, Fort Worth, TX 76119</span>
             </div>
@@ -174,21 +175,21 @@ export default function Header({
                   width: '28px',
                   height: '28px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(201, 169, 110, 0.2)',
-                  color: '#c9a96e',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.05))',
+                  border: '1px solid var(--card-border, rgba(201, 169, 110, 0.2))',
+                  color: 'var(--primary-color, #c9a96e)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.2)';
-                  e.currentTarget.style.borderColor = '#c9a96e';
+                  e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.2))';
+                  e.currentTarget.style.borderColor = 'var(--primary-color, #c9a96e)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                  e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.2)';
+                  e.currentTarget.style.backgroundColor = 'var(--card-inner-bg, rgba(255, 255, 255, 0.05))';
+                  e.currentTarget.style.borderColor = 'var(--card-border, rgba(201, 169, 110, 0.2))';
                 }}
               >
                 <FacebookIcon size={13} />
@@ -203,28 +204,28 @@ export default function Header({
                   width: '28px',
                   height: '28px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(201, 169, 110, 0.2)',
-                  color: '#c9a96e',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.05))',
+                  border: '1px solid var(--card-border, rgba(201, 169, 110, 0.2))',
+                  color: 'var(--primary-color, #c9a96e)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.2)';
-                  e.currentTarget.style.borderColor = '#c9a96e';
+                  e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.2))';
+                  e.currentTarget.style.borderColor = 'var(--primary-color, #c9a96e)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                  e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.2)';
+                  e.currentTarget.style.backgroundColor = 'var(--card-inner-bg, rgba(255, 255, 255, 0.05))';
+                  e.currentTarget.style.borderColor = 'var(--card-border, rgba(201, 169, 110, 0.2))';
                 }}
               >
                 <InstagramIcon size={13} />
               </a>
             </div>
 
-            <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+            <div style={{ width: '1px', height: '14px', backgroundColor: 'var(--border-color, rgba(255,255,255,0.1))' }} />
 
             {/* Theme Switcher Button (Dark / Light) */}
             <button
@@ -266,8 +267,8 @@ export default function Header({
                 window.open(`https://translate.google.com/translate?sl=auto&tl=es&u=${currentUrl}`, '_blank');
               }}
               style={{
-                backgroundColor: 'rgba(201, 169, 110, 0.08)',
-                color: '#dfc285',
+                backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.08))',
+                color: 'var(--primary-color, #dfc285)',
                 padding: '0.28rem 0.65rem',
                 borderRadius: '4px',
                 fontSize: '0.72rem',
@@ -277,16 +278,16 @@ export default function Header({
                 alignItems: 'center',
                 gap: '0.35rem',
                 cursor: 'pointer',
-                border: '1px solid rgba(201, 169, 110, 0.25)',
+                border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.25))',
                 transition: 'all 0.2s',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.2)';
-                e.currentTarget.style.borderColor = '#dfc285';
+                e.currentTarget.style.backgroundColor = 'var(--card-inner-bg, rgba(201, 169, 110, 0.2))';
+                e.currentTarget.style.borderColor = 'var(--primary-color, #dfc285)';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.08)';
-                e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.25)';
+                e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.08))';
+                e.currentTarget.style.borderColor = 'var(--primary-border, rgba(201, 169, 110, 0.25))';
               }}
               title="Translate Page to Spanish | Traducir al Español"
             >
@@ -298,8 +299,8 @@ export default function Header({
               <button
                 onClick={() => setIsLoginOpen(!isLoginOpen)}
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  color: '#f0ebe0',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.08))',
+                  color: 'var(--text-main, #f0ebe0)',
                   padding: '0.32rem 0.8rem',
                   borderRadius: '4px',
                   fontSize: '0.75rem',
@@ -308,11 +309,11 @@ export default function Header({
                   alignItems: 'center',
                   gap: '0.4rem',
                   cursor: 'pointer',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color, #c9a96e)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--card-border, rgba(255, 255, 255, 0.15))'}
               >
                 <User size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
                 <span>Portals</span>
@@ -327,7 +328,7 @@ export default function Header({
                     right: 0,
                     top: '125%',
                     backgroundColor: 'var(--modal-bg, #0c0f18)',
-                    boxShadow: '0 15px 35px rgba(0,0,0,0.4), 0 0 0 1px var(--card-border)',
+                    boxShadow: '0 15px 35px var(--shadow-color, rgba(0,0,0,0.4)), 0 0 0 1px var(--card-border)',
                     borderRadius: '8px',
                     border: '1px solid var(--card-border)',
                     minWidth: '240px',
@@ -346,17 +347,17 @@ export default function Header({
                       justifyContent: 'space-between',
                       padding: '0.75rem 1rem',
                       fontSize: '0.82rem',
-                      color: '#f0ebe0',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      color: 'var(--text-main, #f0ebe0)',
+                      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
                       fontWeight: 600,
                       textDecoration: 'none',
                       cursor: 'pointer',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.1)'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.1))'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <span>Resident Portal</span>
-                    <span style={{ fontSize: '0.65rem', color: '#c9a96e', backgroundColor: 'rgba(201, 169, 110, 0.15)', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--primary-color, #c9a96e)', backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.15))', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
                   </a>
 
                   <a
@@ -370,17 +371,17 @@ export default function Header({
                       justifyContent: 'space-between',
                       padding: '0.75rem 1rem',
                       fontSize: '0.82rem',
-                      color: '#f0ebe0',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      color: 'var(--text-main, #f0ebe0)',
+                      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
                       fontWeight: 600,
                       textDecoration: 'none',
                       cursor: 'pointer',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.1)'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.1))'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <span>Applicant Portal</span>
-                    <span style={{ fontSize: '0.65rem', color: '#c9a96e', backgroundColor: 'rgba(201, 169, 110, 0.15)', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--primary-color, #c9a96e)', backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.15))', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
                   </a>
 
                   <a
@@ -396,13 +397,13 @@ export default function Header({
                       gap: '0.5rem',
                       padding: '0.7rem 1rem',
                       fontSize: '0.82rem',
-                      color: '#dfc285',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      color: 'var(--primary-color, #dfc285)',
+                      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
                       fontWeight: 600,
                       textDecoration: 'none',
                       cursor: 'pointer',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.1)'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.1))'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <LayoutDashboard size={14} />
@@ -423,10 +424,10 @@ export default function Header({
                       gap: '0.5rem',
                       padding: '0.7rem 1rem',
                       fontSize: '0.82rem',
-                      color: '#4ade80',
+                      color: '#16a34a',
                       backgroundColor: 'transparent',
                       border: 'none',
-                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
                       fontWeight: 700,
                       cursor: 'pointer',
                       textAlign: 'left',
@@ -451,12 +452,12 @@ export default function Header({
                       gap: '0.5rem',
                       padding: '0.7rem 1rem',
                       fontSize: '0.82rem',
-                      color: '#f59e0b',
+                      color: 'var(--primary-color, #f59e0b)',
                       fontWeight: 600,
                       textDecoration: 'none',
                       cursor: 'pointer',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.1)'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(245, 158, 11, 0.1))'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <ShieldCheck size={14} />
@@ -472,8 +473,8 @@ export default function Header({
               aria-label="Toggle navigation"
               style={{
                 backgroundColor: 'transparent',
-                border: '1px solid rgba(201, 169, 110, 0.3)',
-                color: '#e8e0d4',
+                border: '1px solid var(--card-border, rgba(201, 169, 110, 0.3))',
+                color: 'var(--text-main, #e8e0d4)',
                 padding: '0.35rem 0.6rem',
                 borderRadius: '4px',
                 display: 'flex',
@@ -491,15 +492,16 @@ export default function Header({
       {/* ── 2. Primary Luxury Navigation Bar ── */}
       <nav 
         style={{
-          backgroundColor: 'rgba(8, 9, 15, 0.94)',
+          backgroundColor: 'var(--nav-bg, rgba(8, 9, 15, 0.94))',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(201, 169, 110, 0.16)',
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)',
+          borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.16))',
+          boxShadow: '0 4px 30px var(--shadow-color, rgba(0, 0, 0, 0.2))',
+          transition: 'background-color 0.3s ease, border-color 0.3s ease',
         }}
       >
         <div 
-          className="container"
+          className="container" 
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -530,16 +532,16 @@ export default function Header({
                 width: '44px',
                 height: '44px',
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 50%, #8c6e3b 100%)',
+                background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 50%, #8c6e3b 100%))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#08090f',
+                color: 'var(--btn-gold-text, #08090f)',
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
                 fontSize: '1.55rem',
                 fontWeight: 700,
-                boxShadow: '0 4px 16px rgba(201, 169, 110, 0.35)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 4px 16px var(--primary-light, rgba(201, 169, 110, 0.35))',
+                border: '1px solid var(--card-border, rgba(255, 255, 255, 0.3))',
                 flexShrink: 0,
               }}
             >
@@ -553,8 +555,9 @@ export default function Header({
                   fontSize: '1.35rem',
                   fontWeight: 600,
                   letterSpacing: '0.04em',
-                  color: '#f4efe6',
+                  color: 'var(--text-main, #f4efe6)',
                   lineHeight: 1.1,
+                  transition: 'color 0.3s ease',
                 }}
               >
                 MONARCH PASS
@@ -566,7 +569,8 @@ export default function Header({
                   fontWeight: 600,
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: '#c9a96e',
+                  color: 'var(--primary-color, #c9a96e)',
+                  transition: 'color 0.3s ease',
                 }}
               >
                 Luxury Residences · Fort Worth
@@ -598,7 +602,7 @@ export default function Header({
                   padding: '0.45rem 0.75rem',
                   fontSize: '0.84rem',
                   fontWeight: link.active ? 600 : 500,
-                  color: link.active ? '#dfc285' : '#b8ada0',
+                  color: link.active ? 'var(--primary-color, #dfc285)' : 'var(--nav-link-color, #b8ada0)',
                   textDecoration: 'none',
                   borderRadius: '4px',
                   display: 'inline-flex',
@@ -609,10 +613,10 @@ export default function Header({
                   letterSpacing: '0.02em',
                 }}
                 onMouseEnter={e => {
-                  if (!link.active) e.currentTarget.style.color = '#f0ebe0';
+                  if (!link.active) e.currentTarget.style.color = 'var(--text-main, #f0ebe0)';
                 }}
                 onMouseLeave={e => {
-                  if (!link.active) e.currentTarget.style.color = '#b8ada0';
+                  if (!link.active) e.currentTarget.style.color = 'var(--nav-link-color, #b8ada0)';
                 }}
               >
                 <span>{link.label}</span>
@@ -621,11 +625,11 @@ export default function Header({
                     style={{
                       fontSize: '0.65rem',
                       fontWeight: 700,
-                      backgroundColor: 'rgba(201, 169, 110, 0.2)',
-                      color: '#dfc285',
+                      backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.2))',
+                      color: 'var(--primary-color, #dfc285)',
                       padding: '1px 5px',
                       borderRadius: '10px',
-                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.3))',
                     }}
                   >
                     {link.badge}
@@ -639,9 +643,9 @@ export default function Header({
                       left: '0.75rem',
                       right: '0.75rem',
                       height: '2px',
-                      backgroundColor: '#c9a96e',
+                      backgroundColor: 'var(--primary-color, #c9a96e)',
                       borderRadius: '2px',
-                      boxShadow: '0 0 8px rgba(201, 169, 110, 0.6)',
+                      boxShadow: '0 0 8px var(--primary-color, rgba(201, 169, 110, 0.6))',
                     }}
                   />
                 )}
@@ -661,9 +665,9 @@ export default function Header({
                 fontWeight: 600,
                 letterSpacing: '0.06em',
                 borderRadius: '4px',
-                border: '1px solid rgba(201, 169, 110, 0.45)',
-                backgroundColor: 'rgba(201, 169, 110, 0.06)',
-                color: '#dfc285',
+                border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.45))',
+                backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.06))',
+                color: 'var(--primary-color, #dfc285)',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -671,17 +675,17 @@ export default function Header({
                 transition: 'all 0.25s',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.18)';
-                e.currentTarget.style.borderColor = '#c9a96e';
+                e.currentTarget.style.backgroundColor = 'var(--card-inner-bg, rgba(201, 169, 110, 0.18))';
+                e.currentTarget.style.borderColor = 'var(--primary-color, #c9a96e)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.06)';
-                e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.45)';
+                e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.06))';
+                e.currentTarget.style.borderColor = 'var(--primary-border, rgba(201, 169, 110, 0.45))';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <Calendar size={13} style={{ color: '#c9a96e' }} />
+              <Calendar size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
               <span>Schedule Tour</span>
             </button>
 
@@ -696,23 +700,23 @@ export default function Header({
                 textTransform: 'uppercase',
                 borderRadius: '4px',
                 border: 'none',
-                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
-                color: '#08090f',
+                background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
+                color: 'var(--btn-gold-text, #08090f)',
                 cursor: 'pointer',
                 display: 'none',
                 sm: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.45rem',
-                boxShadow: '0 4px 15px rgba(201, 169, 110, 0.3)',
+                boxShadow: '0 4px 15px var(--shadow-color, rgba(201, 169, 110, 0.3))',
                 transition: 'all 0.25s',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(201, 169, 110, 0.45)';
+                e.currentTarget.style.boxShadow = '0 6px 20px var(--shadow-color, rgba(201, 169, 110, 0.45))';
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(201, 169, 110, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 15px var(--shadow-color, rgba(201, 169, 110, 0.3))';
               }}
             >
               <span>Explore Units</span>
@@ -741,18 +745,18 @@ export default function Header({
           }}
         >
           {/* Top Bar inside Mobile Drawer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(201, 169, 110, 0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.2))' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div
                 style={{
                   width: '38px',
                   height: '38px',
                   borderRadius: '6px',
-                  background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                  background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#08090f',
+                  color: 'var(--btn-gold-text, #08090f)',
                   fontFamily: "'Cormorant Garamond', Georgia, serif",
                   fontSize: '1.3rem',
                   fontWeight: 700,
@@ -761,10 +765,10 @@ export default function Header({
                 M
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.2rem', fontWeight: 600, color: '#f4efe6' }}>
+                <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
                   MONARCH PASS
                 </span>
-                <span style={{ fontSize: '0.62rem', color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                <span style={{ fontSize: '0.62rem', color: 'var(--primary-color, #c9a96e)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                   Fort Worth, TX
                 </span>
               </div>
@@ -774,9 +778,9 @@ export default function Header({
               onClick={() => setIsNavOpen(false)}
               aria-label="Close menu"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: '#ffffff',
+                backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.08))',
+                border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
+                color: 'var(--text-main, #ffffff)',
                 padding: '0.5rem',
                 borderRadius: '6px',
                 cursor: 'pointer',
@@ -794,8 +798,8 @@ export default function Header({
               justifyContent: 'space-between',
               padding: '0.75rem 1rem',
               borderRadius: '8px',
-              backgroundColor: 'rgba(201, 169, 110, 0.1)',
-              border: '1px solid rgba(201, 169, 110, 0.25)',
+              backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.1))',
+              border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.25))',
               marginBottom: '1.25rem',
             }}
           >
@@ -841,9 +845,9 @@ export default function Header({
                   justifyContent: 'space-between',
                   padding: '0.85rem 1rem',
                   borderRadius: '6px',
-                  backgroundColor: link.active ? 'rgba(201, 169, 110, 0.12)' : 'transparent',
-                  border: link.active ? '1px solid rgba(201, 169, 110, 0.3)' : '1px solid transparent',
-                  color: link.active ? '#dfc285' : '#e8e0d4',
+                  backgroundColor: link.active ? 'var(--primary-light, rgba(201, 169, 110, 0.12))' : 'transparent',
+                  border: link.active ? '1px solid var(--primary-border, rgba(201, 169, 110, 0.3))' : '1px solid transparent',
+                  color: link.active ? 'var(--primary-color, #dfc285)' : 'var(--text-main, #e8e0d4)',
                   fontSize: '1rem',
                   fontWeight: link.active ? 600 : 500,
                   textDecoration: 'none',
@@ -855,8 +859,8 @@ export default function Header({
                     style={{
                       fontSize: '0.72rem',
                       fontWeight: 700,
-                      backgroundColor: 'rgba(201, 169, 110, 0.2)',
-                      color: '#dfc285',
+                      backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.2))',
+                      color: 'var(--primary-color, #dfc285)',
                       padding: '2px 8px',
                       borderRadius: '10px',
                     }}
@@ -871,7 +875,7 @@ export default function Header({
           </div>
 
           {/* Bottom Actions inside Mobile Drawer */}
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))' }}>
             <button
               onClick={() => {
                 setIsNavOpen(false);
@@ -881,8 +885,8 @@ export default function Header({
                 width: '100%',
                 padding: '0.85rem',
                 borderRadius: '6px',
-                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
-                color: '#08090f',
+                background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
+                color: 'var(--btn-gold-text, #08090f)',
                 fontWeight: 700,
                 fontSize: '0.9rem',
                 letterSpacing: '0.06em',
@@ -905,9 +909,9 @@ export default function Header({
                 width: '100%',
                 padding: '0.85rem',
                 borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: '#f0ebe0',
+                backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.06))',
+                border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
+                color: 'var(--text-main, #f0ebe0)',
                 fontWeight: 600,
                 fontSize: '0.9rem',
                 display: 'flex',
@@ -917,7 +921,7 @@ export default function Header({
                 textDecoration: 'none',
               }}
             >
-              <Phone size={16} style={{ color: '#c9a96e' }} />
+              <Phone size={16} style={{ color: 'var(--primary-color, #c9a96e)' }} />
               <span>Call Leasing: {siteSettings?.phone || '(817) 857-8782'}</span>
             </a>
           </div>
