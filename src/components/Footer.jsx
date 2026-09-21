@@ -31,7 +31,7 @@ export default function Footer({
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer style={{ backgroundColor: '#212529', color: '#e2e8f0', marginTop: '4rem' }}>
+    <footer style={{ backgroundColor: 'var(--dark-color, #212529)', color: '#e2e8f0', marginTop: '4rem' }}>
       {/* Top Footer Section */}
       <div className="container" style={{ padding: '3.5rem 1.5rem 2.5rem' }}>
         <div
@@ -68,7 +68,7 @@ export default function Footer({
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.875rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <MapPin size={16} style={{ color: '#68c7b7', flexShrink: 0 }} />
+                <MapPin size={16} style={{ color: 'var(--secondary-color, #68c7b7)', flexShrink: 0 }} />
                 <a 
                   href={siteSettings?.mapsUrl || 'https://maps.app.goo.gl/E71XfBiE8dE9bAjV6'} 
                   target="_blank" 
@@ -81,7 +81,7 @@ export default function Footer({
                 </a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Phone size={16} style={{ color: '#68c7b7', flexShrink: 0 }} />
+                <Phone size={16} style={{ color: 'var(--secondary-color, #68c7b7)', flexShrink: 0 }} />
                 <a href={`tel:${siteSettings?.secondaryPhone?.replace(/[^0-9+]/g, '') || '+18175311750'}`} style={{ color: '#ffffff' }}>
                   {siteSettings?.secondaryPhone || '+1 817-531-1750'}
                 </a>

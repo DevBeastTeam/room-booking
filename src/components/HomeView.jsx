@@ -199,7 +199,7 @@ export default function HomeView({
             <button
               onClick={onNavigateFloorPlans}
               style={{
-                backgroundColor: '#0f766e',
+                backgroundColor: 'var(--primary-color, #0f766e)',
                 color: '#ffffff',
                 padding: '0.85rem 1.85rem',
                 borderRadius: '6px',
@@ -213,8 +213,8 @@ export default function HomeView({
                 boxShadow: '0 4px 15px rgba(15, 118, 110, 0.4)',
                 transition: 'all 0.2s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #0f766e)')}
             >
               <Layers size={18} />
               <span>Explore Floor Plans</span>
@@ -224,7 +224,7 @@ export default function HomeView({
               onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                color: '#0f766e',
+                color: 'var(--primary-color, #0f766e)',
                 padding: '0.85rem 1.85rem',
                 borderRadius: '6px',
                 fontSize: '1rem',
@@ -336,7 +336,7 @@ export default function HomeView({
       <section style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '1.5rem 0' }}>
         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#ccfbf1', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'var(--primary-light, #f0fdfa)', color: 'var(--primary-color, #0f766e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Layers size={22} />
             </div>
             <div>
@@ -346,7 +346,7 @@ export default function HomeView({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#ccfbf1', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'var(--primary-light, #f0fdfa)', color: 'var(--primary-color, #0f766e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ShieldCheck size={22} />
             </div>
             <div>
@@ -356,7 +356,7 @@ export default function HomeView({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#ccfbf1', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'var(--primary-light, #f0fdfa)', color: 'var(--primary-color, #0f766e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Sparkles size={22} />
             </div>
             <div>
@@ -366,7 +366,7 @@ export default function HomeView({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#ccfbf1', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'var(--primary-light, #f0fdfa)', color: 'var(--primary-color, #0f766e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MapPin size={22} />
             </div>
             <div>
@@ -473,7 +473,7 @@ export default function HomeView({
                 <button
                   onClick={onNavigateFloorPlans}
                   style={{
-                    backgroundColor: '#0f766e',
+                    backgroundColor: 'var(--primary-color, #0f766e)',
                     color: '#ffffff',
                     padding: '0.75rem 1.5rem',
                     borderRadius: '6px',
@@ -486,8 +486,8 @@ export default function HomeView({
                     cursor: 'pointer',
                     transition: 'background 0.2s',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #0f766e)')}
                 >
                   <span>View Floor Plans</span>
                   <ArrowRight size={16} />
@@ -512,7 +512,7 @@ export default function HomeView({
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
                 >
-                  <ShieldCheck size={16} style={{ color: '#0f766e' }} />
+                  <ShieldCheck size={16} style={{ color: 'var(--primary-color, #0f766e)' }} />
                   <span>Income Guidelines</span>
                 </button>
               </div>
@@ -609,7 +609,7 @@ export default function HomeView({
             <button
               onClick={onNavigateAmenities}
               style={{
-                backgroundColor: '#0f766e',
+                backgroundColor: 'var(--primary-color, #0f766e)',
                 color: '#ffffff',
                 padding: '0.85rem 2rem',
                 borderRadius: '6px',
@@ -623,8 +623,8 @@ export default function HomeView({
                 boxShadow: '0 4px 15px rgba(15, 118, 110, 0.4)',
                 transition: 'background 0.2s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #0f766e)')}
             >
               <span>Explore All 29 Amenities</span>
               <ArrowRight size={16} />
@@ -638,7 +638,7 @@ export default function HomeView({
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.5rem' }}>
             <div>
-              <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <span style={{ color: 'var(--primary-color, #0f766e)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Visual Tour
               </span>
               <h2 style={{ fontSize: 'clamp(1.85rem, 3vw, 2.5rem)', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', margin: '0.25rem 0 0' }}>
@@ -651,8 +651,8 @@ export default function HomeView({
                 onClick={onNavigatePhotos}
                 style={{
                   backgroundColor: '#ffffff',
-                  color: '#0f766e',
-                  border: '1px solid #0f766e',
+                  color: 'var(--primary-color, #0f766e)',
+                  border: '1px solid var(--primary-color, #0f766e)',
                   borderRadius: '6px',
                   padding: '0.65rem 1.25rem',
                   fontWeight: 600,
@@ -670,7 +670,7 @@ export default function HomeView({
               <button
                 onClick={onNavigateVirtualTour}
                 style={{
-                  backgroundColor: '#0f766e',
+                  backgroundColor: 'var(--primary-color, #0f766e)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '6px',
@@ -757,7 +757,7 @@ export default function HomeView({
             }}
           >
             <div>
-              <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <span style={{ color: 'var(--primary-color, #0f766e)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Prime Fort Worth Location
               </span>
               <h2
@@ -777,15 +777,15 @@ export default function HomeView({
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', fontSize: '0.95rem' }}>
-                  <CheckCircle2 size={18} style={{ color: '#0f766e', flexShrink: 0 }} />
+                  <CheckCircle2 size={18} style={{ color: 'var(--primary-color, #0f766e)', flexShrink: 0 }} />
                   <span>Minutes from Tarrant County College South Campus</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', fontSize: '0.95rem' }}>
-                  <CheckCircle2 size={18} style={{ color: '#0f766e', flexShrink: 0 }} />
+                  <CheckCircle2 size={18} style={{ color: 'var(--primary-color, #0f766e)', flexShrink: 0 }} />
                   <span>Quick access to I-20, I-35W, and Southeast Parkway</span>
                 </li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#334155', fontSize: '0.95rem' }}>
-                  <CheckCircle2 size={18} style={{ color: '#0f766e', flexShrink: 0 }} />
+                  <CheckCircle2 size={18} style={{ color: 'var(--primary-color, #0f766e)', flexShrink: 0 }} />
                   <span>Close to Lake Arlington recreation, parks & dining</span>
                 </li>
               </ul>
@@ -793,7 +793,7 @@ export default function HomeView({
               <button
                 onClick={onNavigateMap}
                 style={{
-                  backgroundColor: '#0f766e',
+                  backgroundColor: 'var(--primary-color, #0f766e)',
                   color: '#ffffff',
                   padding: '0.75rem 1.75rem',
                   borderRadius: '6px',
@@ -831,10 +831,10 @@ export default function HomeView({
       </section>
 
       {/* ── 7. QUICK INQUIRY & CONTACT FORM STRIP ── */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: '#f0fdfa', borderTop: '1px solid #ccfbf1' }}>
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--primary-light, #f0fdfa)', borderTop: '1px solid #ccfbf1' }}>
         <div className="container" style={{ maxWidth: '900px' }}>
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <span style={{ color: 'var(--primary-color, #0f766e)', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Connect with Our Leasing Team
             </span>
             <h2 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.25rem)', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', margin: '0.25rem 0 0.5rem' }}>
@@ -856,7 +856,7 @@ export default function HomeView({
           >
             {formSubmitted ? (
               <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-                <CheckCircle2 size={48} style={{ color: '#0f766e', margin: '0 auto 1rem' }} />
+                <CheckCircle2 size={48} style={{ color: 'var(--primary-color, #0f766e)', margin: '0 auto 1rem' }} />
                 <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
                   Thank you for contacting Monarch Pass!
                 </h3>
@@ -992,8 +992,8 @@ export default function HomeView({
                     onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
                     style={{
                       backgroundColor: '#ffffff',
-                      color: '#0f766e',
-                      border: '1px solid #0f766e',
+                      color: 'var(--primary-color, #0f766e)',
+                      border: '1px solid var(--primary-color, #0f766e)',
                       padding: '0.75rem 1.5rem',
                       borderRadius: '6px',
                       fontSize: '0.92rem',
@@ -1007,7 +1007,7 @@ export default function HomeView({
                   <button
                     type="submit"
                     style={{
-                      backgroundColor: '#0f766e',
+                      backgroundColor: 'var(--primary-color, #0f766e)',
                       color: '#ffffff',
                       border: 'none',
                       padding: '0.75rem 1.75rem',
@@ -1020,8 +1020,8 @@ export default function HomeView({
                       cursor: 'pointer',
                       transition: 'background 0.2s',
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #0f766e)')}
                   >
                     <Send size={16} />
                     <span>Submit Inquiry</span>

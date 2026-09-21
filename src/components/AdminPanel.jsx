@@ -6,7 +6,7 @@ import {
   Package, Layers, Car, Archive, Search,
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
-  Phone, Send, TrendingUp
+  Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -18,6 +18,7 @@ import {
   saveSupportInquiries,
   addSupportInquiry
 } from '../services/siteDataService';
+import { THEME_CONFIG, applyThemeToDOM } from '../config/themeConfig';
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
 const A = {
@@ -1811,6 +1812,392 @@ function SiteSettingsSection({ siteSettings, setSiteSettings }) {
   );
 }
 
+// ── Theme & Colors Management Section ──────────────────────────────────────────
+function ThemeConfigSection() {
+  const [colors, setColors] = useState({ ...THEME_CONFIG });
+  const [copied, setCopied] = useState(false);
+  const [appliedMsg, setAppliedMsg] = useState(false);
+
+  const THEME_PRESETS = [
+    {
+      name: 'Monarch Signature Teal (Default)',
+      desc: 'Authentic Monarch Pass deep evergreen with fresh aqua teal accents',
+      primary: '#0f766e',
+      primaryHover: '#0d6460',
+      primaryDark: '#134e4a',
+      primaryLight: '#f0fdfa',
+      primaryBorder: '#99f6e4',
+      secondary: '#68c7b7',
+      secondaryHover: '#52b6a5',
+      secondaryDark: '#3d9c8d',
+      secondaryLight: '#eef9f7',
+      navOverlayBg: '#68c7b7',
+      navOverlayBgRgba: 'rgba(104, 199, 183, 0.98)',
+      promoBanner: '#68c7b7',
+      promoButton: '#0f766e',
+    },
+    {
+      name: 'Ocean Pacific Blue',
+      desc: 'Deep marine royal blue with electric sky accents',
+      primary: '#1d4ed8',
+      primaryHover: '#1e40af',
+      primaryDark: '#172554',
+      primaryLight: '#eff6ff',
+      primaryBorder: '#bfdbfe',
+      secondary: '#38bdf8',
+      secondaryHover: '#0284c7',
+      secondaryDark: '#0369a1',
+      secondaryLight: '#f0f9ff',
+      navOverlayBg: '#0284c7',
+      navOverlayBgRgba: 'rgba(2, 132, 199, 0.98)',
+      promoBanner: '#38bdf8',
+      promoButton: '#1d4ed8',
+    },
+    {
+      name: 'Royal Burgundy & Rose',
+      desc: 'Warm luxury burgundy with soft blush rose accents',
+      primary: '#881337',
+      primaryHover: '#9f1239',
+      primaryDark: '#4c0519',
+      primaryLight: '#fff1f2',
+      primaryBorder: '#fecdd3',
+      secondary: '#fb7185',
+      secondaryHover: '#f43f5e',
+      secondaryDark: '#e11d48',
+      secondaryLight: '#fff1f2',
+      navOverlayBg: '#e11d48',
+      navOverlayBgRgba: 'rgba(225, 29, 72, 0.98)',
+      promoBanner: '#fb7185',
+      promoButton: '#881337',
+    },
+    {
+      name: 'Forest Sage & Emerald',
+      desc: 'Earthy organic woodland green with fresh mint highlights',
+      primary: '#15803d',
+      primaryHover: '#166534',
+      primaryDark: '#052e16',
+      primaryLight: '#f0fdf4',
+      primaryBorder: '#bbf7d0',
+      secondary: '#22c55e',
+      secondaryHover: '#16a34a',
+      secondaryDark: '#15803d',
+      secondaryLight: '#f0fdf4',
+      navOverlayBg: '#15803d',
+      navOverlayBgRgba: 'rgba(21, 128, 61, 0.98)',
+      promoBanner: '#22c55e',
+      promoButton: '#15803d',
+    },
+    {
+      name: 'Modern Charcoal & Amber Gold',
+      desc: 'High-contrast modern charcoal with warm amber luxury gold',
+      primary: '#1e293b',
+      primaryHover: '#0f172a',
+      primaryDark: '#020617',
+      primaryLight: '#f8fafc',
+      primaryBorder: '#cbd5e1',
+      secondary: '#d97706',
+      secondaryHover: '#b45309',
+      secondaryDark: '#92400e',
+      secondaryLight: '#fffbeb',
+      navOverlayBg: '#d97706',
+      navOverlayBgRgba: 'rgba(217, 119, 6, 0.98)',
+      promoBanner: '#d97706',
+      promoButton: '#1e293b',
+    },
+  ];
+
+  const handleApplyPreset = (preset) => {
+    const updated = { ...colors, ...preset };
+    setColors(updated);
+    applyThemeToDOM(updated);
+    setAppliedMsg(true);
+    setTimeout(() => setAppliedMsg(false), 3000);
+  };
+
+  const handleColorChange = (key, value) => {
+    const updated = { ...colors, [key]: value };
+    setColors(updated);
+  };
+
+  const handleApplyLive = () => {
+    applyThemeToDOM(colors);
+    setAppliedMsg(true);
+    setTimeout(() => setAppliedMsg(false), 3000);
+  };
+
+  const handleReset = () => {
+    setColors({ ...THEME_CONFIG });
+    applyThemeToDOM(THEME_CONFIG);
+    setAppliedMsg(false);
+  };
+
+  const generateConfigFileCode = () => {
+    return `/**
+ * MONARCH PASS APARTMENTS - CENTRAL THEME & BRAND COLOR CONFIGURATION
+ * File: src/config/themeConfig.js
+ */
+
+export const THEME_CONFIG = ${JSON.stringify(colors, null, 2)};
+
+export function applyThemeToDOM(colors = THEME_CONFIG) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  root.style.setProperty('--primary-color', colors.primary);
+  root.style.setProperty('--primary-hover', colors.primaryHover);
+  root.style.setProperty('--primary-dark', colors.primaryDark);
+  root.style.setProperty('--primary-light', colors.primaryLight);
+  root.style.setProperty('--primary-border', colors.primaryBorder);
+  root.style.setProperty('--secondary-color', colors.secondary);
+  root.style.setProperty('--secondary-hover', colors.secondaryHover);
+  root.style.setProperty('--secondary-dark', colors.secondaryDark);
+  root.style.setProperty('--secondary-light', colors.secondaryLight);
+  root.style.setProperty('--nav-overlay-bg', colors.navOverlayBg);
+  root.style.setProperty('--nav-overlay-bg-rgba', colors.navOverlayBgRgba);
+  root.style.setProperty('--dark-color', colors.dark);
+  root.style.setProperty('--promo-banner', colors.promoBanner);
+  root.style.setProperty('--promo-button', colors.promoButton);
+}
+
+if (typeof window !== 'undefined') {
+  applyThemeToDOM(THEME_CONFIG);
+}
+
+export default THEME_CONFIG;
+`;
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(generateConfigFileCode());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const colorFields = [
+    { key: 'primary',          label: 'Primary Brand Color',       desc: 'Main website buttons, active tabs, highlights, CTAs' },
+    { key: 'primaryHover',     label: 'Primary Hover Color',       desc: 'Hover state for primary buttons and interactive items' },
+    { key: 'primaryDark',      label: 'Primary Dark Variant',      desc: 'Dark shade for contrast, deep banners, borders' },
+    { key: 'primaryLight',     label: 'Primary Light Background',  desc: 'Soft background tint for active tabs, badges, icons' },
+    { key: 'primaryBorder',    label: 'Primary Border Outline',    desc: 'Border outline for active tabs and focused cards' },
+    { key: 'secondary',        label: 'Secondary Signature Accent',desc: 'Monarch Pass signature aqua teal, icons, subheadings' },
+    { key: 'secondaryHover',   label: 'Secondary Hover',           desc: 'Hover state for secondary interactive elements' },
+    { key: 'secondaryLight',   label: 'Secondary Light Tint',      desc: 'Soft aqua background tint for notification badges' },
+    { key: 'navOverlayBg',     label: 'Navigation Overlay Menu',   desc: 'Fullscreen navigation drawer background' },
+    { key: 'dark',             label: 'Dark Charcoal Surface',     desc: 'Footer background, dark modals, and text high contrast' },
+    { key: 'promoBanner',      label: 'Summer Savings Banner',     desc: 'Promotional nudge bar and special offer badge banner' },
+    { key: 'promoButton',      label: 'Promo Action Button',       desc: 'Action button inside the promotional modal and nudge' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', maxWidth: 1100 }}>
+      {/* Header info */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: A.text, display: 'flex', alignItems: 'center', gap: '0.6rem', margin: 0 }}>
+            <Palette size={24} style={{ color: A.accent }} /> Brand & Theme Colors Configuration
+          </h2>
+          <p style={{ color: A.muted, fontSize: '0.88rem', marginTop: '0.4rem' }}>
+            Central color configuration system. Changing any color here updates the Header, Navigation, Modals, Buttons, and Footer dynamically.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.65rem' }}>
+          <button
+            onClick={handleReset}
+            style={{
+              padding: '0.6rem 1.1rem',
+              backgroundColor: `${A.muted}22`,
+              color: A.text,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}
+          >
+            <RotateCcw size={15} /> Reset Defaults
+          </button>
+
+          <button
+            onClick={handleApplyLive}
+            style={{
+              padding: '0.6rem 1.25rem',
+              backgroundColor: A.accent,
+              color: '#0a0d14',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              boxShadow: `0 4px 14px ${A.accent}44`,
+            }}
+          >
+            <Sparkles size={16} /> Apply Live Preview
+          </button>
+        </div>
+      </div>
+
+      {appliedMsg && (
+        <div style={{ backgroundColor: '#064e3b', border: '1px solid #10b981', borderRadius: 8, padding: '0.75rem 1.25rem', color: '#a7f3d0', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Check size={18} /> Live theme successfully applied across the entire website!
+        </div>
+      )}
+
+      {/* File Location Guidance Box */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, color: A.accent, fontSize: '0.95rem' }}>
+          <span>📁 Central Configuration File Location:</span>
+          <code style={{ backgroundColor: '#0f172a', padding: '3px 8px', borderRadius: 5, color: '#38bdf8', fontSize: '0.88rem' }}>
+            src/config/themeConfig.js
+          </code>
+        </div>
+        <p style={{ color: A.muted, fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+          Admin ya developer is file (<code style={{ color: '#e2e8f0' }}>themeConfig.js</code>) ke andar koi bhi color change karega toh poori website ka theme automatically woh color ban jayega!
+          All styles connect automatically to CSS Custom Properties and live tokens.
+        </p>
+      </div>
+
+      {/* Theme Presets */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: A.text, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={16} style={{ color: A.accent }} /> Instant 1-Click Theme Presets
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+          {THEME_PRESETS.map((preset, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleApplyPreset(preset)}
+              style={{
+                backgroundColor: A.card2,
+                border: colors.primary === preset.primary ? `2px solid ${A.accent}` : `1px solid ${A.border}`,
+                borderRadius: 8,
+                padding: '0.85rem 1rem',
+                textAlign: 'left',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                <div style={{ width: 18, height: 18, borderRadius: '50%', backgroundColor: preset.primary, border: '1px solid rgba(255,255,255,0.3)' }} />
+                <div style={{ width: 18, height: 18, borderRadius: '50%', backgroundColor: preset.secondary, border: '1px solid rgba(255,255,255,0.3)' }} />
+                <span style={{ fontWeight: 700, fontSize: '0.82rem', color: A.text, marginLeft: 'auto' }}>
+                  {colors.primary === preset.primary ? '✓ Active' : ''}
+                </span>
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: A.text }}>{preset.name}</div>
+              <div style={{ fontSize: '0.75rem', color: A.muted, marginTop: '0.2rem', lineHeight: 1.3 }}>{preset.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Color Palette Grid */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: A.text, marginBottom: '1.25rem' }}>
+          Palette Color Tokens
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+          {colorFields.map((field) => (
+            <div key={field.key} style={{ backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, padding: '0.85rem 1rem' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.82rem', color: A.text, marginBottom: '0.2rem' }}>
+                {field.label}
+              </div>
+              <div style={{ fontSize: '0.74rem', color: A.muted, marginBottom: '0.6rem', lineHeight: 1.3 }}>
+                {field.desc}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="color"
+                  value={colors[field.key] && colors[field.key].startsWith('#') ? colors[field.key] : '#0f766e'}
+                  onChange={(e) => handleColorChange(field.key, e.target.value)}
+                  style={{
+                    width: 38,
+                    height: 34,
+                    border: 'none',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    backgroundColor: 'transparent',
+                  }}
+                />
+                <input
+                  type="text"
+                  value={colors[field.key] || ''}
+                  onChange={(e) => handleColorChange(field.key, e.target.value)}
+                  style={{
+                    flex: 1,
+                    backgroundColor: A.bg,
+                    border: `1px solid ${A.border}`,
+                    color: A.text,
+                    padding: '0.4rem 0.6rem',
+                    borderRadius: 6,
+                    fontSize: '0.85rem',
+                    fontFamily: 'monospace',
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Code Export Box with Copy */}
+      <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1.25rem 1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <div>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: A.text, margin: 0 }}>
+              Generated Config for <code style={{ color: A.accent }}>src/config/themeConfig.js</code>
+            </h3>
+            <p style={{ color: A.muted, fontSize: '0.8rem', margin: '0.2rem 0 0' }}>
+              You can copy this code and paste it directly into <code style={{ color: '#e2e8f0' }}>themeConfig.js</code> for permanent persistence.
+            </p>
+          </div>
+          <button
+            onClick={handleCopyCode}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: copied ? '#059669' : A.card2,
+              color: '#ffffff',
+              border: `1px solid ${copied ? '#10b981' : A.border}`,
+              borderRadius: 6,
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? 'Copied to Clipboard!' : 'Copy Config Code'}
+          </button>
+        </div>
+
+        <pre
+          style={{
+            backgroundColor: '#090d16',
+            border: `1px solid ${A.border}`,
+            borderRadius: 8,
+            padding: '1rem',
+            fontSize: '0.8rem',
+            color: '#93c5fd',
+            maxHeight: 220,
+            overflowY: 'auto',
+            fontFamily: 'Consolas, Monaco, monospace',
+            margin: 0,
+          }}
+        >
+          {generateConfigFileCode()}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
 // ── Sidebar nav ────────────────────────────────────────────────────────────────
 const ADMIN_NAV = [
   { id: 'overview',     label: 'Overview',          Icon: BarChart2   },
@@ -1824,6 +2211,7 @@ const ADMIN_NAV = [
   { id: 'support',      label: 'Contact Support',    Icon: Headphones  },
   { id: 'pages',        label: 'Pages & Legal',      Icon: BookOpen    },
   { id: 'settings',     label: 'Site Settings',      Icon: Sliders     },
+  { id: 'theme',        label: 'Theme & Colors',     Icon: Palette     },
 ];
 
 // ── Main Export ────────────────────────────────────────────────────────────────
@@ -1868,6 +2256,7 @@ export default function AdminPanel({
     support:      <ContactSupportSection supportInquiries={supportInquiries} setSupportInquiries={handleUpdateSupportInquiries} />,
     pages:        <PagesManagementSection legalPages={legalPages} setLegalPages={handleUpdateLegalPages} />,
     settings:     <SiteSettingsSection siteSettings={siteSettings} setSiteSettings={handleUpdateSiteSettings} />,
+    theme:        <ThemeConfigSection />,
   };
 
   const pendingCount = APPLICATIONS_DATA.filter((a) => a.status === 'pending').length;

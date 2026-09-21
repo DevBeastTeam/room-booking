@@ -203,7 +203,7 @@ export default function Header({
             <button
               onClick={() => setIsLoginOpen(!isLoginOpen)}
               style={{
-                backgroundColor: '#0f766e',
+                backgroundColor: 'var(--primary-color, #0f766e)',
                 color: '#ffffff',
                 padding: '0.45rem 1rem',
                 borderRadius: '4px',
@@ -258,7 +258,7 @@ export default function Header({
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                 >
                   <span>Resident Portal</span>
-                  <span style={{ fontSize: '0.7rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--primary-color, #0f766e)', backgroundColor: 'var(--primary-light, #ccfbf1)', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
                 </a>
                 <a
                   href={siteSettings?.portals?.applicant || 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx'}
@@ -281,7 +281,7 @@ export default function Header({
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                 >
                   <span>Applicant Portal</span>
-                  <span style={{ fontSize: '0.7rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--primary-color, #0f766e)', backgroundColor: 'var(--primary-light, #ccfbf1)', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
                 </a>
                 <a
                   href="#resident-dashboard"
@@ -292,13 +292,13 @@ export default function Header({
                     gap: '0.5rem',
                     padding: '0.65rem 1rem',
                     fontSize: '0.825rem',
-                    color: '#0f766e',
+                    color: 'var(--primary-color, #0f766e)',
                     borderBottom: '1px solid #f1f5f9',
                     fontWeight: 600,
                     textDecoration: 'none',
                     cursor: 'pointer',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0fdfa'}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, #f0fdfa)'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                 >
                   <LayoutDashboard size={14} />
@@ -387,7 +387,7 @@ export default function Header({
               style={{ maxHeight: '42px', width: 'auto', display: 'block' }}
             />
           ) : (
-            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f766e', letterSpacing: '0.02em' }}>
+            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-color, #0f766e)', letterSpacing: '0.02em' }}>
               {siteSettings?.siteName || 'Monarch Pass Apartments'}
             </span>
           )}
@@ -439,10 +439,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isHomeActive ? 700 : 500,
-              color: isHomeActive ? '#0f766e' : '#475569',
-              background: isHomeActive ? '#f0fdfa' : 'transparent',
+              color: isHomeActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isHomeActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isHomeActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isHomeActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -462,10 +462,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isFloorPlansActive ? 700 : 500,
-              color: isFloorPlansActive ? '#0f766e' : '#475569',
-              background: isFloorPlansActive ? '#f0fdfa' : 'transparent',
+              color: isFloorPlansActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isFloorPlansActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isFloorPlansActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isFloorPlansActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -485,10 +485,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isPhotosActive ? 700 : 500,
-              color: isPhotosActive ? '#0f766e' : '#475569',
-              background: isPhotosActive ? '#f0fdfa' : 'transparent',
+              color: isPhotosActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isPhotosActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isPhotosActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isPhotosActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -500,7 +500,7 @@ export default function Header({
             <span>Photos</span>
             <span
               style={{
-                backgroundColor: isPhotosActive ? '#0f766e' : '#e2e8f0',
+                backgroundColor: isPhotosActive ? 'var(--primary-color, #0f766e)' : '#e2e8f0',
                 color: isPhotosActive ? '#ffffff' : '#475569',
                 fontSize: '0.7rem',
                 fontWeight: 700,
@@ -520,10 +520,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isGuidelinesActive ? 700 : 500,
-              color: isGuidelinesActive ? '#0f766e' : '#475569',
-              background: isGuidelinesActive ? '#f0fdfa' : 'transparent',
+              color: isGuidelinesActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isGuidelinesActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isGuidelinesActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isGuidelinesActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -543,10 +543,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isAmenitiesActive ? 700 : 500,
-              color: isAmenitiesActive ? '#0f766e' : '#475569',
-              background: isAmenitiesActive ? '#f0fdfa' : 'transparent',
+              color: isAmenitiesActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isAmenitiesActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isAmenitiesActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isAmenitiesActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -566,10 +566,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isVirtualTourActive ? 700 : 500,
-              color: isVirtualTourActive ? '#0f766e' : '#475569',
-              background: isVirtualTourActive ? '#f0fdfa' : 'transparent',
+              color: isVirtualTourActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isVirtualTourActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isVirtualTourActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isVirtualTourActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -589,10 +589,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isMapActive ? 700 : 500,
-              color: isMapActive ? '#0f766e' : '#475569',
-              background: isMapActive ? '#f0fdfa' : 'transparent',
+              color: isMapActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isMapActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isMapActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isMapActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -612,10 +612,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isFAQActive ? 700 : 500,
-              color: isFAQActive ? '#0f766e' : '#475569',
-              background: isFAQActive ? '#f0fdfa' : 'transparent',
+              color: isFAQActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isFAQActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isFAQActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isFAQActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -635,10 +635,10 @@ export default function Header({
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
               fontWeight: isContactActive ? 700 : 500,
-              color: isContactActive ? '#0f766e' : '#475569',
-              background: isContactActive ? '#f0fdfa' : 'transparent',
+              color: isContactActive ? 'var(--primary-color, #0f766e)' : '#475569',
+              background: isContactActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
               borderRadius: '6px',
-              border: isContactActive ? '1px solid #99f6e4' : '1px solid transparent',
+              border: isContactActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -659,7 +659,7 @@ export default function Header({
               fontSize: '0.9rem',
               fontWeight: 600,
               color: '#ffffff',
-              backgroundColor: '#0f766e',
+              backgroundColor: 'var(--primary-color, #0f766e)',
               borderRadius: '6px',
               border: 'none',
               cursor: 'pointer',
@@ -670,8 +670,8 @@ export default function Header({
               transition: 'background 0.2s ease',
               marginLeft: '0.25rem',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #0f766e)')}
           >
             <Calendar size={15} />
             <span>Schedule a Tour</span>
@@ -686,7 +686,7 @@ export default function Header({
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(104, 199, 183, 0.97)',
+            backgroundColor: 'var(--nav-overlay-bg-rgba, rgba(104, 199, 183, 0.98))',
             zIndex: 100,
             display: 'flex',
             flexDirection: 'column',

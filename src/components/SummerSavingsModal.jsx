@@ -37,7 +37,7 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
           bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: '#68c7b7',
+          backgroundColor: 'var(--promo-banner, #68c7b7)',
           padding: '0.65rem 1rem',
           zIndex: 990,
           boxShadow: '0 -4px 15px rgba(0,0,0,0.15)',
@@ -51,7 +51,7 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
           style={{
             width: '100%',
             maxWidth: '380px',
-            backgroundColor: '#0f766e',
+            backgroundColor: 'var(--promo-button, #0f766e)',
             color: '#ffffff',
             border: 'none',
             borderRadius: '6px',
@@ -120,13 +120,13 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
                   margin: 0,
                   fontSize: '1.25rem',
                   fontWeight: 700,
-                  color: '#0f766e',
+                  color: 'var(--primary-color, #0f766e)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.4rem',
                 }}
               >
-                <Sparkles size={18} style={{ color: '#0f766e' }} />
+                <Sparkles size={18} style={{ color: 'var(--primary-color, #0f766e)' }} />
                 <span>Summer Savings</span>
               </h3>
               <button
@@ -182,7 +182,7 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
                   id="btn-nudge-view-floorplans"
                   onClick={handleAction}
                   style={{
-                    backgroundColor: '#0f766e',
+                    backgroundColor: 'var(--promo-button, #0f766e)',
                     color: '#ffffff',
                     padding: '0.85rem 1.5rem',
                     borderRadius: '8px',
@@ -197,8 +197,8 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
                     boxShadow: '0 4px 12px rgba(15, 118, 110, 0.35)',
                     transition: 'background 0.2s, transform 0.1s',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--promo-button, #0f766e)')}
                 >
                   <span>View Floorplans</span>
                   <ArrowRight size={18} />
