@@ -18,16 +18,18 @@ public_html/
 ├── amenities/              <-- Frontend (Amenities page)
 ├── _astro/                 <-- Frontend (React JS & CSS bundles)
 ├── .htaccess               <-- Connector (Frontend aur Backend ko jorta hai)
-├── api/                    <-- Backend (API Endpoints)
-└── backend/                <-- Backend (PHP Database logic & .env file)
-    ├── api/                <-- Backend Endpoints
-    ├── config/.env         <-- Database Password & Config
-    └── migrations/         <-- Database SQL file
+└── backend/                <-- Complete PHP Backend (Everything in ONE place)
+    ├── api/                <-- All API Endpoints (contact.php, schedule.php, paddle.php, etc.)
+    ├── config/.env         <-- Database Credentials & Password
+    ├── config/database.php <-- Database Connection Helper
+    └── migrations/         <-- Database Schema SQL File
 ```
+
+> **📌 Important:** `api` ka folder bahir rakhne ki **bilkul zaroorat nahi hai**. Saari API files `backend/api/` ke andar hi rehti hain. `.htaccess` automatically kisi bhi `/api/` request ko `backend/api/` par route kar deta hai!
 
 #### Yeh Direct Connect Kesy Hota Hai?
 1. Koi Node.js server ya alag port chalane ki zaroorat nahi.
-2. Visitor jab website par button dabata hai (e.g. Schedule Tour ya Contact Form), to Frontend React code seedha `/backend/api/contact.php` ko request bhejta hai.
+2. Visitor jab website par button dabata hai (e.g. Schedule Tour ya Contact Form), to Frontend React code seedha `/backend/api/contact.php` (ya `/api/contact.php`) ko request bhejta hai.
 3. Hostinger ka Apache web server aur PHP us request ko execute karke MySQL Database mein data save kar dete hain.
 4. **Result:** Frontend aur Backend 100% directly connect rehte hain!
 
