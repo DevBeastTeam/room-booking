@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import {
   Home, Users, FileText, Wrench, DollarSign, BarChart2, Settings,
-  LogOut, ChevronDown, ChevronUp, CheckCircle, XCircle, Clock,
-  AlertTriangle, TrendingUp, Edit2, Trash2, Plus, X, Eye,
-  Package, Layers, Car, Archive, Search, Filter, Download,
-  Building, UserCheck, AlertCircle, Mail, RefreshCw
+  LogOut, CheckCircle, XCircle, Clock,
+  Edit2, Trash2, Plus, X, Eye,
+  Package, Layers, Car, Archive, Search,
+  Building, UserCheck, AlertCircle, Mail,
+  Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
+  Phone, Send, TrendingUp
 } from 'lucide-react';
+import {
+  getSiteSettings,
+  saveSiteSettings,
+  resetSiteSettings,
+  getLegalPages,
+  saveLegalPages,
+  getSupportInquiries,
+  saveSupportInquiries,
+  addSupportInquiry
+} from '../services/siteDataService';
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
 const A = {
@@ -553,6 +565,1252 @@ function EmailLogsSection() {
   );
 }
 
+// ── Contact Support Section ────────────────────────────────────────────────────
+function ContactSupportSection({ supportInquiries = [], setSupportInquiries }) {
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [selectedInquiry, setSelectedInquiry] = useState(null);
+  const [adminNote, setAdminNote] = useState('');
+  const [replyText, setReplyText] = useState('');
+  const [replySentToast, setReplySentToast] = useState(false);
+
+  const inquiries = supportInquiries || [];
+
+  const filtered = inquiries.filter((item) => {
+    const matchesFilter = filter === 'all' || item.status === filter;
+    const matchesSearch =
+      !search ||
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.email.toLowerCase().includes(search.toLowerCase()) ||
+      item.subject.toLowerCase().includes(search.toLowerCase()) ||
+      item.message.toLowerCase().includes(search.toLowerCase()) ||
+      item.id.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const totalCount = inquiries.length;
+  const newCount = inquiries.filter((i) => i.status === 'new').length;
+  const inProgressCount = inquiries.filter((i) => i.status === 'in-progress').length;
+  const resolvedCount = inquiries.filter((i) => i.status === 'resolved').length;
+
+  const updateStatus = (id, newStatus) => {
+    const updated = inquiries.map((i) => (i.id === id ? { ...i, status: newStatus } : i));
+    if (setSupportInquiries) setSupportInquiries(updated);
+    saveSupportInquiries(updated);
+    if (selectedInquiry?.id === id) {
+      setSelectedInquiry((prev) => ({ ...prev, status: newStatus }));
+    }
+  };
+
+  const saveNotes = (id) => {
+    const updated = inquiries.map((i) => (i.id === id ? { ...i, notes: adminNote } : i));
+    if (setSupportInquiries) setSupportInquiries(updated);
+    saveSupportInquiries(updated);
+    if (selectedInquiry?.id === id) {
+      setSelectedInquiry((prev) => ({ ...prev, notes: adminNote }));
+    }
+  };
+
+  const deleteInquiry = (id) => {
+    if (!window.confirm('Are you sure you want to delete this inquiry?')) return;
+    const updated = inquiries.filter((i) => i.id !== id);
+    if (setSupportInquiries) setSupportInquiries(updated);
+    saveSupportInquiries(updated);
+    if (selectedInquiry?.id === id) setSelectedInquiry(null);
+  };
+
+  const simulateInquiry = () => {
+    const sampleNames = ['Jessica Miller', 'David Ross', 'Sofia Hernandez', 'Tyler Bennett'];
+    const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+    const newInquiry = addSupportInquiry({
+      name: randomName,
+      email: `${randomName.toLowerCase().replace(' ', '.')}@example.com`,
+      phone: '+1 817-555-0941',
+      category: 'Tour Request',
+      subject: 'Inquiry regarding 2-bedroom move-in special',
+      message: 'Hello! I noticed the move-in specials on the website. Can you tell me if the $500 off first month promotion is still available for November?',
+    });
+    if (newInquiry && setSupportInquiries) {
+      const updated = [newInquiry, ...inquiries];
+      setSupportInquiries(updated);
+    }
+  };
+
+  const handleSendSimulatedReply = () => {
+    if (!replyText.trim()) return;
+    const notesCombined = `${selectedInquiry.notes ? selectedInquiry.notes + '\n' : ''}[Reply sent on ${new Date().toLocaleDateString()}]: ${replyText.trim()}`;
+    const updated = inquiries.map((i) => (i.id === selectedInquiry.id ? { ...i, status: 'resolved', notes: notesCombined } : i));
+    if (setSupportInquiries) setSupportInquiries(updated);
+    saveSupportInquiries(updated);
+    setSelectedInquiry((prev) => ({ ...prev, status: 'resolved', notes: notesCombined }));
+    setReplyText('');
+    setReplySentToast(true);
+    setTimeout(() => setReplySentToast(false), 3000);
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <SectionTitle>Contact & Support Inquiries</SectionTitle>
+        <button
+          onClick={simulateInquiry}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.5rem 0.9rem',
+            backgroundColor: `${A.accent}22`,
+            color: A.accentLt,
+            border: `1px solid ${A.accent}55`,
+            borderRadius: 8,
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          <Plus size={14} /> Simulate Incoming Inquiry
+        </button>
+      </div>
+
+      {/* Stat Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <StatCard icon={Inbox} label="Total Inquiries" value={totalCount} color={A.info} />
+        <StatCard icon={AlertCircle} label="New / Action Required" value={newCount} sub="Needs response" color={A.warning} />
+        <StatCard icon={Clock} label="In Progress" value={inProgressCount} color={A.teal} />
+        <StatCard icon={CheckCircle} label="Resolved" value={resolvedCount} color={A.success} />
+      </div>
+
+      {/* Search and Filters */}
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem' }}>
+          {[
+            { id: 'all', label: `All (${totalCount})` },
+            { id: 'new', label: `New (${newCount})` },
+            { id: 'in-progress', label: `In Progress (${inProgressCount})` },
+            { id: 'resolved', label: `Resolved (${resolvedCount})` },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id)}
+              style={{
+                padding: '0.45rem 0.85rem',
+                borderRadius: 8,
+                border: 'none',
+                backgroundColor: filter === tab.id ? A.accent : A.card2,
+                color: filter === tab.id ? '#0a0d14' : A.muted,
+                fontWeight: 700,
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ position: 'relative', minWidth: '240px' }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, top: 11, color: A.muted }} />
+          <input
+            type="text"
+            placeholder="Search inquiries or sender..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.45rem 0.75rem 0.45rem 2rem',
+              backgroundColor: A.card2,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              color: A.text,
+              fontSize: '0.82rem',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Inquiries Table */}
+      <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, overflow: 'hidden' }}>
+        {filtered.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: A.muted, fontSize: '0.9rem' }}>
+            No support inquiries found matching criteria.
+          </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <THead cols={['ID', 'Sender', 'Category & Subject', 'Received At', 'Status', 'Actions']} />
+            <tbody>
+              {filtered.map((item) => (
+                <tr key={item.id} style={{ borderBottom: `1px solid ${A.border}`, transition: 'background 0.15s' }}>
+                  <td style={{ padding: '0.85rem 1rem', color: A.accent, fontWeight: 700, fontSize: '0.8rem' }}>
+                    {item.id}
+                  </td>
+                  <td style={{ padding: '0.85rem 1rem' }}>
+                    <div style={{ color: A.text, fontWeight: 600, fontSize: '0.85rem' }}>{item.name}</div>
+                    <div style={{ color: A.muted, fontSize: '0.75rem' }}>{item.email} · {item.phone}</div>
+                  </td>
+                  <td style={{ padding: '0.85rem 1rem', maxWidth: '320px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
+                      <span style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem', borderRadius: 4, backgroundColor: `${A.teal}22`, color: A.teal, fontWeight: 700 }}>
+                        {item.category}
+                      </span>
+                    </div>
+                    <div style={{ color: A.text, fontWeight: 600, fontSize: '0.82rem' }}>{item.subject}</div>
+                    <div style={{ color: A.muted, fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.message}
+                    </div>
+                  </td>
+                  <td style={{ padding: '0.85rem 1rem', color: A.muted, fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                    {item.date}
+                  </td>
+                  <td style={{ padding: '0.85rem 1rem' }}>
+                    <Badge status={item.status} />
+                  </td>
+                  <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button
+                        onClick={() => {
+                          setSelectedInquiry(item);
+                          setAdminNote(item.notes || '');
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          padding: '0.35rem 0.65rem',
+                          backgroundColor: `${A.info}22`,
+                          color: A.info,
+                          border: `1px solid ${A.info}44`,
+                          borderRadius: 6,
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Eye size={13} /> View
+                      </button>
+
+                      {item.status !== 'resolved' ? (
+                        <button
+                          onClick={() => updateStatus(item.id, 'resolved')}
+                          title="Mark Resolved"
+                          style={{
+                            padding: '0.35rem 0.55rem',
+                            backgroundColor: `${A.success}22`,
+                            color: A.success,
+                            border: `1px solid ${A.success}44`,
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Check size={13} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => updateStatus(item.id, 'in-progress')}
+                          title="Reopen"
+                          style={{
+                            padding: '0.35rem 0.55rem',
+                            backgroundColor: `${A.warning}22`,
+                            color: A.warning,
+                            border: `1px solid ${A.warning}44`,
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <RotateCcw size={13} />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => deleteInquiry(item.id)}
+                        title="Delete inquiry"
+                        style={{
+                          padding: '0.35rem 0.55rem',
+                          backgroundColor: `${A.danger}22`,
+                          color: A.danger,
+                          border: `1px solid ${A.danger}44`,
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Inquiry Detail Modal */}
+      {selectedInquiry && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '1rem',
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedInquiry(null);
+          }}
+        >
+          <div
+            className="animate-fade-in"
+            style={{
+              backgroundColor: A.card,
+              border: `1px solid ${A.border}`,
+              borderRadius: 16,
+              width: '100%',
+              maxWidth: '650px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '1.75rem',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: `1px solid ${A.border}`, paddingBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span style={{ color: A.accent, fontWeight: 800, fontSize: '1rem' }}>{selectedInquiry.id}</span>
+                <Badge status={selectedInquiry.status} />
+              </div>
+              <button
+                onClick={() => setSelectedInquiry(null)}
+                style={{ background: 'none', border: 'none', color: A.muted, cursor: 'pointer' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Sender details */}
+            <div style={{ backgroundColor: A.card2, padding: '1rem', borderRadius: 10, marginBottom: '1.25rem', border: `1px solid ${A.border}` }}>
+              <div style={{ color: A.text, fontWeight: 700, fontSize: '1rem', marginBottom: '0.35rem' }}>
+                {selectedInquiry.name}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.82rem', color: A.muted }}>
+                <div>Email: <a href={`mailto:${selectedInquiry.email}`} style={{ color: A.info }}>{selectedInquiry.email}</a></div>
+                <div>Phone: <a href={`tel:${selectedInquiry.phone}`} style={{ color: A.teal }}>{selectedInquiry.phone}</a></div>
+                <div>Date: {selectedInquiry.date}</div>
+              </div>
+            </div>
+
+            {/* Message Body */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.75rem', color: A.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem', fontWeight: 700 }}>
+                Subject: {selectedInquiry.subject}
+              </div>
+              <div style={{ backgroundColor: A.bg, border: `1px solid ${A.border}`, borderRadius: 10, padding: '1rem', color: A.text, fontSize: '0.88rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                {selectedInquiry.message}
+              </div>
+            </div>
+
+            {/* Status Change row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <div style={{ color: A.muted, fontSize: '0.82rem', fontWeight: 600 }}>Update Status:</div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {['new', 'in-progress', 'resolved'].map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => updateStatus(selectedInquiry.id, st)}
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: 6,
+                      border: 'none',
+                      backgroundColor: selectedInquiry.status === st ? A.accent : A.card2,
+                      color: selectedInquiry.status === st ? '#0a0d14' : A.muted,
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {st.replace('-', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Reply Form */}
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.78rem', color: A.text, fontWeight: 700, marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Send size={13} color={A.accent} /> Quick Reply to Resident / Visitor
+              </div>
+              <textarea
+                rows={3}
+                placeholder={`Type message to send to ${selectedInquiry.email}...`}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.65rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.85rem',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button
+                  onClick={handleSendSimulatedReply}
+                  style={{
+                    padding: '0.45rem 1rem',
+                    backgroundColor: A.accent,
+                    color: '#0a0d14',
+                    border: 'none',
+                    borderRadius: 7,
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  <Send size={13} /> Send Reply & Resolve
+                </button>
+              </div>
+              {replySentToast && (
+                <div style={{ marginTop: '0.5rem', color: A.success, fontSize: '0.8rem', fontWeight: 600 }}>
+                  ✓ Response sent to {selectedInquiry.email} and recorded in notes!
+                </div>
+              )}
+            </div>
+
+            {/* Admin Notes */}
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.78rem', color: A.muted, fontWeight: 700, marginBottom: '0.4rem' }}>
+                Internal Admin Notes / Activity Log:
+              </div>
+              <textarea
+                rows={2}
+                placeholder="Add private staff notes..."
+                value={adminNote}
+                onChange={(e) => setAdminNote(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.65rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.82rem',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+              <button
+                onClick={() => saveNotes(selectedInquiry.id)}
+                style={{
+                  marginTop: '0.4rem',
+                  padding: '0.35rem 0.85rem',
+                  backgroundColor: A.card2,
+                  color: A.text,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 6,
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Save Notes
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setSelectedInquiry(null)}
+                style={{
+                  padding: '0.5rem 1.2rem',
+                  backgroundColor: A.card2,
+                  color: A.text,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Pages Management Section ───────────────────────────────────────────────────
+function PagesManagementSection({ legalPages, setLegalPages }) {
+  const [activeTab, setActiveTab] = useState('terms');
+  const [currentPages, setCurrentPages] = useState(() => legalPages || getLegalPages());
+  const [saveToast, setSaveToast] = useState(false);
+
+  const activePage = currentPages[activeTab];
+
+  const handleFieldChange = (field, val) => {
+    setCurrentPages((prev) => ({
+      ...prev,
+      [activeTab]: {
+        ...prev[activeTab],
+        [field]: val,
+      },
+    }));
+  };
+
+  const handleSave = () => {
+    saveLegalPages(currentPages);
+    if (setLegalPages) setLegalPages(currentPages);
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 2500);
+  };
+
+  const handleReset = () => {
+    if (!window.confirm('Reset this page back to original defaults?')) return;
+    const defaults = getLegalPages();
+    const updated = {
+      ...currentPages,
+      [activeTab]: defaults[activeTab],
+    };
+    setCurrentPages(updated);
+    saveLegalPages(updated);
+    if (setLegalPages) setLegalPages(updated);
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <SectionTitle>Website Pages & Legal Content</SectionTitle>
+        <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <button
+            onClick={handleReset}
+            style={{
+              padding: '0.5rem 0.9rem',
+              backgroundColor: A.card2,
+              color: A.muted,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}
+          >
+            <RotateCcw size={14} /> Reset
+          </button>
+          <button
+            onClick={handleSave}
+            style={{
+              padding: '0.5rem 1.25rem',
+              backgroundColor: A.accent,
+              color: '#0a0d14',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: `0 4px 12px ${A.accent}44`,
+            }}
+          >
+            <Save size={14} /> Save Changes
+          </button>
+        </div>
+      </div>
+
+      {saveToast && (
+        <div
+          className="animate-fade-in"
+          style={{
+            backgroundColor: `${A.success}22`,
+            border: `1px solid ${A.success}66`,
+            color: A.success,
+            padding: '0.75rem 1rem',
+            borderRadius: 8,
+            marginBottom: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <CheckCircle size={16} />
+          <span>Page content successfully saved and published!</span>
+        </div>
+      )}
+
+      {/* Page Tabs */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: `1px solid ${A.border}`, paddingBottom: '0.5rem' }}>
+        <button
+          onClick={() => setActiveTab('terms')}
+          style={{
+            padding: '0.6rem 1.25rem',
+            borderRadius: 8,
+            border: 'none',
+            backgroundColor: activeTab === 'terms' ? `${A.accent}22` : 'transparent',
+            color: activeTab === 'terms' ? A.accent : A.muted,
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <FileText size={16} /> Terms & Conditions
+        </button>
+        <button
+          onClick={() => setActiveTab('privacy')}
+          style={{
+            padding: '0.6rem 1.25rem',
+            borderRadius: 8,
+            border: 'none',
+            backgroundColor: activeTab === 'privacy' ? `${A.accent}22` : 'transparent',
+            color: activeTab === 'privacy' ? A.accent : A.muted,
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <BookOpen size={16} /> Privacy Policy
+        </button>
+      </div>
+
+      {/* Editor & Preview Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(300px, 1fr)', gap: '1.5rem' }}>
+        {/* Left: Content Editor */}
+        <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+              Page Title
+            </label>
+            <input
+              type="text"
+              value={activePage.title}
+              onChange={(e) => handleFieldChange('title', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.6rem 0.8rem',
+                backgroundColor: A.bg,
+                border: `1px solid ${A.border}`,
+                borderRadius: 8,
+                color: A.text,
+                fontSize: '0.9rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+              Last Updated Label
+            </label>
+            <input
+              type="text"
+              value={activePage.lastUpdated}
+              onChange={(e) => handleFieldChange('lastUpdated', e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.6rem 0.8rem',
+                backgroundColor: A.bg,
+                border: `1px solid ${A.border}`,
+                borderRadius: 8,
+                color: A.text,
+                fontSize: '0.88rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+              Page Body Content
+            </label>
+            <textarea
+              rows={14}
+              value={activePage.content}
+              onChange={(e) => handleFieldChange('content', e.target.value)}
+              style={{
+                width: '100%',
+                flex: 1,
+                padding: '0.75rem',
+                backgroundColor: A.bg,
+                border: `1px solid ${A.border}`,
+                borderRadius: 8,
+                color: A.text,
+                fontSize: '0.85rem',
+                fontFamily: 'monospace',
+                lineHeight: 1.6,
+                outline: 'none',
+                resize: 'vertical',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Right: Live Public Preview */}
+        <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: `1px solid ${A.border}`, paddingBottom: '0.6rem' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: A.muted, textTransform: 'uppercase' }}>
+              Live Public Preview
+            </div>
+            <div style={{ fontSize: '0.72rem', color: A.teal, fontWeight: 700, padding: '0.15rem 0.5rem', backgroundColor: `${A.teal}22`, borderRadius: 4 }}>
+              Preview Mode
+            </div>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 8,
+              padding: '1.5rem',
+              color: '#1e293b',
+              flex: 1,
+              overflowY: 'auto',
+              maxHeight: '520px',
+              border: '1px solid #cbd5e1',
+            }}
+          >
+            <h3 style={{ margin: '0 0 0.4rem', fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>
+              {activePage.title}
+            </h3>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+              Last updated: {activePage.lastUpdated}
+            </div>
+            <div style={{ fontSize: '0.875rem', lineHeight: 1.7, color: '#334155', whiteSpace: 'pre-wrap' }}>
+              {activePage.content}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Site Settings Section ──────────────────────────────────────────────────────
+function SiteSettingsSection({ siteSettings, setSiteSettings }) {
+  const [formData, setFormData] = useState(() => siteSettings || getSiteSettings());
+  const [saveToast, setSaveToast] = useState(false);
+
+  const handleChange = (field, val) => {
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  const handleNestedChange = (parent, field, val) => {
+    setFormData((prev) => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent],
+        [field]: val,
+      },
+    }));
+  };
+
+  const handleSave = (e) => {
+    if (e) e.preventDefault();
+    saveSiteSettings(formData);
+    if (setSiteSettings) setSiteSettings(formData);
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 2500);
+  };
+
+  const handleResetDefaults = () => {
+    if (!window.confirm('Restore all site settings and contact numbers to factory defaults?')) return;
+    const defs = resetSiteSettings();
+    setFormData(defs);
+    if (setSiteSettings) setSiteSettings(defs);
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 2500);
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <SectionTitle>Website Branding & Contact Settings</SectionTitle>
+        <div style={{ display: 'flex', gap: '0.6rem' }}>
+          <button
+            onClick={handleResetDefaults}
+            style={{
+              padding: '0.5rem 0.9rem',
+              backgroundColor: A.card2,
+              color: A.muted,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}
+          >
+            <RotateCcw size={14} /> Restore Defaults
+          </button>
+          <button
+            onClick={handleSave}
+            style={{
+              padding: '0.5rem 1.25rem',
+              backgroundColor: A.accent,
+              color: '#0a0d14',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: `0 4px 12px ${A.accent}44`,
+            }}
+          >
+            <Save size={14} /> Save All Settings
+          </button>
+        </div>
+      </div>
+
+      {saveToast && (
+        <div
+          className="animate-fade-in"
+          style={{
+            backgroundColor: `${A.success}22`,
+            border: `1px solid ${A.success}66`,
+            color: A.success,
+            padding: '0.75rem 1rem',
+            borderRadius: 8,
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <CheckCircle size={16} />
+          <span>Website settings successfully saved! Changes are now live across the Header, Footer, and Contact sections.</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+        {/* Card 1: Branding & Identity */}
+        <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem' }}>
+          <h3 style={{ color: A.text, fontSize: '0.95rem', fontWeight: 700, margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Building size={16} color={A.accent} /> Property Branding & Identity
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Website / Property Name
+              </label>
+              <input
+                type="text"
+                value={formData.siteName}
+                onChange={(e) => handleChange('siteName', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Hero Tagline / Banner Title
+              </label>
+              <input
+                type="text"
+                value={formData.tagline}
+                onChange={(e) => handleChange('tagline', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Website Logo Image URL
+              </label>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={formData.logoUrl}
+                  onChange={(e) => handleChange('logoUrl', e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '0.6rem 0.8rem',
+                    backgroundColor: A.bg,
+                    border: `1px solid ${A.border}`,
+                    borderRadius: 8,
+                    color: A.text,
+                    fontSize: '0.88rem',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                {/* Logo Preview */}
+                <div style={{ backgroundColor: '#ffffff', padding: '0.4rem 0.75rem', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '120px', height: '36px' }}>
+                  {formData.logoUrl ? (
+                    <img src={formData.logoUrl} alt="Logo preview" style={{ maxHeight: '28px', maxWidth: '100%' }} />
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>No logo preview</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Contact Details & Location */}
+        <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem' }}>
+          <h3 style={{ color: A.text, fontSize: '0.95rem', fontWeight: 700, margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Phone size={16} color={A.teal} /> Contact Numbers, Email & Address
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Primary Phone Number (Header & Footer)
+              </label>
+              <input
+                type="text"
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Secondary Contact Phone
+              </label>
+              <input
+                type="text"
+                value={formData.secondaryPhone}
+                onChange={(e) => handleChange('secondaryPhone', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Leasing & General Email
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Support / Resident Services Email
+              </label>
+              <input
+                type="email"
+                value={formData.supportEmail}
+                onChange={(e) => handleChange('supportEmail', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Full Property Address (Street, City, State, ZIP)
+              </label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => handleChange('address', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Footer Description & Management */}
+        <div style={{ backgroundColor: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.5rem' }}>
+          <h3 style={{ color: A.text, fontSize: '0.95rem', fontWeight: 700, margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FileText size={16} color={A.purple} /> Footer Information & Management
+          </h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                Footer Description Paragraph
+              </label>
+              <textarea
+                rows={3}
+                value={formData.footerDescription}
+                onChange={(e) => handleChange('footerDescription', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.65rem 0.8rem',
+                  backgroundColor: A.bg,
+                  border: `1px solid ${A.border}`,
+                  borderRadius: 8,
+                  color: A.text,
+                  fontSize: '0.88rem',
+                  lineHeight: 1.5,
+                  outline: 'none',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                  Management Company Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.managedBy}
+                  onChange={(e) => handleChange('managedBy', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.8rem',
+                    backgroundColor: A.bg,
+                    border: `1px solid ${A.border}`,
+                    borderRadius: 8,
+                    color: A.text,
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+                  Management Subtitle
+                </label>
+                <input
+                  type="text"
+                  value={formData.managedBySub}
+                  onChange={(e) => handleChange('managedBySub', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.8rem',
+                    backgroundColor: A.bg,
+                    border: `1px solid ${A.border}`,
+                    borderRadius: 8,
+                    color: A.text,
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Office Hours */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                Leasing Office Hours
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: A.muted }}>Monday - Friday:</span>
+                  <input
+                    type="text"
+                    value={formData.officeHours?.monFri || ''}
+                    onChange={(e) => handleNestedChange('officeHours', 'monFri', e.target.value)}
+                    style={{
+                      width: '100%',
+                      marginTop: '0.25rem',
+                      padding: '0.55rem 0.75rem',
+                      backgroundColor: A.bg,
+                      border: `1px solid ${A.border}`,
+                      borderRadius: 8,
+                      color: A.text,
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: A.muted }}>Saturday:</span>
+                  <input
+                    type="text"
+                    value={formData.officeHours?.sat || ''}
+                    onChange={(e) => handleNestedChange('officeHours', 'sat', e.target.value)}
+                    style={{
+                      width: '100%',
+                      marginTop: '0.25rem',
+                      padding: '0.55rem 0.75rem',
+                      backgroundColor: A.bg,
+                      border: `1px solid ${A.border}`,
+                      borderRadius: 8,
+                      color: A.text,
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: A.muted }}>Sunday:</span>
+                  <input
+                    type="text"
+                    value={formData.officeHours?.sun || ''}
+                    onChange={(e) => handleNestedChange('officeHours', 'sun', e.target.value)}
+                    style={{
+                      width: '100%',
+                      marginTop: '0.25rem',
+                      padding: '0.55rem 0.75rem',
+                      backgroundColor: A.bg,
+                      border: `1px solid ${A.border}`,
+                      borderRadius: 8,
+                      color: A.text,
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Save Bar */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '0.5rem' }}>
+          <button
+            type="button"
+            onClick={handleResetDefaults}
+            style={{
+              padding: '0.65rem 1.25rem',
+              backgroundColor: A.card2,
+              color: A.muted,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Restore Factory Defaults
+          </button>
+          <button
+            type="submit"
+            style={{
+              padding: '0.65rem 1.75rem',
+              backgroundColor: A.accent,
+              color: '#0a0d14',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: '0.88rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: `0 4px 14px ${A.accent}44`,
+            }}
+          >
+            <Save size={16} /> Save Settings
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 // ── Sidebar nav ────────────────────────────────────────────────────────────────
 const ADMIN_NAV = [
   { id: 'overview',     label: 'Overview',          Icon: BarChart2   },
@@ -563,11 +1821,40 @@ const ADMIN_NAV = [
   { id: 'maintenance',  label: 'Maintenance',        Icon: Wrench      },
   { id: 'addons',       label: 'Add-ons',            Icon: Package     },
   { id: 'emaillogs',    label: 'Email Logs',         Icon: Mail        },
+  { id: 'support',      label: 'Contact Support',    Icon: Headphones  },
+  { id: 'pages',        label: 'Pages & Legal',      Icon: BookOpen    },
+  { id: 'settings',     label: 'Site Settings',      Icon: Sliders     },
 ];
 
 // ── Main Export ────────────────────────────────────────────────────────────────
-export default function AdminPanel({ onBack }) {
+export default function AdminPanel({
+  onBack,
+  siteSettings: propSiteSettings,
+  onUpdateSiteSettings,
+  legalPages: propLegalPages,
+  onUpdateLegalPages,
+  supportInquiries: propSupportInquiries,
+  onUpdateSupportInquiries,
+}) {
   const [activeSection, setActiveSection] = useState('overview');
+  const [supportInquiries, setSupportInquiries] = useState(() => propSupportInquiries || getSupportInquiries());
+  const [siteSettings, setSiteSettings] = useState(() => propSiteSettings || getSiteSettings());
+  const [legalPages, setLegalPages] = useState(() => propLegalPages || getLegalPages());
+
+  const handleUpdateSiteSettings = (newSettings) => {
+    setSiteSettings(newSettings);
+    if (onUpdateSiteSettings) onUpdateSiteSettings(newSettings);
+  };
+
+  const handleUpdateLegalPages = (newPages) => {
+    setLegalPages(newPages);
+    if (onUpdateLegalPages) onUpdateLegalPages(newPages);
+  };
+
+  const handleUpdateSupportInquiries = (newInquiries) => {
+    setSupportInquiries(newInquiries);
+    if (onUpdateSupportInquiries) onUpdateSupportInquiries(newInquiries);
+  };
 
   const sectionMap = {
     overview:     <OverviewSection />,
@@ -578,14 +1865,18 @@ export default function AdminPanel({ onBack }) {
     maintenance:  <AdminMaintenanceSection />,
     addons:       <AddOnsManagementSection />,
     emaillogs:    <EmailLogsSection />,
+    support:      <ContactSupportSection supportInquiries={supportInquiries} setSupportInquiries={handleUpdateSupportInquiries} />,
+    pages:        <PagesManagementSection legalPages={legalPages} setLegalPages={handleUpdateLegalPages} />,
+    settings:     <SiteSettingsSection siteSettings={siteSettings} setSiteSettings={handleUpdateSiteSettings} />,
   };
 
-  const pendingCount = APPLICATIONS_DATA.filter(a => a.status === 'pending').length;
+  const pendingCount = APPLICATIONS_DATA.filter((a) => a.status === 'pending').length;
+  const newSupportCount = supportInquiries.filter((s) => s.status === 'new').length;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: A.bg, display: 'flex', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
       {/* ── Sidebar ── */}
-      <aside style={{ width: 230, backgroundColor: A.sidebar, borderRight: `1px solid ${A.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <aside style={{ width: 235, backgroundColor: A.sidebar, borderRight: `1px solid ${A.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
         {/* Brand */}
         <div style={{ padding: '1.5rem 1.3rem', borderBottom: `1px solid ${A.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
@@ -594,7 +1885,7 @@ export default function AdminPanel({ onBack }) {
             </div>
             <div>
               <div style={{ color: A.text, fontWeight: 800, fontSize: '0.9rem', lineHeight: 1 }}>Admin Panel</div>
-              <div style={{ color: A.muted, fontSize: '0.7rem' }}>Monarch Pass</div>
+              <div style={{ color: A.muted, fontSize: '0.7rem' }}>{siteSettings?.siteName || 'Monarch Pass'}</div>
             </div>
           </div>
           <div style={{ marginTop: '0.6rem', padding: '0.35rem 0.6rem', backgroundColor: `${A.accent}22`, borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: '0.3rem', border: `1px solid ${A.accent}44` }}>
@@ -607,25 +1898,57 @@ export default function AdminPanel({ onBack }) {
         <nav style={{ flex: 1, padding: '0.85rem 0.65rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
           {ADMIN_NAV.map(({ id, label, Icon }) => {
             const active = activeSection === id;
-            const isBadge = id === 'applications' && pendingCount > 0;
+            const isAppBadge = id === 'applications' && pendingCount > 0;
+            const isSupportBadge = id === 'support' && newSupportCount > 0;
             return (
-              <button key={id} onClick={() => setActiveSection(id)} style={{
-                display: 'flex', alignItems: 'center', gap: '0.7rem', justifyContent: 'space-between',
-                padding: '0.65rem 0.85rem', borderRadius: 9, cursor: 'pointer', border: 'none', width: '100%',
-                backgroundColor: active ? `${A.accent}18` : 'transparent',
-                color: active ? A.accent : A.muted,
-                fontWeight: active ? 700 : 500, fontSize: '0.855rem', textAlign: 'left',
-                transition: 'all 0.15s',
-              }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = A.text; } }}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = A.muted; } }}
+              <button
+                key={id}
+                onClick={() => setActiveSection(id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.7rem',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: 9,
+                  cursor: 'pointer',
+                  border: 'none',
+                  width: '100%',
+                  backgroundColor: active ? `${A.accent}18` : 'transparent',
+                  color: active ? A.accent : A.muted,
+                  fontWeight: active ? 700 : 500,
+                  fontSize: '0.84rem',
+                  textAlign: 'left',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)';
+                    e.currentTarget.style.color = A.text;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = A.muted;
+                  }
+                }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
                   {active && <div style={{ width: 3, height: 16, backgroundColor: A.accent, borderRadius: 4, marginLeft: -5, marginRight: 2 }} />}
                   <Icon size={16} />
                   <span>{label}</span>
                 </div>
-                {isBadge && <span style={{ backgroundColor: A.danger, color: '#fff', borderRadius: 10, padding: '0.1rem 0.45rem', fontSize: '0.65rem', fontWeight: 800 }}>{pendingCount}</span>}
+                {isAppBadge && (
+                  <span style={{ backgroundColor: A.danger, color: '#fff', borderRadius: 10, padding: '0.1rem 0.45rem', fontSize: '0.65rem', fontWeight: 800 }}>
+                    {pendingCount}
+                  </span>
+                )}
+                {isSupportBadge && (
+                  <span style={{ backgroundColor: A.accent, color: '#0a0d14', borderRadius: 10, padding: '0.1rem 0.45rem', fontSize: '0.65rem', fontWeight: 800 }}>
+                    {newSupportCount}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -633,7 +1956,24 @@ export default function AdminPanel({ onBack }) {
 
         {/* Footer */}
         <div style={{ padding: '0.85rem 0.65rem', borderTop: `1px solid ${A.border}` }}>
-          <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.85rem', borderRadius: 9, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: A.muted, fontWeight: 500, fontSize: '0.855rem', width: '100%', textAlign: 'left' }}>
+          <button
+            onClick={onBack}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.7rem',
+              padding: '0.65rem 0.85rem',
+              borderRadius: 9,
+              cursor: 'pointer',
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: A.muted,
+              fontWeight: 500,
+              fontSize: '0.855rem',
+              width: '100%',
+              textAlign: 'left',
+            }}
+          >
             <LogOut size={16} /> Back to Website
           </button>
         </div>
@@ -645,16 +1985,35 @@ export default function AdminPanel({ onBack }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: `1px solid ${A.border}` }}>
           <div>
             <h1 style={{ color: A.text, fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-              {ADMIN_NAV.find(n => n.id === activeSection)?.label}
+              {ADMIN_NAV.find((n) => n.id === activeSection)?.label}
             </h1>
-            <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0.25rem 0 0' }}>Monarch Pass Apartments · Admin Dashboard</p>
+            <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0.25rem 0 0' }}>
+              {siteSettings?.siteName || 'Monarch Pass Apartments'} · Admin Dashboard
+            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ color: A.text, fontSize: '0.82rem', fontWeight: 600 }}>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</div>
+              <div style={{ color: A.text, fontSize: '0.82rem', fontWeight: 600 }}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+              </div>
               <div style={{ color: A.accent, fontSize: '0.72rem', fontWeight: 700 }}>Admin: Property Manager</div>
             </div>
-            <div style={{ width: 38, height: 38, borderRadius: '50%', background: `linear-gradient(135deg, ${A.accent}, #d97706)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#0a0d14', fontSize: '0.85rem' }}>PM</div>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: '50%',
+                background: `linear-gradient(135deg, ${A.accent}, #d97706)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                color: '#0a0d14',
+                fontSize: '0.85rem',
+              }}
+            >
+              PM
+            </div>
           </div>
         </div>
 
@@ -666,3 +2025,4 @@ export default function AdminPanel({ onBack }) {
     </div>
   );
 }
+

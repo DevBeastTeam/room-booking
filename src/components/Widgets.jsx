@@ -18,8 +18,9 @@ import {
   ZoomIn,
   Contrast
 } from 'lucide-react';
+import { addSupportInquiry } from '../services/siteDataService';
 
-export default function Widgets() {
+export default function Widgets({ onOpenScheduleTour }) {
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'chat', 'tour', 'email', 'call', 'accessibility'
 
@@ -89,6 +90,14 @@ export default function Widgets() {
       alert('Please fill out all required contact fields.');
       return;
     }
+    addSupportInquiry({
+      name: `${tourForm.firstName} ${tourForm.lastName}`.trim(),
+      email: tourForm.email.trim(),
+      phone: tourForm.phone.trim(),
+      category: 'Tour Request',
+      subject: `Guided Tour (${tourType}) for ${tourForm.bedrooms}`,
+      message: `Requested tour date: ${selectedDate} at ${selectedTime}.`,
+    });
     setTourSubmitted(true);
   };
 
@@ -98,6 +107,14 @@ export default function Widgets() {
       alert('Please enter your name, email, and message.');
       return;
     }
+    addSupportInquiry({
+      name: `${emailForm.firstName} ${emailForm.lastName}`.trim(),
+      email: emailForm.email.trim(),
+      phone: emailForm.phone.trim() || 'N/A',
+      category: 'Widget Inquiry',
+      subject: 'Message from Email Agent Widget',
+      message: emailForm.message.trim(),
+    });
     setEmailSubmitted(true);
   };
 
@@ -277,7 +294,14 @@ export default function Widgets() {
 
               {/* 2. Book a tour */}
               <button
-                onClick={() => setActiveModal('tour')}
+                id="btn-widget-book-tour"
+                onClick={() => {
+                  if (onOpenScheduleTour) {
+                    onOpenScheduleTour();
+                  } else {
+                    setActiveModal('tour');
+                  }
+                }}
                 style={{
                   backgroundColor: '#ffffff',
                   color: '#1e293b',

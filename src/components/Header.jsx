@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
-import { Phone, User, Menu, X, ChevronDown, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { 
+  Phone, 
+  User, 
+  Menu, 
+  X, 
+  ChevronDown, 
+  LayoutDashboard, 
+  ShieldCheck, 
+  Camera, 
+  Layers, 
+  MapPin, 
+  Calendar, 
+  HelpCircle,
+  Home,
+  Sparkles,
+  Compass,
+  Building
+} from 'lucide-react';
 
 const FacebookIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -13,21 +30,55 @@ const InstagramIcon = ({ size = 16 }) => (
   </svg>
 );
 
-export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNavigateAdmin }) {
+export default function Header({
+  currentView = 'home',
+  onNavigateHome,
+  onNavigateFloorPlans,
+  onNavigatePhotos,
+  onNavigateGuidelines,
+  onNavigateAmenities,
+  onNavigateVirtualTour,
+  onNavigateMap,
+  onNavigateFAQ,
+  onNavigateContact,
+  onNavigateDashboard,
+  onNavigateAdmin,
+  siteSettings,
+  onOpenContactSupport,
+  onOpenScheduleTour,
+}) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
+  const isHomeActive = currentView === 'home';
+  const isFloorPlansActive = currentView === 'floorplans' || currentView === 'estimator';
+  const isPhotosActive = currentView === 'photos';
+  const isGuidelinesActive = currentView === 'guidelines';
+  const isAmenitiesActive = currentView === 'amenities';
+  const isVirtualTourActive = currentView === 'virtualtour';
+  const isMapActive = currentView === 'map';
+  const isFAQActive = currentView === 'faq';
+  const isContactActive = currentView === 'contact';
+
   const navLinks = [
-    { label: 'Home', href: '#', onClick: onNavigateFloorPlans },
-    { label: 'Amenities', href: '#' },
-    { label: 'Floor Plans', href: '#', active: true, onClick: onNavigateFloorPlans },
-    { label: 'Photos', href: '#' },
-    { label: 'Virtual Tour', href: '#' },
-    { label: 'Income Guidelines', href: '#' },
-    { label: 'Map', href: '#' },
-    { label: 'Contact Us', href: '#' },
-    { label: 'FAQ', href: '#' },
-    { label: 'Schedule a Tour', href: '#' },
+    { label: 'Home', active: isHomeActive, onClick: onNavigateHome },
+    { label: 'Amenities', active: isAmenitiesActive, onClick: onNavigateAmenities },
+    { label: 'Floor Plans', active: isFloorPlansActive, onClick: onNavigateFloorPlans },
+    { 
+      label: 'Photos', 
+      active: isPhotosActive || isVirtualTourActive, 
+      onClick: onNavigatePhotos,
+      badge: '26',
+      subLinks: [
+        { label: 'Photos', active: isPhotosActive, onClick: onNavigatePhotos },
+        { label: 'Virtual Tour', active: isVirtualTourActive, onClick: onNavigateVirtualTour },
+      ]
+    },
+    { label: 'Income Guidelines', active: isGuidelinesActive, onClick: onNavigateGuidelines },
+    { label: 'Map', active: isMapActive, onClick: onNavigateMap },
+    { label: 'Contact Us', active: isContactActive, onClick: onNavigateContact },
+    { label: 'FAQ', active: isFAQActive, onClick: onNavigateFAQ },
+    { label: 'Schedule a Tour', active: false, onClick: onOpenScheduleTour },
   ];
 
   return (
@@ -53,7 +104,7 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
         >
           {/* Phone Number */}
           <a 
-            href="tel:+18176465785"
+            href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -65,7 +116,7 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
             }}
           >
             <Phone size={15} style={{ color: '#2c3038' }} />
-            <span>+1 817-646-5785</span>
+            <span>{siteSettings?.phone || '+1 817-857-8782'}</span>
           </a>
 
           <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
@@ -73,7 +124,7 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
           {/* Social Icons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <a 
-              href="https://facebook.com" 
+              href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarchPassAPTS'} 
               target="_blank" 
               rel="noreferrer"
               aria-label="Facebook"
@@ -93,7 +144,7 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
               <FacebookIcon size={16} />
             </a>
             <a 
-              href="https://instagram.com" 
+              href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarchpass'} 
               target="_blank" 
               rel="noreferrer"
               aria-label="Instagram"
@@ -116,17 +167,21 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
 
           <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
 
-          {/* Dashboard Button */}
+          {/* Translate | Traducir Button (Google Translate Integration) */}
           <button
-            id="btn-dashboard"
-            onClick={onNavigateDashboard}
+            id="btn-translate"
+            onClick={() => {
+              const currentUrl = encodeURIComponent(window.location.href);
+              window.open(`https://translate.google.com/translate?sl=auto&tl=es&u=${currentUrl}`, '_blank');
+            }}
             style={{
-              backgroundColor: '#0f766e',
+              backgroundColor: '#4a4e57',
               color: '#ffffff',
-              padding: '0.45rem 1rem',
+              padding: '0.42rem 0.9rem',
               borderRadius: '4px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
@@ -134,44 +189,21 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
               border: 'none',
               transition: 'background 0.2s',
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#0d6460'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#0f766e'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#373a42'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#4a4e57'}
+            title="Translate Page to Spanish | Traducir al Español"
           >
-            <LayoutDashboard size={15} />
-            <span>Dashboard</span>
+            <span>TRANSLATE | TRADUCIR</span>
           </button>
 
-          {/* Admin Panel Button */}
-          <button
-            id="btn-admin"
-            onClick={onNavigateAdmin}
-            style={{
-              backgroundColor: '#92400e',
-              color: '#fbbf24',
-              padding: '0.45rem 1rem',
-              borderRadius: '4px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              cursor: 'pointer',
-              border: 'none',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#78350f'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#92400e'}
-          >
-            <ShieldCheck size={15} />
-            <span>Admin</span>
-          </button>
+          <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
 
           {/* Login Dropdown */}
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setIsLoginOpen(!isLoginOpen)}
               style={{
-                backgroundColor: '#4a4e57',
+                backgroundColor: '#0f766e',
                 color: '#ffffff',
                 padding: '0.45rem 1rem',
                 borderRadius: '4px',
@@ -180,8 +212,11 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
+                cursor: 'pointer',
+                border: 'none',
               }}
             >
+              <User size={14} />
               <span>Login</span>
               <ChevronDown size={14} />
             </button>
@@ -194,40 +229,100 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
                   right: 0,
                   top: '120%',
                   backgroundColor: '#ffffff',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.18)',
                   borderRadius: '6px',
                   border: '1px solid #e2e8f0',
-                  minWidth: '170px',
+                  minWidth: '220px',
                   zIndex: 50,
                   overflow: 'hidden',
                 }}
               >
                 <a
-                  href="#resident-login"
-                  onClick={(e) => { e.preventDefault(); setIsLoginOpen(false); onNavigateDashboard && onNavigateDashboard(); }}
+                  href={siteSettings?.portals?.resident || 'https://monarchpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsLoginOpen(false)}
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                     padding: '0.75rem 1rem',
                     fontSize: '0.875rem',
-                    color: '#334155',
+                    color: '#1e293b',
                     borderBottom: '1px solid #f1f5f9',
-                    fontWeight: 500,
+                    fontWeight: 600,
+                    textDecoration: 'none',
                     cursor: 'pointer',
                   }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                 >
-                  Resident Login
+                  <span>Resident Portal</span>
+                  <span style={{ fontSize: '0.7rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
                 </a>
                 <a
-                  href="#applicant-login"
+                  href={siteSettings?.portals?.applicant || 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsLoginOpen(false)}
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                     padding: '0.75rem 1rem',
                     fontSize: '0.875rem',
-                    color: '#334155',
-                    fontWeight: 500,
+                    color: '#1e293b',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
                   }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                 >
-                  Applicant Login
+                  <span>Applicant Portal</span>
+                  <span style={{ fontSize: '0.7rem', color: '#0f766e', backgroundColor: '#ccfbf1', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
+                </a>
+                <a
+                  href="#resident-dashboard"
+                  onClick={(e) => { e.preventDefault(); setIsLoginOpen(false); onNavigateDashboard && onNavigateDashboard(); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 1rem',
+                    fontSize: '0.825rem',
+                    color: '#0f766e',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0fdfa'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                >
+                  <LayoutDashboard size={14} />
+                  <span>Resident Dashboard (Demo)</span>
+                </a>
+                <a
+                  href="#admin-panel"
+                  onClick={(e) => { e.preventDefault(); setIsLoginOpen(false); onNavigateAdmin && onNavigateAdmin(); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 1rem',
+                    fontSize: '0.825rem',
+                    color: '#b45309',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fffbeb'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                >
+                  <ShieldCheck size={14} />
+                  <span>Admin Panel (Demo)</span>
                 </a>
               </div>
             )}
@@ -259,7 +354,7 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
         style={{
           position: 'relative',
           height: '280px',
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.4)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.4)), url('${siteSettings?.heroImageUrl || 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg'}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           display: 'flex',
@@ -269,7 +364,7 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
           padding: '1rem',
           cursor: 'pointer',
         }}
-        onClick={onNavigateFloorPlans}
+        onClick={onNavigateHome || onNavigateFloorPlans}
       >
         {/* Monarch Pass Logo Badge */}
         <div
@@ -285,11 +380,17 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
             marginBottom: '1rem',
           }}
         >
-          <img
-            src="https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_325,h_60/s3/2/58193/pn_monarchpass_logo_pms%20web.png"
-            alt="Monarch Pass Apartments"
-            style={{ maxHeight: '42px', width: 'auto', display: 'block' }}
-          />
+          {siteSettings?.logoUrl ? (
+            <img
+              src={siteSettings.logoUrl}
+              alt={siteSettings?.siteName || 'Monarch Pass Apartments'}
+              style={{ maxHeight: '42px', width: 'auto', display: 'block' }}
+            />
+          ) : (
+            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f766e', letterSpacing: '0.02em' }}>
+              {siteSettings?.siteName || 'Monarch Pass Apartments'}
+            </span>
+          )}
         </div>
 
         {/* Hero Title */}
@@ -304,9 +405,279 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
             margin: 0,
           }}
         >
-          Spacious 1-4 Bedroom Apartments in Fort Worth
+          {siteSettings?.tagline || 'Spacious 1-4 Bedroom Apartments in Fort Worth'}
         </h2>
       </div>
+
+      {/* Primary Navigation Tabs Bar */}
+      <nav
+        style={{
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+        }}
+      >
+        <div
+          className="container"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '0.35rem',
+            padding: '0.4rem 1rem',
+          }}
+        >
+          {/* Home */}
+          <button
+            id="tab-home"
+            onClick={onNavigateHome}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isHomeActive ? 700 : 500,
+              color: isHomeActive ? '#0f766e' : '#475569',
+              background: isHomeActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isHomeActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Home size={15} />
+            <span>Home</span>
+          </button>
+
+          {/* Floor Plans */}
+          <button
+            id="tab-floor-plans"
+            onClick={onNavigateFloorPlans}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isFloorPlansActive ? 700 : 500,
+              color: isFloorPlansActive ? '#0f766e' : '#475569',
+              background: isFloorPlansActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isFloorPlansActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Layers size={15} />
+            <span>Floor Plans</span>
+          </button>
+
+          {/* Photos */}
+          <button
+            id="tab-photos"
+            onClick={onNavigatePhotos}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isPhotosActive ? 700 : 500,
+              color: isPhotosActive ? '#0f766e' : '#475569',
+              background: isPhotosActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isPhotosActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Camera size={15} />
+            <span>Photos</span>
+            <span
+              style={{
+                backgroundColor: isPhotosActive ? '#0f766e' : '#e2e8f0',
+                color: isPhotosActive ? '#ffffff' : '#475569',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                padding: '1px 6px',
+                borderRadius: '9999px',
+              }}
+            >
+              26
+            </span>
+          </button>
+
+          {/* Income Guidelines */}
+          <button
+            id="tab-guidelines"
+            onClick={onNavigateGuidelines}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isGuidelinesActive ? 700 : 500,
+              color: isGuidelinesActive ? '#0f766e' : '#475569',
+              background: isGuidelinesActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isGuidelinesActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <ShieldCheck size={15} />
+            <span>Income Guidelines</span>
+          </button>
+
+          {/* Amenities */}
+          <button
+            id="tab-amenities"
+            onClick={onNavigateAmenities}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isAmenitiesActive ? 700 : 500,
+              color: isAmenitiesActive ? '#0f766e' : '#475569',
+              background: isAmenitiesActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isAmenitiesActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Sparkles size={15} />
+            <span>Amenities</span>
+          </button>
+
+          {/* Virtual Tour */}
+          <button
+            id="tab-virtual-tour"
+            onClick={onNavigateVirtualTour}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isVirtualTourActive ? 700 : 500,
+              color: isVirtualTourActive ? '#0f766e' : '#475569',
+              background: isVirtualTourActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isVirtualTourActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Compass size={15} />
+            <span>Virtual Tour</span>
+          </button>
+
+          {/* Map & Directions */}
+          <button
+            id="tab-map"
+            onClick={onNavigateMap}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isMapActive ? 700 : 500,
+              color: isMapActive ? '#0f766e' : '#475569',
+              background: isMapActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isMapActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <MapPin size={15} />
+            <span>Map</span>
+          </button>
+
+          {/* FAQ */}
+          <button
+            id="tab-faq"
+            onClick={onNavigateFAQ}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isFAQActive ? 700 : 500,
+              color: isFAQActive ? '#0f766e' : '#475569',
+              background: isFAQActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isFAQActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <HelpCircle size={15} />
+            <span>FAQ</span>
+          </button>
+
+          {/* Contact Us */}
+          <button
+            id="tab-contact"
+            onClick={onNavigateContact}
+            style={{
+              padding: '0.6rem 0.95rem',
+              fontSize: '0.9rem',
+              fontWeight: isContactActive ? 700 : 500,
+              color: isContactActive ? '#0f766e' : '#475569',
+              background: isContactActive ? '#f0fdfa' : 'transparent',
+              borderRadius: '6px',
+              border: isContactActive ? '1px solid #99f6e4' : '1px solid transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Phone size={15} />
+            <span>Contact Us</span>
+          </button>
+
+          {/* Schedule a Tour CTA */}
+          <button
+            id="btn-schedule-tour"
+            onClick={onOpenScheduleTour}
+            style={{
+              padding: '0.6rem 1.1rem',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              color: '#ffffff',
+              backgroundColor: '#0f766e',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxShadow: '0 2px 6px rgba(15, 118, 110, 0.3)',
+              transition: 'background 0.2s ease',
+              marginLeft: '0.25rem',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
+          >
+            <Calendar size={15} />
+            <span>Schedule a Tour</span>
+          </button>
+        </div>
+      </nav>
 
       {/* Fullscreen Overlay Navigation Drawer */}
       {isNavOpen && (
@@ -344,32 +715,79 @@ export default function Header({ onNavigateFloorPlans, onNavigateDashboard, onNa
             <X size={28} />
           </button>
 
-          <nav style={{ textAlign: 'center' }}>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <nav style={{ textAlign: 'center', width: '100%', maxWidth: '400px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
               {navLinks.map((link, idx) => (
                 <li key={idx}>
-                  <a
-                    href={link.href}
-                    onClick={() => {
-                      setIsNavOpen(false);
-                      if (link.onClick) link.onClick();
-                    }}
-                    style={{
-                      color: '#ffffff',
-                      fontSize: '1.4rem',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      textDecoration: 'none',
-                      transition: 'transform 0.2s, opacity 0.2s',
-                      display: 'inline-block',
-                      opacity: link.active ? 1 : 0.85,
-                      borderBottom: link.active ? '3px solid #ffffff' : 'none',
-                      paddingBottom: '4px',
-                    }}
-                  >
-                    {link.label}
-                  </a>
+                  {link.subLinks ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                      <span
+                        style={{
+                          color: '#ffffff',
+                          fontSize: '1.45rem',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                          opacity: link.active ? 1 : 0.9,
+                          borderBottom: link.active ? '3px solid #ffffff' : 'none',
+                          paddingBottom: '2px',
+                        }}
+                      >
+                        {link.label}
+                      </span>
+                      <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.2rem' }}>
+                        {link.subLinks.map((sub, sIdx) => (
+                          <button
+                            key={sIdx}
+                            onClick={() => {
+                              setIsNavOpen(false);
+                              if (sub.onClick) sub.onClick();
+                            }}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.22)',
+                              border: sub.active ? '2px solid #ffffff' : '1px solid rgba(255, 255, 255, 0.4)',
+                              borderRadius: '20px',
+                              padding: '0.35rem 0.9rem',
+                              color: '#ffffff',
+                              fontSize: '0.95rem',
+                              fontWeight: 600,
+                              textTransform: 'uppercase',
+                              cursor: 'pointer',
+                              backdropFilter: 'blur(4px)',
+                            }}
+                          >
+                            {sub.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setIsNavOpen(false);
+                        if (link.onClick) link.onClick();
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontSize: '1.45rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s, opacity 0.2s',
+                        display: 'inline-block',
+                        opacity: link.active ? 1 : 0.85,
+                        borderBottom: link.active ? '3px solid #ffffff' : 'none',
+                        paddingBottom: '4px',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = link.active ? '1' : '0.85'}
+                    >
+                      {link.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

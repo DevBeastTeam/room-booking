@@ -13,7 +13,23 @@ const InstagramIcon = ({ size = 18 }) => (
   </svg>
 );
 
-export default function Footer() {
+export default function Footer({
+  siteSettings,
+  onOpenContactSupport,
+  onOpenLegal,
+  onNavigateHome,
+  onNavigateFloorPlans,
+  onNavigatePhotos,
+  onNavigateGuidelines,
+  onNavigateAmenities,
+  onNavigateVirtualTour,
+  onNavigateMap,
+  onNavigateFAQ,
+  onNavigateContact,
+  onNavigateDashboard,
+}) {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer style={{ backgroundColor: '#212529', color: '#e2e8f0', marginTop: '4rem' }}>
       {/* Top Footer Section */}
@@ -29,59 +45,66 @@ export default function Footer() {
           {/* Column 1: Property Info */}
           <div>
             <div style={{ marginBottom: '1.25rem' }}>
-              <img
-                src="https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_240,h_50/s3/2/58193/pn_monarchpass_logo_pms%20web.png"
-                alt="Monarch Pass Apartments"
-                style={{
-                  maxHeight: '40px',
-                  width: 'auto',
-                  backgroundColor: '#ffffff',
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                }}
-              />
+              {siteSettings?.logoUrl ? (
+                <img
+                  src={siteSettings.logoUrl}
+                  alt={siteSettings?.siteName || 'Monarch Pass Apartments'}
+                  style={{
+                    maxHeight: '40px',
+                    width: 'auto',
+                    backgroundColor: '#ffffff',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ffffff' }}>
+                  {siteSettings?.siteName || 'Monarch Pass Apartments'}
+                </span>
+              )}
             </div>
             <p style={{ fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: '1rem' }}>
-              Modern living nestled in Fort Worth, TX. Experience premier apartment amenities and exceptional community living.
+              {siteSettings?.footerDescription || 'Modern living nestled in Fort Worth, TX. Experience premier apartment amenities and exceptional community living.'}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.875rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <MapPin size={16} style={{ color: '#68c7b7', flexShrink: 0 }} />
-                <span>4500 Campus Dr, Fort Worth, TX 76119</span>
+                <a 
+                  href={siteSettings?.mapsUrl || 'https://maps.app.goo.gl/E71XfBiE8dE9bAjV6'} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  style={{ color: '#ffffff', textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  {siteSettings?.address || '4500 Campus Dr, Fort Worth, TX 76119'}
+                </a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <Phone size={16} style={{ color: '#68c7b7', flexShrink: 0 }} />
-                <a href="tel:+18173919347" style={{ color: '#ffffff' }}>+1 817-391-9347</a>
+                <a href={`tel:${siteSettings?.secondaryPhone?.replace(/[^0-9+]/g, '') || '+18175311750'}`} style={{ color: '#ffffff' }}>
+                  {siteSettings?.secondaryPhone || '+1 817-531-1750'}
+                </a>
               </div>
             </div>
           </div>
 
           {/* Column 2: Management & Social */}
           <div style={{ textAlign: 'center' }}>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', color: '#ffffff' }}>
-              Managed By
-            </h4>
-            <div
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.06)',
-                padding: '1.25rem',
-                borderRadius: '8px',
-                display: 'inline-block',
-                marginBottom: '1.25rem',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <div style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.05em', color: '#ffffff' }}>
-                CUSHMAN & WAKEFIELD
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-                Excellence in Multifamily Living
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <img
+                src="https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_250,h_50/s3/2/58193/cw_logo_white-footer_resize-200h(1).png"
+                alt="Cushman & Wakefield"
+                style={{ height: '42px', width: 'auto', display: 'block' }}
+              />
             </div>
+            <p style={{ fontSize: '0.875rem', color: '#cbd5e1', lineHeight: 1.5, maxWidth: '280px', margin: '0 auto 1.25rem' }}>
+              Come explore the wonders of Monarch Pass and find the perfect home that fits your lifestyle!
+            </p>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
               <a
-                href="https://facebook.com"
+                href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarchPassAPTS'}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Facebook"
@@ -99,7 +122,7 @@ export default function Footer() {
                 <FacebookIcon size={18} />
               </a>
               <a
-                href="https://instagram.com"
+                href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarchpass'}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
@@ -127,15 +150,15 @@ export default function Footer() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.875rem', color: '#cbd5e1' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.4rem' }}>
                 <span>Monday - Friday</span>
-                <span style={{ fontWeight: 600, color: '#ffffff' }}>8:30 AM - 5:30 PM</span>
+                <span style={{ fontWeight: 600, color: '#ffffff' }}>{siteSettings?.officeHours?.monFri || '10:00 AM - 6:00 PM'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.4rem' }}>
                 <span>Saturday</span>
-                <span style={{ fontWeight: 600, color: '#ffffff' }}>10:00 AM - 5:00 PM</span>
+                <span style={{ fontWeight: 600, color: '#ffffff' }}>{siteSettings?.officeHours?.sat || '10:00 AM - 5:00 PM'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Sunday</span>
-                <span style={{ fontWeight: 600, color: '#94a3b8' }}>Closed</span>
+                <span style={{ fontWeight: 600, color: '#ffffff' }}>{siteSettings?.officeHours?.sun || '1:00 PM - 5:00 PM'}</span>
               </div>
             </div>
           </div>
@@ -149,7 +172,7 @@ export default function Footer() {
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'center',
-            gap: '1.5rem',
+            gap: '1.25rem',
             fontSize: '0.8rem',
             fontWeight: 600,
             textTransform: 'uppercase',
@@ -157,12 +180,134 @@ export default function Footer() {
             marginBottom: '1.5rem',
           }}
         >
-          <a href="#" style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.target.style.color = '#ffffff')} onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}>Resident Login</a>
-          <a href="#" style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.target.style.color = '#ffffff')} onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}>Applicant Login</a>
-          <a href="#" style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.target.style.color = '#ffffff')} onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}>Floor Plans</a>
-          <a href="#" style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.target.style.color = '#ffffff')} onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}>Privacy Policy</a>
-          <a href="#" style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.target.style.color = '#ffffff')} onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}>Terms & Conditions</a>
-          <a href="#" style={{ transition: 'color 0.2s' }} onMouseEnter={(e) => (e.target.style.color = '#ffffff')} onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}>Contact Us</a>
+          <a
+            href="#home"
+            onClick={(e) => { e.preventDefault(); if (onNavigateHome) onNavigateHome(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Home
+          </a>
+          <a
+            href="#amenities"
+            onClick={(e) => { e.preventDefault(); if (onNavigateAmenities) onNavigateAmenities(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Amenities
+          </a>
+          <a
+            href="#floor-plans"
+            onClick={(e) => { e.preventDefault(); if (onNavigateFloorPlans) onNavigateFloorPlans(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Floor Plans
+          </a>
+          <a
+            href="#photos"
+            onClick={(e) => { e.preventDefault(); if (onNavigatePhotos) onNavigatePhotos(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Photos
+          </a>
+          <a
+            href="#virtual-tour"
+            onClick={(e) => { e.preventDefault(); if (onNavigateVirtualTour) onNavigateVirtualTour(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Virtual Tour
+          </a>
+          <a
+            href="#income-guidelines"
+            onClick={(e) => { e.preventDefault(); if (onNavigateGuidelines) onNavigateGuidelines(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Income Guidelines
+          </a>
+          <a
+            href="#maps"
+            onClick={(e) => { e.preventDefault(); if (onNavigateMap) onNavigateMap(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Map
+          </a>
+          <a
+            href="#contact-us"
+            onClick={(e) => { e.preventDefault(); if (onNavigateContact) onNavigateContact(); else if (onOpenContactSupport) onOpenContactSupport(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Contact Us
+          </a>
+          <a
+            href="#faq"
+            onClick={(e) => { e.preventDefault(); if (onNavigateFAQ) onNavigateFAQ(); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            FAQ
+          </a>
+          <a
+            href={siteSettings?.portals?.resident || 'https://monarchpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx'}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Resident Login
+          </a>
+          <a
+            href={siteSettings?.portals?.applicant || 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx'}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Applicant Login
+          </a>
+          <a
+            href="#terms-conditions"
+            onClick={(e) => { e.preventDefault(); if (onOpenLegal) onOpenLegal('terms'); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Terms and Conditions
+          </a>
+          <a
+            href="#privacy-policy"
+            onClick={(e) => { e.preventDefault(); if (onOpenLegal) onOpenLegal('privacy'); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Privacy Policy
+          </a>
+          <a
+            href="#accessibility"
+            onClick={(e) => { e.preventDefault(); if (onOpenLegal) onOpenLegal('accessibility'); }}
+            style={{ transition: 'color 0.2s', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
+            onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
+          >
+            Accessibility Statement
+          </a>
         </div>
 
         {/* Legal & Copyright */}
@@ -172,23 +317,31 @@ export default function Footer() {
             flexDirection: 'column',
             alignItems: 'center',
             gap: '0.75rem',
-            fontSize: '0.75rem',
-            color: '#64748b',
+            fontSize: '0.78rem',
+            color: '#94a3b8',
             textAlign: 'center',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Shield size={16} style={{ color: '#94a3b8' }} />
-              <span>Equal Housing Opportunity</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Award size={16} style={{ color: '#94a3b8' }} />
-              <span>Handicapped Accessible</span>
-            </div>
+          {/* Equal Housing Opportunity SVG */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <svg
+              role="img"
+              aria-label="Equal housing opportunity"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="20"
+              viewBox="0 0 15.2 10.72"
+              fill="#cbd5e1"
+            >
+              <path d="M7.54,0,0,3.72V5.46H.84V10.7H14.19V5.46h1V3.72Zm5,9.12H2.48V4.34l5.06-2.6,5,2.6Z" />
+              <polygon points="9.85 6.02 5.18 6.02 5.18 4.34 9.85 4.34 9.85 6.02 9.85 6.02" />
+              <polygon points="9.85 8.44 5.18 8.44 5.18 6.76 9.85 6.76 9.85 8.44 9.85 8.44" />
+            </svg>
+            <span style={{ fontWeight: 600, color: '#e2e8f0' }}>Equal Housing Opportunity</span>
           </div>
+
           <div>
-            &copy; 2026 Monarch Pass Apartments · Cushman & Wakefield. All Rights Reserved.
+            {siteSettings?.copyrightText || '© 2026 Cushman & Wakefield All Rights Reserved. | Powered by RentCafe (© 2026 Yardi Systems, Inc. All Rights Reserved.)'}
           </div>
         </div>
       </div>
