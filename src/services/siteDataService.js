@@ -183,6 +183,15 @@ export function saveSiteSettings(settings) {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     window.dispatchEvent(new CustomEvent('site-settings-updated', { detail: settings }));
+    
+    // Sync to MySQL backend asynchronously
+    if (typeof fetch !== 'undefined') {
+      fetch('/backend/api/settings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      }).catch(err => console.debug('Settings backend sync note:', err));
+    }
     return true;
   } catch {
     return false;
@@ -193,6 +202,13 @@ export function resetSiteSettings() {
   try {
     localStorage.removeItem(SETTINGS_KEY);
     window.dispatchEvent(new CustomEvent('site-settings-updated', { detail: DEFAULT_SITE_SETTINGS }));
+    if (typeof fetch !== 'undefined') {
+      fetch('/backend/api/settings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(DEFAULT_SITE_SETTINGS)
+      }).catch(() => {});
+    }
     return DEFAULT_SITE_SETTINGS;
   } catch {
     return DEFAULT_SITE_SETTINGS;
@@ -263,6 +279,23 @@ export function addSupportInquiry(inquiry) {
     };
     const updated = [newInquiry, ...current];
     saveSupportInquiries(updated);
+
+    // Sync to MySQL backend
+    if (typeof fetch !== 'undefined') {
+      fetch('/backend/api/contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: inquiry.name,
+          email: inquiry.email,
+          phone: inquiry.phone || '',
+          preferredBedroom: inquiry.bedrooms || 'Any',
+          category: inquiry.topic || inquiry.subject || 'Support Inquiry',
+          message: inquiry.message || ''
+        })
+      }).catch(err => console.debug('Inquiry backend sync note:', err));
+    }
+
     return newInquiry;
   } catch (err) {
     console.error('Failed to add support inquiry', err);
@@ -271,4 +304,70 @@ export function addSupportInquiry(inquiry) {
 }
 
 export const saveSupportInquiry = addSupportInquiry;
+
+// ── Maintenance API Helpers ───────────────────────────────────────────────────
+export async function submitMaintenanceTicketDB(ticketData) {
+  if (typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch('/backend/api/maintenance.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ticketData)
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn('Maintenance DB sync note:', err);
+    return null;
+  }
+}
+
+// ── Floor Plans API Helpers ───────────────────────────────────────────────────
+export async function fetchFloorPlansDB() {
+  if (typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch('/backend/api/floor-plans.php');
+    return await res.json();
+  } catch (err) {
+    console.warn('Floor plans DB fetch note:', err);
+    return null;
+  }
+}
+
+// ── Paddle Payment API Helpers ────────────────────────────────────────────────
+export async function fetchPaddleConfig() {
+  if (typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch('/backend/api/paddle.php?action=config');
+    return await res.json();
+  } catch (err) {
+    console.warn('Paddle config note:', err);
+    return null;
+  }
+}
+
+export async function createPaddleTransaction(paymentData) {
+  if (typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch('/backend/api/paddle.php?action=create_transaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(paymentData)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Paddle transaction error:', err);
+    return null;
+  }
+}
+
+export async function verifyPaddleTransaction(txnId) {
+  if (typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch(`/backend/api/paddle.php?action=verify_transaction&txn_id=${encodeURIComponent(txnId)}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Paddle verify error:', err);
+    return null;
+  }
+}
 

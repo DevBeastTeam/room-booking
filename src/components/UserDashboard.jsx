@@ -233,8 +233,20 @@ function PaymentsSection() {
           </div>
         ))}
       </div>
-      <button style={{ padding: '0.65rem 1.4rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: 'none' }}>
-        Pay Rent Online →
+      <button
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+            detail: {
+              item: 'rent_payment',
+              amount: RESIDENT.rent || 909,
+              unit: RESIDENT.unit || '2104',
+              customer: { name: RESIDENT.name, email: RESIDENT.email, phone: RESIDENT.phone }
+            }
+          }));
+        }}
+        style={{ padding: '0.65rem 1.4rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: 'none' }}
+      >
+        Pay Rent with Paddle →
       </button>
     </div>
   );

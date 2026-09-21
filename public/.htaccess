@@ -12,6 +12,9 @@ DirectoryIndex index.html index.php
     # Handle directory trailing slash
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^(.+[^/])$ $1/ [L,R=301]
+
+    # Transparently rewrite /api/ requests to modular /backend/api/
+    RewriteRule ^api/(.*)$ backend/api/$1 [L,QSA]
 </IfModule>
 
 # ── Enable Gzip / Brotli Compression ──────────────────────────────────────────

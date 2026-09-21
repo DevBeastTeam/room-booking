@@ -57,7 +57,7 @@ export default function ScheduleTourModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) {
       setErrorMessage('Please enter your first and last name.');
@@ -76,6 +76,28 @@ export default function ScheduleTourModal({
     setIsSubmitting(true);
 
     try {
+      // Send to MySQL backend API
+      try {
+        await fetch('/backend/api/schedule.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            date: tourDate,
+            time: tourTime,
+            tourType: tourType,
+            bedroom: bedrooms || 'Any',
+            unit: selectedUnit || '',
+            notes: `Move-in: ${moveDate || 'Flexible'} | Notes: ${message || 'None'}`
+          })
+        });
+      } catch (apiErr) {
+        console.warn('Backend API schedule sync note:', apiErr);
+      }
+
       addSupportInquiry({
         name: `${firstName.trim()} ${lastName.trim()}`,
         email: email.trim(),
@@ -85,11 +107,9 @@ export default function ScheduleTourModal({
         message: `Scheduled Tour:\n- Date: ${tourDate}\n- Time: ${tourTime}\n- Move-In Date: ${moveDate || 'Flexible'}\n- Bedrooms Preferred: ${bedrooms || 'Not specified'}\n- Unit Preferred: ${selectedUnit || 'Any available'}\n\nClient Notes:\n${message || 'None'}`,
       });
 
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-        if (onTourScheduled) onTourScheduled();
-      }, 500);
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      if (onTourScheduled) onTourScheduled();
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);

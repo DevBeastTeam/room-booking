@@ -573,21 +573,29 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
                       >
                         Estimate
                       </button>
-                      <a
-                        href="https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/oleapplication.aspx"
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+                            detail: {
+                              item: 'holding_deposit',
+                              unit: u.unit,
+                              amount: 250.00
+                            }
+                          }));
+                        }}
                         style={{
-                          backgroundColor: '#2c3038',
+                          backgroundColor: '#059669',
                           color: '#ffffff',
+                          border: 'none',
                           borderRadius: '4px',
                           padding: '0.4rem 0.6rem',
                           fontSize: '0.75rem',
                           fontWeight: 700,
+                          cursor: 'pointer',
                         }}
                       >
-                        Apply
-                      </a>
+                        Reserve
+                      </button>
                     </div>
                   </div>
                 ))}

@@ -14,7 +14,8 @@ import {
   HelpCircle,
   Home,
   Sparkles,
-  Compass
+  Compass,
+  CreditCard
 } from 'lucide-react';
 
 const FacebookIcon = ({ size = 16 }) => (
@@ -322,6 +323,34 @@ export default function Header({
                   <LayoutDashboard size={14} />
                   <span>Resident Dashboard (Demo)</span>
                 </a>
+                <button
+                  onClick={() => {
+                    setIsLoginOpen(false);
+                    window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+                      detail: { item: 'holding_deposit', amount: 250.00 }
+                    }));
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 1rem',
+                    fontSize: '0.825rem',
+                    color: '#059669',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#ecfdf5'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <CreditCard size={14} />
+                  <span>Pay Deposit / Rent (Paddle)</span>
+                </button>
                 <a
                   href="/admin"
                   onClick={(e) => {

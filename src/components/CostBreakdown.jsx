@@ -369,15 +369,21 @@ export default function CostBreakdown({
         >
           Email My Costs
         </button>
-        <a
-          href="https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/oleapplication.aspx"
-          target="_blank"
-          rel="noreferrer"
+        <button
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+              detail: {
+                item: 'holding_deposit',
+                amount: 250.00,
+                unit: selectedUnit?.unit || '',
+              }
+            }));
+          }}
           className="btn-primary"
-          style={{ flex: '1 1 200px', padding: '1rem', fontSize: '0.9rem' }}
+          style={{ flex: '1 1 200px', padding: '1rem', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
         >
-          Apply Now
-        </a>
+          <span>Reserve Unit & Pay Deposit ($250)</span>
+        </button>
       </div>
     </div>
   );

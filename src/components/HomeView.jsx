@@ -88,7 +88,7 @@ export default function HomeView({
     if (!formData.firstName || !formData.email) return;
 
     try {
-      await fetch('/api/contact.php', {
+      await fetch('/backend/api/contact.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && cp -r backend dist/ && mkdir -p dist/api && cp -r backend/api/* dist/api/",
+    "migrate": "php backend/migrations/migrate.php",
     "lint": "oxlint",
     "preview": "astro preview"
   },
