@@ -260,19 +260,19 @@ export default function PhotoGallery({ onOpenTourModal }) {
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
-      {/* Intro Description matching exact screenshot copy */}
+      {/* Intro Description */}
       <div
         style={{
-          color: '#334155',
+          color: '#b5a999',
           fontSize: '0.98rem',
-          lineHeight: 1.65,
+          lineHeight: 1.7,
           textAlign: 'center',
           maxWidth: '960px',
-          margin: '0 auto 2rem',
+          margin: '0 auto 2.5rem',
           padding: '0 1rem',
         }}
       >
-        Browse through our photo gallery to see our gorgeous apartments for rent in Fort Worth, TX. We offer spacious floor plans that come equipped with convenient amenities, so you never have to worry. Living is easy at Monarch Pass. Give our leasing team a call to schedule a tour today!
+        Browse through our curated photo gallery showcasing apartment interiors, chef kitchens, community grounds, and our signature splash park in Fort Worth, TX. Living is refined and effortless at Monarch Pass.
       </div>
 
       {/* Category Pills & Quick Actions */}
@@ -297,29 +297,31 @@ export default function PhotoGallery({ onOpenTourModal }) {
                 setCurrentPage(0);
               }}
               style={{
-                padding: '0.5rem 1.1rem',
+                padding: '0.5rem 1.25rem',
                 borderRadius: '30px',
-                border: isActive ? '1px solid #0f766e' : '1px solid #cbd5e1',
-                backgroundColor: isActive ? '#0f766e' : '#ffffff',
-                color: isActive ? '#ffffff' : '#475569',
-                fontSize: '0.85rem',
+                border: isActive ? '1px solid #c9a96e' : '1px solid rgba(201, 169, 110, 0.25)',
+                backgroundColor: isActive ? 'rgba(201, 169, 110, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                color: isActive ? '#dfc285' : '#8c8273',
+                fontSize: '0.84rem',
                 fontWeight: 600,
+                letterSpacing: '0.04em',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                boxShadow: isActive ? '0 4px 10px rgba(15, 118, 110, 0.2)' : 'none',
+                gap: '0.45rem',
+                boxShadow: isActive ? '0 4px 15px rgba(201, 169, 110, 0.25)' : 'none',
               }}
             >
               <span>{cat}</span>
               <span
                 style={{
-                  fontSize: '0.72rem',
+                  fontSize: '0.7rem',
                   padding: '0.1rem 0.45rem',
                   borderRadius: '12px',
-                  backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                  color: isActive ? '#ffffff' : '#64748b',
+                  backgroundColor: isActive ? 'rgba(201, 169, 110, 0.35)' : 'rgba(255, 255, 255, 0.08)',
+                  color: isActive ? '#ffffff' : '#6b6357',
+                  fontWeight: 700,
                 }}
               >
                 {count}
@@ -344,28 +346,26 @@ export default function PhotoGallery({ onOpenTourModal }) {
             width: '46px',
             height: '46px',
             borderRadius: '50%',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+            backgroundColor: 'rgba(12, 16, 28, 0.92)',
+            border: '1px solid rgba(201, 169, 110, 0.35)',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+            color: '#dfc285',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: '#1e293b',
             transition: 'all 0.2s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#0f766e';
-            e.currentTarget.style.color = '#ffffff';
-            e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+            e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.25)';
+            e.currentTarget.style.borderColor = '#c9a96e';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#ffffff';
-            e.currentTarget.style.color = '#1e293b';
-            e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            e.currentTarget.style.backgroundColor = 'rgba(12, 16, 28, 0.92)';
+            e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.35)';
           }}
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={22} />
         </button>
 
         {/* Right Arrow Button */}
@@ -381,28 +381,26 @@ export default function PhotoGallery({ onOpenTourModal }) {
             width: '46px',
             height: '46px',
             borderRadius: '50%',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+            backgroundColor: 'rgba(12, 16, 28, 0.92)',
+            border: '1px solid rgba(201, 169, 110, 0.35)',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+            color: '#dfc285',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: '#1e293b',
             transition: 'all 0.2s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#0f766e';
-            e.currentTarget.style.color = '#ffffff';
-            e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+            e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.25)';
+            e.currentTarget.style.borderColor = '#c9a96e';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#ffffff';
-            e.currentTarget.style.color = '#1e293b';
-            e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+            e.currentTarget.style.backgroundColor = 'rgba(12, 16, 28, 0.92)';
+            e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.35)';
           }}
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={22} />
         </button>
 
         {/* 2 Rows x 4 Columns Photo Grid */}

@@ -78,53 +78,57 @@ export default function ScheduleTourModal({
     try {
       // Send to MySQL backend API
       try {
-        await fetch('/backend/api/schedule.php', {
+        await fetch('/backend/api/tour.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-            email: email.trim(),
-            phone: phone.trim(),
-            date: tourDate,
-            time: tourTime,
-            tourType: tourType,
-            bedroom: bedrooms || 'Any',
-            unit: selectedUnit || '',
-            notes: `Move-in: ${moveDate || 'Flexible'} | Notes: ${message || 'None'}`
-          })
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            phone,
+            tour_date: tourDate,
+            tour_time: tourTime,
+            move_date: moveDate,
+            bedrooms,
+            unit_number: selectedUnit,
+            notes: message,
+          }),
         });
-      } catch (apiErr) {
-        console.warn('Backend API schedule sync note:', apiErr);
+      } catch (err) {
+        console.warn('Backend tour API offline or unreachable, proceeding with local fallback', err);
       }
 
+      // Persist in local storage via siteDataService
       addSupportInquiry({
-        name: `${firstName.trim()} ${lastName.trim()}`,
-        email: email.trim(),
-        phone: phone.trim(),
-        topic: 'Tour Request',
-        subject: `Tour Request: ${tourDate} at ${tourTime} (${bedrooms || 'Any Bedrooms'})`,
-        message: `Scheduled Tour:\n- Date: ${tourDate}\n- Time: ${tourTime}\n- Move-In Date: ${moveDate || 'Flexible'}\n- Bedrooms Preferred: ${bedrooms || 'Not specified'}\n- Unit Preferred: ${selectedUnit || 'Any available'}\n\nClient Notes:\n${message || 'None'}`,
+        name: `${firstName} ${lastName}`,
+        email,
+        phone,
+        topic: 'Tour Scheduling',
+        message: `Guided Tour on ${tourDate} at ${tourTime}. Unit/Floorplan: ${bedrooms || 'Any'} ${selectedUnit ? `(Unit #${selectedUnit})` : ''}. Move-in: ${moveDate || 'N/A'}. Message: ${message}`,
+        status: 'Unread',
       });
 
-      setIsSubmitting(false);
       setIsSubmitted(true);
-      if (onTourScheduled) onTourScheduled();
+      if (onTourScheduled) {
+        onTourScheduled({
+          name: `${firstName} ${lastName}`,
+          email,
+          phone,
+          tourDate,
+          tourTime,
+          bedrooms,
+          selectedUnit,
+        });
+      }
     } catch (err) {
-      console.error(err);
+      setErrorMessage('Unable to process your reservation at this moment. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      setErrorMessage('Failed to schedule tour. Please try again.');
     }
   };
 
   const handleResetAndClose = () => {
     setIsSubmitted(false);
-    setFirstName('');
-    setLastName('');
-    setEmail('');
-    setPhone('');
-    setMoveDate('');
-    setMessage('');
     setErrorMessage('');
     onClose();
   };
@@ -135,8 +139,8 @@ export default function ScheduleTourModal({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(23, 49, 43, 0.85)',
-        backdropFilter: 'blur(5px)',
+        backgroundColor: 'rgba(5, 7, 14, 0.85)',
+        backdropFilter: 'blur(8px)',
         zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
@@ -150,20 +154,22 @@ export default function ScheduleTourModal({
         className="animate-slide-down"
         style={{
           width: '100%',
-          maxWidth: '520px',
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
+          maxWidth: '540px',
+          backgroundColor: '#0c101c',
+          border: '1px solid rgba(201, 169, 110, 0.35)',
+          borderRadius: '16px',
           overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
           position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Teal Header Banner ── */}
+        {/* ── Luxury Header Banner ── */}
         <div
           style={{
-            backgroundColor: '#68c7b7',
-            padding: '1.5rem 1.5rem 1.25rem',
+            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
+            borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
+            padding: '1.75rem 1.75rem 1.25rem',
             textAlign: 'center',
             position: 'relative',
           }}
@@ -177,117 +183,105 @@ export default function ScheduleTourModal({
               position: 'absolute',
               top: '16px',
               right: '16px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: '#ffffff',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
+              color: '#c9a96e',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '4px',
+              padding: '6px',
               borderRadius: '50%',
-              transition: 'opacity 0.2s',
+              transition: 'all 0.2s',
             }}
           >
-            <X size={24} strokeWidth={2.5} />
+            <X size={18} strokeWidth={2.5} />
           </button>
 
-          {/* White Circular Logo Badge */}
+          {/* Gold Monogram Crest */}
           <div
             style={{
-              width: '64px',
-              height: '64px',
+              width: '54px',
+              height: '54px',
               borderRadius: '50%',
-              backgroundColor: '#ffffff',
+              background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 50%, #9e7a3d 100%)',
               margin: '0 auto 0.75rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              padding: '8px',
+              boxShadow: '0 4px 15px rgba(201, 169, 110, 0.35)',
+              color: '#08090f',
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              fontSize: '1.8rem',
+              fontWeight: 700,
             }}
           >
-            <img
-              src="https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_325,h_60/s3/2/58193/pn_monarchpass_logo_pms%20web.png"
-              alt="Monarch Pass"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain',
-              }}
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.parentNode.innerHTML = '<span style="font-size: 0.65rem; font-weight: 900; color: #0f766e; text-align: center; line-height: 1;">MONARCH<br/>PASS</span>';
-              }}
-            />
+            M
           </div>
 
+          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#c9a96e', fontWeight: 700 }}>
+            {siteSettings?.siteName || 'Monarch Pass Residences'}
+          </span>
           <h2
             style={{
-              color: '#ffffff',
-              fontSize: '1.3rem',
+              color: '#f8fafc',
+              fontSize: '1.45rem',
               fontWeight: 600,
-              margin: 0,
-              letterSpacing: '0.01em',
+              margin: '0.25rem 0 0',
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
             }}
           >
-            Schedule with Monarch Pass
+            Schedule a Private Viewing
           </h2>
         </div>
 
         {/* ── Modal Body Content ── */}
-        <div style={{ padding: '1.5rem 1.75rem 2rem' }}>
+        <div style={{ padding: '1.75rem 2rem 2.25rem' }}>
           {isSubmitted ? (
             <div style={{ textAlign: 'center', padding: '1.5rem 0.5rem' }}>
               <CheckCircle2
                 size={56}
-                style={{ color: '#0f766e', margin: '0 auto 1rem', display: 'block' }}
+                style={{ color: '#dfc285', margin: '0 auto 1rem', display: 'block' }}
               />
-              <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>
-                Tour Successfully Booked!
+              <h3 style={{ fontSize: '1.6rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+                Private Tour Confirmed
               </h3>
-              <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                Thank you, <strong>{firstName}</strong>! Your guided tour is confirmed for:
+              <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                Thank you, <strong>{firstName}</strong>! Your VIP private viewing has been scheduled for:
               </p>
 
               <div
                 style={{
-                  backgroundColor: '#f0fdfa',
-                  border: '1px solid #99f6e4',
-                  borderRadius: '8px',
-                  padding: '1rem',
+                  backgroundColor: 'rgba(16, 20, 34, 0.95)',
+                  border: '1px solid rgba(201, 169, 110, 0.3)',
+                  borderRadius: '12px',
+                  padding: '1.25rem',
                   display: 'inline-block',
                   textAlign: 'left',
                   marginBottom: '1.5rem',
-                  fontSize: '0.9rem',
+                  fontSize: '0.92rem',
+                  color: '#f4efe6',
+                  width: '100%',
                 }}
               >
                 <div>📅 <strong>Date:</strong> {tourDate}</div>
-                <div style={{ marginTop: '0.35rem' }}>⏰ <strong>Time:</strong> {tourTime}</div>
-                {bedrooms && <div style={{ marginTop: '0.35rem' }}>🛏️ <strong>Layout:</strong> {bedrooms}</div>}
-                {selectedUnit && <div style={{ marginTop: '0.35rem' }}>🚪 <strong>Unit:</strong> {selectedUnit}</div>}
+                <div style={{ marginTop: '0.45rem' }}>⏰ <strong>Time:</strong> {tourTime}</div>
+                {bedrooms && <div style={{ marginTop: '0.45rem' }}>🛏️ <strong>Residence:</strong> {bedrooms}</div>}
+                {selectedUnit && <div style={{ marginTop: '0.45rem' }}>🚪 <strong>Unit:</strong> #{selectedUnit}</div>}
               </div>
 
-              <p style={{ color: '#64748b', fontSize: '0.825rem', marginBottom: '1.5rem' }}>
-                Our leasing agent will reach out at <strong>{phone}</strong> or <strong>{email}</strong> if any adjustments are needed.
+              <p style={{ color: '#94a3b8', fontSize: '0.825rem', marginBottom: '1.5rem' }}>
+                Our leasing concierge will reach out to you directly at <strong>{phone}</strong> or <strong>{email}</strong> with directions.
               </p>
 
               <button
                 type="button"
                 onClick={handleResetAndClose}
+                className="btn-gold"
                 style={{
-                  backgroundColor: '#68c7b7',
-                  color: '#ffffff',
-                  fontWeight: 700,
+                  padding: '0.8rem 2.5rem',
                   fontSize: '0.95rem',
-                  padding: '0.75rem 2rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#52b5a5')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#68c7b7')}
               >
                 Done
               </button>
@@ -297,13 +291,13 @@ export default function ScheduleTourModal({
               {errorMessage && (
                 <div
                   style={{
-                    backgroundColor: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    color: '#991b1b',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '6px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#fca5a5',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
                     fontSize: '0.85rem',
-                    marginBottom: '1rem',
+                    marginBottom: '1.25rem',
                   }}
                 >
                   {errorMessage}
@@ -316,14 +310,14 @@ export default function ScheduleTourModal({
                   style={{
                     display: 'block',
                     fontSize: '0.75rem',
-                    fontWeight: 800,
-                    color: '#1e293b',
+                    fontWeight: 700,
+                    color: '#c9a96e',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    marginBottom: '0.45rem',
+                    letterSpacing: '0.08em',
+                    marginBottom: '0.5rem',
                   }}
                 >
-                  CHOOSE AN AVAILABLE TIME TO TOUR
+                  Choose an Available Date & Time
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <input
@@ -333,12 +327,12 @@ export default function ScheduleTourModal({
                     required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       fontSize: '0.92rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      color: '#1e293b',
-                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      borderRadius: '8px',
+                      color: '#f4efe6',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
                       outline: 'none',
                     }}
                   />
@@ -348,19 +342,19 @@ export default function ScheduleTourModal({
                       onChange={(e) => setTourTime(e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '0.65rem 2rem 0.65rem 0.85rem',
+                        padding: '0.75rem 2rem 0.75rem 0.85rem',
                         fontSize: '0.92rem',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        color: '#1e293b',
-                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(201, 169, 110, 0.3)',
+                        borderRadius: '8px',
+                        color: '#f4efe6',
+                        backgroundColor: 'rgba(8, 10, 18, 0.75)',
                         appearance: 'none',
                         outline: 'none',
                         cursor: 'pointer',
                       }}
                     >
                       {TIME_SLOTS.map((t) => (
-                        <option key={t} value={t}>
+                        <option key={t} value={t} style={{ backgroundColor: '#0c101c' }}>
                           {t}
                         </option>
                       ))}
@@ -369,10 +363,10 @@ export default function ScheduleTourModal({
                       size={18}
                       style={{
                         position: 'absolute',
-                        right: '10px',
+                        right: '12px',
                         top: '50%',
                         transform: 'translateY(-50%)',
-                        color: '#64748b',
+                        color: '#c9a96e',
                         pointerEvents: 'none',
                       }}
                     />
@@ -386,14 +380,14 @@ export default function ScheduleTourModal({
                   style={{
                     display: 'block',
                     fontSize: '0.75rem',
-                    fontWeight: 800,
-                    color: '#1e293b',
+                    fontWeight: 700,
+                    color: '#c9a96e',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    marginBottom: '0.45rem',
+                    letterSpacing: '0.08em',
+                    marginBottom: '0.5rem',
                   }}
                 >
-                  YOUR INFO
+                  Your Information
                 </label>
 
                 {/* First name & Last name */}
@@ -406,12 +400,12 @@ export default function ScheduleTourModal({
                     required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       fontSize: '0.92rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      color: '#1e293b',
-                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      borderRadius: '8px',
+                      color: '#f4efe6',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
                       outline: 'none',
                     }}
                   />
@@ -423,12 +417,12 @@ export default function ScheduleTourModal({
                     required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       fontSize: '0.92rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      color: '#1e293b',
-                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      borderRadius: '8px',
+                      color: '#f4efe6',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
                       outline: 'none',
                     }}
                   />
@@ -438,18 +432,18 @@ export default function ScheduleTourModal({
                 <div style={{ marginBottom: '0.75rem' }}>
                   <input
                     type="email"
-                    placeholder="Email *"
+                    placeholder="Email address *"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       fontSize: '0.92rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      color: '#1e293b',
-                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      borderRadius: '8px',
+                      color: '#f4efe6',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
                       outline: 'none',
                     }}
                   />
@@ -459,24 +453,24 @@ export default function ScheduleTourModal({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <input
                     type="tel"
-                    placeholder="Phone *"
+                    placeholder="Phone number *"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       fontSize: '0.92rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      color: '#1e293b',
-                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      borderRadius: '8px',
+                      color: '#f4efe6',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
                       outline: 'none',
                     }}
                   />
                   <input
                     type="text"
-                    placeholder="Move Date"
+                    placeholder="Target Move Date"
                     value={moveDate}
                     onFocus={(e) => (e.target.type = 'date')}
                     onBlur={(e) => {
@@ -485,12 +479,12 @@ export default function ScheduleTourModal({
                     onChange={(e) => setMoveDate(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       fontSize: '0.92rem',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      color: '#1e293b',
-                      backgroundColor: '#ffffff',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                      borderRadius: '8px',
+                      color: '#f4efe6',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
                       outline: 'none',
                     }}
                   />
@@ -503,28 +497,28 @@ export default function ScheduleTourModal({
                   style={{
                     display: 'block',
                     fontSize: '0.75rem',
-                    fontWeight: 800,
-                    color: '#1e293b',
+                    fontWeight: 700,
+                    color: '#c9a96e',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    marginBottom: '0.45rem',
+                    letterSpacing: '0.08em',
+                    marginBottom: '0.5rem',
                   }}
                 >
-                  MESSAGE:
+                  Special Requests or Questions
                 </label>
                 <textarea
-                  placeholder="Add your message"
+                  placeholder="Share any preferred layouts, move-in flexibility, or questions..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
                   style={{
                     width: '100%',
-                    padding: '0.65rem 0.85rem',
+                    padding: '0.75rem 0.85rem',
                     fontSize: '0.92rem',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    color: '#1e293b',
-                    backgroundColor: '#ffffff',
+                    border: '1px solid rgba(201, 169, 110, 0.3)',
+                    borderRadius: '8px',
+                    color: '#f4efe6',
+                    backgroundColor: 'rgba(8, 10, 18, 0.75)',
                     outline: 'none',
                     resize: 'vertical',
                     fontFamily: 'inherit',
@@ -541,14 +535,14 @@ export default function ScheduleTourModal({
                       style={{
                         display: 'block',
                         fontSize: '0.75rem',
-                        fontWeight: 800,
-                        color: '#1e293b',
+                        fontWeight: 700,
+                        color: '#c9a96e',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.04em',
-                        marginBottom: '0.45rem',
+                        letterSpacing: '0.08em',
+                        marginBottom: '0.5rem',
                       }}
                     >
-                      BEDROOMS
+                      Bedrooms
                     </label>
                     <div style={{ position: 'relative' }}>
                       <select
@@ -556,31 +550,31 @@ export default function ScheduleTourModal({
                         onChange={(e) => setBedrooms(e.target.value)}
                         style={{
                           width: '100%',
-                          padding: '0.65rem 2rem 0.65rem 0.85rem',
+                          padding: '0.75rem 2rem 0.75rem 0.85rem',
                           fontSize: '0.92rem',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '6px',
-                          color: '#1e293b',
-                          backgroundColor: '#ffffff',
+                          border: '1px solid rgba(201, 169, 110, 0.3)',
+                          borderRadius: '8px',
+                          color: '#f4efe6',
+                          backgroundColor: 'rgba(8, 10, 18, 0.75)',
                           appearance: 'none',
                           outline: 'none',
                           cursor: 'pointer',
                         }}
                       >
-                        <option value="">Select Bedrooms</option>
-                        <option value="1 Bedroom">1 Bedroom</option>
-                        <option value="2 Bedrooms">2 Bedrooms</option>
-                        <option value="3 Bedrooms">3 Bedrooms</option>
-                        <option value="4 Bedrooms">4 Bedrooms</option>
+                        <option value="" style={{ backgroundColor: '#0c101c' }}>Select Bedrooms</option>
+                        <option value="1 Bedroom" style={{ backgroundColor: '#0c101c' }}>1 Bedroom</option>
+                        <option value="2 Bedrooms" style={{ backgroundColor: '#0c101c' }}>2 Bedrooms</option>
+                        <option value="3 Bedrooms" style={{ backgroundColor: '#0c101c' }}>3 Bedrooms</option>
+                        <option value="4 Bedrooms" style={{ backgroundColor: '#0c101c' }}>4 Bedrooms</option>
                       </select>
                       <ChevronDown
                         size={18}
                         style={{
                           position: 'absolute',
-                          right: '10px',
+                          right: '12px',
                           top: '50%',
                           transform: 'translateY(-50%)',
-                          color: '#64748b',
+                          color: '#c9a96e',
                           pointerEvents: 'none',
                         }}
                       />
@@ -593,14 +587,14 @@ export default function ScheduleTourModal({
                       style={{
                         display: 'block',
                         fontSize: '0.75rem',
-                        fontWeight: 800,
-                        color: '#1e293b',
+                        fontWeight: 700,
+                        color: '#c9a96e',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.04em',
-                        marginBottom: '0.45rem',
+                        letterSpacing: '0.08em',
+                        marginBottom: '0.5rem',
                       }}
                     >
-                      UNIT
+                      Unit (Optional)
                     </label>
                     <div style={{ position: 'relative' }}>
                       <select
@@ -608,20 +602,20 @@ export default function ScheduleTourModal({
                         onChange={(e) => setSelectedUnit(e.target.value)}
                         style={{
                           width: '100%',
-                          padding: '0.65rem 2rem 0.65rem 0.85rem',
+                          padding: '0.75rem 2rem 0.75rem 0.85rem',
                           fontSize: '0.92rem',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '6px',
-                          color: '#1e293b',
-                          backgroundColor: '#ffffff',
+                          border: '1px solid rgba(201, 169, 110, 0.3)',
+                          borderRadius: '8px',
+                          color: '#f4efe6',
+                          backgroundColor: 'rgba(8, 10, 18, 0.75)',
                           appearance: 'none',
                           outline: 'none',
                           cursor: 'pointer',
                         }}
                       >
-                        <option value="">Select Unit (optional)</option>
+                        <option value="" style={{ backgroundColor: '#0c101c' }}>Select Unit (optional)</option>
                         {AVAILABLE_UNITS.map((u) => (
-                          <option key={u.unit} value={u.unit}>
+                          <option key={u.unit} value={u.unit} style={{ backgroundColor: '#0c101c' }}>
                             Unit {u.unit} ({u.bed} Bed)
                           </option>
                         ))}
@@ -630,10 +624,10 @@ export default function ScheduleTourModal({
                         size={18}
                         style={{
                           position: 'absolute',
-                          right: '10px',
+                          right: '12px',
                           top: '50%',
                           transform: 'translateY(-50%)',
-                          color: '#64748b',
+                          color: '#c9a96e',
                           pointerEvents: 'none',
                         }}
                       />
@@ -645,40 +639,28 @@ export default function ScheduleTourModal({
               {/* 5. Legal Disclaimer Notice */}
               <p
                 style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.72rem',
                   color: '#64748b',
-                  lineHeight: 1.45,
-                  margin: '1rem 0 1.25rem',
+                  lineHeight: 1.5,
+                  margin: '1rem 0 1.5rem',
                 }}
               >
-                By registering, you agree to <strong>Terms of Use</strong> and <strong>Privacy Policy</strong> and consent to be contacted at this phone number by text message, and/or by autodialer for any purpose, including marketing, by the property and anyone acting on their behalf. Consent not required to purchase or rent. Message frequency will vary. Text STOP to opt-out. Messages and data rates may apply.
+                By reserving a tour, you agree to our Terms and consent to be contacted by our leasing office regarding availability and housing guidelines. Message frequency varies.
               </p>
 
               {/* 6. Book Tour Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
+                className="btn-gold"
                 style={{
                   width: '100%',
-                  padding: '0.9rem',
-                  backgroundColor: '#a3ded5',
-                  color: '#ffffff',
-                  fontSize: '1.05rem',
-                  fontWeight: 700,
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  transition: 'background 0.2s',
-                  boxShadow: '0 2px 8px rgba(104, 199, 183, 0.3)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSubmitting) e.currentTarget.style.backgroundColor = '#68c7b7';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSubmitting) e.currentTarget.style.backgroundColor = '#a3ded5';
+                  padding: '0.95rem',
+                  fontSize: '1rem',
+                  letterSpacing: '0.08em',
                 }}
               >
-                {isSubmitting ? 'Booking tour...' : 'Book tour!'}
+                {isSubmitting ? 'Confirming Tour...' : 'CONFIRM PRIVATE VIEWING'}
               </button>
             </form>
           )}

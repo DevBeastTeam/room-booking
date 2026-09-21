@@ -8,7 +8,8 @@ import {
   Home, 
   DollarSign, 
   Calendar, 
-  Phone 
+  Phone,
+  Sparkles
 } from 'lucide-react';
 
 const FAQ_DATA = [
@@ -22,11 +23,11 @@ const FAQ_DATA = [
       },
       {
         q: 'What are your leasing office hours?',
-        a: 'Our on-site leasing office is open Monday through Friday from 9:00 AM to 6:00 PM, and Saturday from 10:00 AM to 5:00 PM. We are closed on Sunday. You can call our office directly at +1 817-646-5785.',
+        a: 'Our on-site leasing office is open Monday through Friday from 10:00 AM to 6:00 PM, and Saturday from 10:00 AM to 5:00 PM, Sunday from 1:00 PM to 5:00 PM. You can call our office directly at (817) 857-8782.',
       },
       {
         q: 'Who manages Monarch Pass Apartments?',
-        a: 'Monarch Pass is professionally managed by Cushman & Wakefield, one of the nation’s leading property management and commercial real estate firms.',
+        a: 'Monarch Pass is professionally managed by Cushman & Wakefield, one of the nation\'s premier residential and commercial real estate management firms.',
       },
       {
         q: 'Which school district serves this community?',
@@ -40,19 +41,19 @@ const FAQ_DATA = [
     items: [
       {
         q: 'What is the Affordable Housing / AMI program?',
-        a: 'Monarch Pass participates in the Low-Income Housing Tax Credit (LIHTC) program under Section 42 of the Internal Revenue Code. This federal and state (TDHCA) program provides high-quality apartment homes at below-market rental rates to qualifying households whose gross annual income falls at or below 30%, 50%, or 60% of the Area Median Income (AMI) for the Dallas-Fort Worth metro area.',
+        a: 'Monarch Pass participates in established Section 42 Low-Income Housing Tax Credit (LIHTC) programs administered by the Texas Department of Housing and Community Affairs (TDHCA). This program offers high-quality apartment homes at restricted rental rates to households qualifying under 30%, 50%, or 60% Area Median Income (AMI) limits for the Fort Worth metro area.',
       },
       {
         q: 'What are the current maximum income limits?',
-        a: 'Income limits are determined by household size. For example: A 1-person household limit ranges from $22,410 (30% AMI) up to $44,820 (60% AMI); a 4-person household limit ranges from $32,010 up to $64,020. Please refer to our Income Guidelines page for the complete 1–10 person qualification chart.',
+        a: 'Income limits are based on household occupancy. For instance, a 1-person household qualifies up to $43,740 at the 60% AMI tier, while a 4-person household limit extends up to $62,460. Visit our Income Guidelines page for full qualification tables.',
       },
       {
-        q: 'What documents are required to certify income during the application?',
-        a: 'Applicants must supply: (1) Government-issued photo IDs for all adults, (2) Social security cards or birth certificates for all household members, (3) Six consecutive recent paystubs from all current jobs, (4) Most recent W-2s or tax returns, (5) Six months of checking and savings bank statements, and (6) Verification of any child support, SSI/SSDI, pension, or other recurring income.',
+        q: 'What documentation is needed during the application?',
+        a: 'Applicants provide: (1) Government-issued photo IDs for adults, (2) Social security cards or birth certificates for household members, (3) Consecutive recent paystubs from current employers, (4) Recent W-2s or tax filings, (5) Recent bank statements, and (6) Verification of any child support, disability, SSI, or pension income.',
       },
       {
         q: 'Can full-time college students live here?',
-        a: 'Under federal LIHTC regulations, households comprised entirely of full-time students must meet one of several statutory exemptions to qualify (e.g., married filing jointly, receiving TANF, enrolled in a job training program, or single parents with dependent children). Contact our office for details.',
+        a: 'Under federal LIHTC regulations, households comprised entirely of full-time students must qualify under statutory exemptions (e.g., married filing jointly, receiving TANF, single parent with dependent child). Contact our office for personalized evaluation.',
       },
     ],
   },
@@ -62,11 +63,11 @@ const FAQ_DATA = [
     items: [
       {
         q: 'What appliances come standard in each apartment?',
-        a: 'Every apartment features energy-efficient appliances, including a frost-free refrigerator with ice maker, electric range/oven, built-in dishwasher, garbage disposal, electronic digital thermostat, and ceiling fans.',
+        a: 'Every residence features high-efficiency black appliance suites, including a frost-free refrigerator with ice maker, electric range and oven, built-in dishwasher, and garbage disposal.',
       },
       {
         q: 'What is your pet policy?',
-        a: 'Monarch Pass is proudly pet-friendly! We allow up to 2 pets (dogs and cats) per apartment home. There is a one-time non-refundable fee of $350, monthly pet rent of $20 per pet, and a $150 refundable pet deposit. Purebred or mixed breed restrictions apply.',
+        a: 'Monarch Pass welcomes up to 2 pets (cats and dogs) per apartment home. There is a one-time non-refundable fee of $350, monthly pet rent of $20 per pet, and a $150 refundable pet deposit. Breed restrictions apply.',
       },
       {
         q: 'Is parking included with the apartment?',
@@ -74,13 +75,13 @@ const FAQ_DATA = [
       },
       {
         q: 'Are washer and dryer connections available?',
-        a: 'Yes, select units feature full-size washer and dryer hookups. We also offer convenient on-site laundry facilities and appliance rental options.',
+        a: 'Select units feature full-size washer and dryer hookups. We also offer convenient on-site laundry facilities and appliance rental options.',
       },
     ],
   },
   {
     category: 'leasing',
-    categoryLabel: 'Lease & Resident Portal',
+    categoryLabel: 'Lease & Resident Services',
     items: [
       {
         q: 'How do I pay rent each month?',
@@ -88,7 +89,7 @@ const FAQ_DATA = [
       },
       {
         q: 'How do I submit routine or emergency maintenance requests?',
-        a: 'Routine service tickets can be submitted anytime via the Resident Dashboard or Resident Portal with photos and notes. For 24/7 emergency maintenance (such as active leaks or AC issues in summer), our on-call emergency service line is available 24 hours a day.',
+        a: 'Routine service tickets can be submitted anytime via the Resident Dashboard or Resident Portal with photos and notes. For 24/7 emergency maintenance, our on-call emergency service line is available around the clock.',
       },
       {
         q: 'How long are the lease terms offered?',
@@ -126,56 +127,64 @@ export default function FAQView({
   }).filter(Boolean);
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#1e293b' }}>
+    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
       {/* ── 1. HERO BANNER ── */}
       <section
         style={{
           position: 'relative',
-          padding: '4rem 1rem',
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg')`,
+          padding: '5rem 1rem',
+          backgroundImage: `linear-gradient(rgba(8, 9, 15, 0.8), rgba(8, 9, 15, 0.9)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           textAlign: 'center',
-          color: '#ffffff',
+          color: '#f4efe6',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
         }}
       >
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <span
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div
             style={{
-              backgroundColor: 'rgba(15, 118, 110, 0.9)',
-              color: '#ffffff',
-              padding: '0.35rem 1.25rem',
-              borderRadius: '9999px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(201, 169, 110, 0.15)',
+              border: '1px solid rgba(201, 169, 110, 0.35)',
+              color: '#dfc285',
+              padding: '0.4rem 1.25rem',
+              borderRadius: '50px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              display: 'inline-block',
-              marginBottom: '1rem',
+              marginBottom: '1.25rem',
             }}
           >
-            Help & Information Center
-          </span>
+            <Sparkles size={14} style={{ color: '#c9a96e' }} />
+            <span>Resident Knowledge Base</span>
+          </div>
+
           <h1
             style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
-              fontFamily: 'serif',
-              fontWeight: 700,
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(2.3rem, 4.5vw, 3.4rem)',
+              fontWeight: 500,
               marginBottom: '1rem',
-              lineHeight: 1.2,
+              lineHeight: 1.15,
+              color: '#f4efe6',
             }}
           >
             Frequently Asked Questions
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6, margin: '0 auto 2rem' }}>
-            Find immediate answers regarding apartment availability, affordable housing qualifications, pet guidelines, and resident services.
+
+          <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 2.25rem', maxWidth: '680px' }}>
+            Find immediate answers regarding apartment availability, affordable housing qualifications, pet guidelines, and resident portal services.
           </p>
 
           {/* Search Bar */}
           <div
             style={{
               position: 'relative',
-              maxWidth: '560px',
+              maxWidth: '580px',
               margin: '0 auto',
             }}
           >
@@ -183,24 +192,26 @@ export default function FAQView({
               size={18}
               style={{
                 position: 'absolute',
-                left: '16px',
+                left: '18px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: '#64748b',
+                color: '#c9a96e',
               }}
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search questions by keyword (e.g. income, pets, parking)..."
+              placeholder="Search questions (e.g. income, pets, deposit, parking)..."
               style={{
                 width: '100%',
-                padding: '0.85rem 1rem 0.85rem 2.85rem',
+                padding: '0.9rem 1.2rem 0.9rem 3.2rem',
                 borderRadius: '8px',
-                border: 'none',
-                fontSize: '0.95rem',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.25)',
+                border: '1px solid rgba(201, 169, 110, 0.3)',
+                backgroundColor: 'rgba(12, 16, 28, 0.9)',
+                color: '#f4efe6',
+                fontSize: '0.92rem',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
                 outline: 'none',
               }}
             />
@@ -209,53 +220,60 @@ export default function FAQView({
       </section>
 
       {/* ── 2. CATEGORY PILLS ── */}
-      <section style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '1rem 0' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <section style={{ backgroundColor: '#0c101c', borderBottom: '1px solid rgba(201, 169, 110, 0.15)', padding: '1rem 0' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
           {[
             { id: 'all', label: 'All Questions' },
             { id: 'general', label: 'General Info' },
             { id: 'income', label: 'Income Guidelines' },
             { id: 'apartment', label: 'Apartments & Pets' },
             { id: 'leasing', label: 'Lease & Portal' },
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              style={{
-                padding: '0.55rem 1.25rem',
-                borderRadius: '6px',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border: activeCategory === cat.id ? '1px solid #0f766e' : '1px solid #cbd5e1',
-                backgroundColor: activeCategory === cat.id ? '#0f766e' : '#ffffff',
-                color: activeCategory === cat.id ? '#ffffff' : '#475569',
-                transition: 'all 0.2s',
-              }}
-            >
-              {cat.label}
-            </button>
-          ))}
+          ].map((cat) => {
+            const isActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                style={{
+                  padding: '0.55rem 1.3rem',
+                  borderRadius: '4px',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  border: isActive ? '1px solid #c9a96e' : '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: isActive ? 'rgba(201, 169, 110, 0.18)' : 'transparent',
+                  color: isActive ? '#dfc285' : '#8c8273',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
       </section>
 
       {/* ── 3. FAQ ACCORDION LIST ── */}
-      <section style={{ padding: '3.5rem 0' }}>
-        <div className="container" style={{ maxWidth: '860px' }}>
+      <section style={{ padding: '4rem 0' }}>
+        <div className="container" style={{ maxWidth: '880px' }}>
           {filteredCategories.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem 0', color: '#64748b' }}>
-              <HelpCircle size={44} style={{ margin: '0 auto 1rem', color: '#cbd5e1' }} />
-              <h3 style={{ fontSize: '1.25rem', color: '#0f172a' }}>No matching questions found</h3>
-              <p>Try searching for a different keyword or view all questions.</p>
+            <div style={{ textAlign: 'center', padding: '4rem 0', color: '#8c8273' }}>
+              <HelpCircle size={48} style={{ margin: '0 auto 1rem', color: '#c9a96e', opacity: 0.5 }} />
+              <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.6rem', color: '#f4efe6', marginBottom: '0.5rem' }}>No matching questions found</h3>
+              <p style={{ fontSize: '0.92rem' }}>Try searching for a different keyword or reset category filter.</p>
             </div>
           ) : (
             filteredCategories.map((group, gIdx) => (
-              <div key={gIdx} style={{ marginBottom: '2.5rem' }}>
-                <h2 style={{ fontSize: '1.35rem', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', marginBottom: '1rem' }}>
-                  {group.categoryLabel}
-                </h2>
+              <div key={gIdx} style={{ marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <span style={{ width: '4px', height: '20px', backgroundColor: '#c9a96e', borderRadius: '2px' }} />
+                  <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.55rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
+                    {group.categoryLabel}
+                  </h2>
+                </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   {group.items.map((item, iIdx) => {
                     const itemKey = `${group.category}-${iIdx}`;
                     const isOpen = Boolean(openItems[itemKey]);
@@ -264,46 +282,45 @@ export default function FAQView({
                       <div
                         key={iIdx}
                         style={{
-                          border: '1px solid #e2e8f0',
+                          border: isOpen ? '1px solid rgba(201, 169, 110, 0.35)' : '1px solid rgba(255, 255, 255, 0.08)',
                           borderRadius: '8px',
                           overflow: 'hidden',
-                          backgroundColor: '#ffffff',
+                          backgroundColor: isOpen ? 'rgba(16, 20, 34, 0.95)' : 'rgba(14, 18, 30, 0.75)',
+                          transition: 'all 0.25s',
                         }}
                       >
                         <button
                           onClick={() => toggleItem(itemKey)}
                           style={{
                             width: '100%',
-                            padding: '1.1rem 1.25rem',
+                            padding: '1.15rem 1.4rem',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             textAlign: 'left',
-                            backgroundColor: isOpen ? '#f8fafc' : '#ffffff',
+                            backgroundColor: 'transparent',
                             border: 'none',
                             cursor: 'pointer',
-                            transition: 'background 0.2s',
                           }}
                         >
-                          <span style={{ fontSize: '0.98rem', fontWeight: 600, color: '#0f172a', paddingRight: '1rem' }}>
+                          <span style={{ fontSize: '0.96rem', fontWeight: 600, color: isOpen ? '#dfc285' : '#f4efe6', paddingRight: '1rem', lineHeight: 1.4 }}>
                             {item.q}
                           </span>
                           {isOpen ? (
-                            <ChevronUp size={20} style={{ color: '#0f766e', flexShrink: 0 }} />
+                            <ChevronUp size={18} style={{ color: '#c9a96e', flexShrink: 0 }} />
                           ) : (
-                            <ChevronDown size={20} style={{ color: '#64748b', flexShrink: 0 }} />
+                            <ChevronDown size={18} style={{ color: '#7a7063', flexShrink: 0 }} />
                           )}
                         </button>
 
                         {isOpen && (
                           <div
                             style={{
-                              padding: '1rem 1.25rem 1.25rem',
-                              borderTop: '1px solid #f1f5f9',
-                              backgroundColor: '#ffffff',
+                              padding: '1rem 1.4rem 1.35rem',
+                              borderTop: '1px solid rgba(201, 169, 110, 0.12)',
                               fontSize: '0.92rem',
-                              color: '#475569',
-                              lineHeight: 1.65,
+                              color: '#b5a999',
+                              lineHeight: 1.7,
                             }}
                           >
                             {item.a}
@@ -320,59 +337,64 @@ export default function FAQView({
           {/* Still Have Questions Box */}
           <div
             style={{
-              backgroundColor: '#f0fdfa',
-              border: '1px solid #ccfbf1',
+              backgroundColor: 'rgba(14, 18, 30, 0.85)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
               borderRadius: '12px',
-              padding: '2rem',
+              padding: '2.5rem',
               textAlign: 'center',
-              marginTop: '3rem',
+              marginTop: '3.5rem',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
             }}
           >
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.85rem', fontWeight: 500, color: '#f4efe6', margin: '0 0 0.5rem' }}>
               Still have questions about Monarch Pass?
             </h3>
-            <p style={{ color: '#475569', fontSize: '0.92rem', maxWidth: '520px', margin: '0 auto 1.5rem', lineHeight: 1.5 }}>
-              Our friendly on-site leasing office is here to help with personal tours, income qualifications, and unit availability.
+            <p style={{ color: '#a89d8e', fontSize: '0.94rem', maxWidth: '520px', margin: '0 auto 1.75rem', lineHeight: 1.6 }}>
+              Our dedicated on-site leasing office is here to help with personalized tours, income certification, and residence availability.
             </p>
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <a
                 href="tel:+18178578782"
                 style={{
-                  backgroundColor: '#0f766e',
-                  color: '#ffffff',
-                  padding: '0.7rem 1.5rem',
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
+                  background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                  color: '#08090f',
+                  padding: '0.75rem 1.65rem',
+                  borderRadius: '4px',
+                  fontWeight: 700,
+                  fontSize: '0.84rem',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.4rem',
+                  gap: '0.45rem',
                   textDecoration: 'none',
                 }}
               >
-                <Phone size={16} />
+                <Phone size={15} />
                 <span>Call (817) 857-8782</span>
               </a>
 
               <button
                 onClick={() => handleSchedule()}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#0f766e',
-                  border: '1px solid #0f766e',
-                  padding: '0.7rem 1.5rem',
-                  borderRadius: '6px',
+                  backgroundColor: 'transparent',
+                  color: '#dfc285',
+                  padding: '0.75rem 1.65rem',
+                  borderRadius: '4px',
                   fontWeight: 600,
-                  fontSize: '0.9rem',
+                  fontSize: '0.84rem',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  border: '1px solid rgba(201, 169, 110, 0.4)',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.4rem',
+                  gap: '0.45rem',
                 }}
               >
-                <Calendar size={16} />
-                <span>Schedule a Tour</span>
+                <Calendar size={15} />
+                <span>Schedule a Private Tour</span>
               </button>
             </div>
           </div>

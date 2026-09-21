@@ -147,18 +147,18 @@ export default function Widgets({ onOpenScheduleTour }) {
             position: 'fixed',
             bottom: '85px',
             left: '24px',
-            backgroundColor: '#ffffff',
-            borderRadius: '10px',
+            backgroundColor: '#0c101c',
+            borderRadius: '12px',
             padding: '1.25rem',
             width: '280px',
-            boxShadow: '0 15px 30px rgba(0,0,0,0.2)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
             zIndex: 1000,
-            border: '1px solid #e2e8f0',
+            border: '1px solid rgba(201, 169, 110, 0.35)',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>Accessibility</h4>
-            <button onClick={() => setActiveModal(null)} style={{ color: '#64748b' }}>
+            <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f8fafc', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>Accessibility</h4>
+            <button onClick={() => setActiveModal(null)} style={{ color: '#c9a96e', background: 'none', border: 'none', cursor: 'pointer' }}>
               <X size={18} />
             </button>
           </div>
@@ -171,17 +171,18 @@ export default function Widgets({ onOpenScheduleTour }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.6rem',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                padding: '0.6rem 0.85rem',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
                 fontSize: '0.85rem',
                 fontWeight: 600,
-                color: '#334155',
+                color: '#f4efe6',
                 width: '100%',
+                cursor: 'pointer',
               }}
             >
-              <ZoomIn size={16} />
+              <ZoomIn size={16} style={{ color: '#dfc285' }} />
               <span>Toggle Larger Text</span>
             </button>
             <button
@@ -192,18 +193,19 @@ export default function Widgets({ onOpenScheduleTour }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.6rem',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                padding: '0.6rem 0.85rem',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
                 fontSize: '0.85rem',
                 fontWeight: 600,
-                color: '#334155',
+                color: '#f4efe6',
                 width: '100%',
+                cursor: 'pointer',
               }}
             >
-              <Contrast size={16} />
-              <span>High Contrast</span>
+              <Contrast size={16} style={{ color: '#dfc285' }} />
+              <span>High Contrast Mode</span>
             </button>
           </div>
         </div>
@@ -230,17 +232,19 @@ export default function Widgets({ onOpenScheduleTour }) {
             onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
             aria-label="Toggle widget menu"
             style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '4px 4px 0 0',
-              padding: '0.2rem 0.6rem',
-              color: '#64748b',
-              boxShadow: '0 -2px 6px rgba(0,0,0,0.05)',
+              backgroundColor: 'rgba(12, 16, 28, 0.95)',
+              border: '1px solid rgba(201, 169, 110, 0.3)',
+              borderBottom: 'none',
+              borderRadius: '6px 6px 0 0',
+              padding: '0.25rem 0.75rem',
+              color: '#c9a96e',
+              boxShadow: '0 -4px 12px rgba(0,0,0,0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: '-1px',
               zIndex: 2,
+              cursor: 'pointer',
             }}
           >
             <ChevronDown
@@ -256,40 +260,42 @@ export default function Widgets({ onOpenScheduleTour }) {
             <div
               className="animate-slide-down"
               style={{
-                width: '215px',
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.16)',
+                width: '225px',
+                backgroundColor: 'rgba(12, 16, 28, 0.95)',
+                borderRadius: '12px',
+                boxShadow: '0 15px 40px rgba(0,0,0,0.6)',
                 overflow: 'hidden',
-                border: '1px solid #e2e8f0',
+                border: '1px solid rgba(201, 169, 110, 0.35)',
+                backdropFilter: 'blur(16px)',
                 display: 'flex',
                 flexDirection: 'column',
               }}
             >
-              {/* 1. Chat with us (Active Highlighted Teal Item) */}
+              {/* 1. Chat with us (Gold Highlight Item) */}
               <button
                 onClick={() => setActiveModal('chat')}
                 style={{
-                  backgroundColor: '#5ec4b6',
-                  color: '#1e293b',
-                  padding: '0.85rem 1rem',
+                  background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                  color: '#08090f',
+                  padding: '0.9rem 1.1rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderBottom: '1px solid rgba(0,0,0,0.06)',
+                  border: 'none',
+                  borderBottom: '1px solid rgba(0,0,0,0.15)',
                   textAlign: 'left',
-                  transition: 'background-color 0.15s',
+                  cursor: 'pointer',
+                  fontWeight: 800,
+                  boxShadow: '0 2px 10px rgba(201, 169, 110, 0.3)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4eb5a7')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#5ec4b6')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <MessageSquare size={18} style={{ color: '#1e293b' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>
-                    <strong>Chat</strong> with us
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <MessageSquare size={18} style={{ color: '#08090f' }} />
+                  <span style={{ fontSize: '0.9rem', color: '#08090f', letterSpacing: '0.02em' }}>
+                    <strong>Chat</strong> Concierge
                   </span>
                 </div>
-                <ChevronRight size={16} style={{ color: '#1e293b' }} />
+                <ChevronRight size={16} style={{ color: '#08090f' }} />
               </button>
 
               {/* 2. Book a tour */}
@@ -303,23 +309,25 @@ export default function Widgets({ onOpenScheduleTour }) {
                   }
                 }}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#1e293b',
-                  padding: '0.85rem 1rem',
+                  backgroundColor: 'rgba(16, 20, 34, 0.95)',
+                  color: '#f4efe6',
+                  padding: '0.85rem 1.1rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderBottom: '1px solid #f1f5f9',
+                  border: 'none',
+                  borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
                   textAlign: 'left',
-                  transition: 'background-color 0.15s',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.12)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(16, 20, 34, 0.95)')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <Calendar size={18} style={{ color: '#475569' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>
-                    <strong>Book</strong> a tour
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <Calendar size={18} style={{ color: '#dfc285' }} />
+                  <span style={{ fontSize: '0.9rem', color: '#f4efe6' }}>
+                    <strong style={{ color: '#dfc285' }}>Book</strong> a Tour
                   </span>
                 </div>
                 <ChevronRight size={16} style={{ color: '#94a3b8' }} />
@@ -329,23 +337,25 @@ export default function Widgets({ onOpenScheduleTour }) {
               <button
                 onClick={() => setActiveModal('email')}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#1e293b',
-                  padding: '0.85rem 1rem',
+                  backgroundColor: 'rgba(16, 20, 34, 0.95)',
+                  color: '#f4efe6',
+                  padding: '0.85rem 1.1rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderBottom: '1px solid #f1f5f9',
+                  border: 'none',
+                  borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
                   textAlign: 'left',
-                  transition: 'background-color 0.15s',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.12)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(16, 20, 34, 0.95)')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <Mail size={18} style={{ color: '#475569' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>
-                    <strong>Email</strong> an agent
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <Mail size={18} style={{ color: '#dfc285' }} />
+                  <span style={{ fontSize: '0.9rem', color: '#f4efe6' }}>
+                    <strong style={{ color: '#dfc285' }}>Email</strong> an Agent
                   </span>
                 </div>
                 <ChevronRight size={16} style={{ color: '#94a3b8' }} />
@@ -355,22 +365,24 @@ export default function Widgets({ onOpenScheduleTour }) {
               <button
                 onClick={() => setActiveModal('call')}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#1e293b',
-                  padding: '0.85rem 1rem',
+                  backgroundColor: 'rgba(16, 20, 34, 0.95)',
+                  color: '#f4efe6',
+                  padding: '0.85rem 1.1rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  border: 'none',
                   textAlign: 'left',
-                  transition: 'background-color 0.15s',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.12)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(16, 20, 34, 0.95)')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                  <Smartphone size={18} style={{ color: '#475569' }} />
-                  <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>
-                    <strong>Call</strong> or <strong>text</strong> us
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <Smartphone size={18} style={{ color: '#dfc285' }} />
+                  <span style={{ fontSize: '0.9rem', color: '#f4efe6' }}>
+                    <strong style={{ color: '#dfc285' }}>Call</strong> or Text
                   </span>
                 </div>
                 <ChevronRight size={16} style={{ color: '#94a3b8' }} />
@@ -380,15 +392,17 @@ export default function Widgets({ onOpenScheduleTour }) {
             <button
               onClick={() => setIsMenuCollapsed(false)}
               style={{
-                width: '52px',
-                height: '52px',
+                width: '54px',
+                height: '54px',
                 borderRadius: '50%',
-                backgroundColor: '#5ec4b6',
-                color: '#1e293b',
+                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                color: '#08090f',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+                boxShadow: '0 8px 25px rgba(201, 169, 110, 0.45)',
+                border: 'none',
+                cursor: 'pointer',
               }}
             >
               <MessageSquare size={24} />
@@ -409,31 +423,49 @@ export default function Widgets({ onOpenScheduleTour }) {
             right: '24px',
             width: '360px',
             height: '520px',
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            boxShadow: '0 20px 45px rgba(0,0,0,0.25)',
+            backgroundColor: '#0c101c',
+            borderRadius: '16px',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.7)',
             zIndex: 1000,
             overflow: 'hidden',
-            border: '1px solid #cbd5e1',
+            border: '1px solid rgba(201, 169, 110, 0.35)',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          {/* Light Mint Top Header */}
+          {/* Luxury Top Header */}
           <div
             style={{
-              backgroundColor: '#a4d8d1',
-              padding: '0.9rem 1.25rem',
+              background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
+              padding: '1rem 1.25rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
+              borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
             }}
           >
-            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#1e293b' }}>
-              Monarch Pass
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #dfc285, #c9a96e)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#08090f',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                }}
+              >
+                M
+              </div>
+              <div style={{ fontWeight: 600, fontSize: '1.15rem', color: '#f8fafc', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+                Monarch Pass Concierge
+              </div>
             </div>
-            <button onClick={() => setActiveModal(null)} style={{ color: '#1e293b' }}>
+            <button onClick={() => setActiveModal(null)} style={{ color: '#c9a96e', background: 'none', border: 'none', cursor: 'pointer' }}>
               <X size={20} />
             </button>
           </div>
@@ -442,14 +474,14 @@ export default function Widgets({ onOpenScheduleTour }) {
           <div
             style={{
               padding: '0.6rem 1rem',
-              backgroundColor: '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
+              backgroundColor: 'rgba(8, 10, 18, 0.85)',
+              borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
               fontSize: '0.725rem',
-              color: '#64748b',
-              lineHeight: 1.35,
+              color: '#94a3b8',
+              lineHeight: 1.4,
             }}
           >
-            By interacting with this system, you consent to this privacy policy, including being contacted by AI or a human & having your conversation recorded and used by a third party.
+            Connected to 24/7 Leasing Concierge. Ask about floor plan pricing, deposit policies, and virtual tour options.
           </div>
 
           {/* Messages Area */}
@@ -461,7 +493,7 @@ export default function Widgets({ onOpenScheduleTour }) {
               display: 'flex',
               flexDirection: 'column',
               gap: '0.75rem',
-              backgroundColor: '#f1f5f9',
+              backgroundColor: 'rgba(8, 10, 18, 0.95)',
             }}
           >
             {chatMessages.map((m, idx) => (
@@ -469,14 +501,17 @@ export default function Widgets({ onOpenScheduleTour }) {
                 key={idx}
                 style={{
                   alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                  backgroundColor: m.sender === 'user' ? '#2c3038' : '#ffffff',
-                  color: m.sender === 'user' ? '#ffffff' : '#1e293b',
+                  backgroundColor: m.sender === 'user' ? 'linear-gradient(135deg, #dfc285, #c9a96e)' : 'rgba(16, 20, 34, 0.95)',
+                  background: m.sender === 'user' ? 'linear-gradient(135deg, #dfc285, #c9a96e)' : 'rgba(16, 20, 34, 0.95)',
+                  color: m.sender === 'user' ? '#08090f' : '#f4efe6',
+                  border: m.sender === 'user' ? 'none' : '1px solid rgba(201, 169, 110, 0.25)',
                   padding: '0.75rem 1rem',
                   borderRadius: m.sender === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                   maxWidth: '85%',
                   fontSize: '0.85rem',
-                  lineHeight: 1.45,
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                  lineHeight: 1.5,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                  fontWeight: m.sender === 'user' ? 600 : 400,
                 }}
               >
                 {m.text}
@@ -484,42 +519,45 @@ export default function Widgets({ onOpenScheduleTour }) {
             ))}
           </div>
 
-          {/* Input Footer (Black Box) */}
+          {/* Input Footer */}
           <form
             onSubmit={handleSendMessage}
             style={{
-              backgroundColor: '#1e293b',
-              padding: '0.6rem 0.75rem',
+              backgroundColor: 'rgba(12, 16, 28, 0.98)',
+              borderTop: '1px solid rgba(201, 169, 110, 0.25)',
+              padding: '0.65rem 0.85rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.6rem',
             }}
           >
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask a question..."
+              placeholder="Inquire about pricing, floor plans..."
               style={{
                 flex: 1,
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#ffffff',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
+                borderRadius: '8px',
+                padding: '0.5rem 0.75rem',
+                color: '#f8fafc',
                 fontSize: '0.85rem',
                 outline: 'none',
               }}
             />
             <button
               type="submit"
+              className="btn-gold"
               style={{
-                backgroundColor: '#ffffff',
-                color: '#1e293b',
-                width: '30px',
-                height: '30px',
-                borderRadius: '4px',
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                padding: 0,
               }}
             >
               <Send size={15} />
@@ -529,9 +567,9 @@ export default function Widgets({ onOpenScheduleTour }) {
           {/* Quick Shortcuts Bar */}
           <div
             style={{
-              backgroundColor: '#ffffff',
-              padding: '0.5rem 1rem',
-              borderTop: '1px solid #e2e8f0',
+              backgroundColor: 'rgba(8, 10, 18, 0.95)',
+              padding: '0.55rem 1rem',
+              borderTop: '1px solid rgba(201, 169, 110, 0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -543,35 +581,37 @@ export default function Widgets({ onOpenScheduleTour }) {
                 width: '28px',
                 height: '28px',
                 borderRadius: '50%',
-                backgroundColor: '#5ec4b6',
-                color: '#1e293b',
+                backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                border: '1px solid rgba(201, 169, 110, 0.3)',
+                color: '#dfc285',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                cursor: 'pointer',
               }}
             >
               <X size={15} />
             </button>
 
-            <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
                 onClick={() => setActiveModal('tour')}
                 title="Book a tour"
-                style={{ color: '#64748b', padding: '4px' }}
+                style={{ color: '#dfc285', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
               >
                 <Calendar size={18} />
               </button>
               <button
                 onClick={() => setActiveModal('email')}
                 title="Email an agent"
-                style={{ color: '#64748b', padding: '4px' }}
+                style={{ color: '#dfc285', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
               >
                 <Mail size={18} />
               </button>
               <button
                 onClick={() => setActiveModal('call')}
                 title="Call or text"
-                style={{ color: '#64748b', padding: '4px' }}
+                style={{ color: '#dfc285', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
               >
                 <Smartphone size={18} />
               </button>

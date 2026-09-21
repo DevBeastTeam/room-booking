@@ -48,90 +48,102 @@ export default function VirtualTourView({
   const activeTour = TOURS[activeTourIndex];
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#1e293b' }}>
+    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
       {/* ── 1. HEADER BANNER ── */}
       <section
         style={{
           position: 'relative',
-          padding: '4rem 1rem',
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/7-web-or-mls-unit%201701-005%20virtually%20staged.jpeg')`,
+          padding: '5rem 1rem',
+          backgroundImage: `linear-gradient(rgba(8, 9, 15, 0.8), rgba(8, 9, 15, 0.9)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/7-web-or-mls-unit%201701-005%20virtually%20staged.jpeg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           textAlign: 'center',
-          color: '#ffffff',
+          color: '#f4efe6',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
         }}
       >
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <span
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div
             style={{
-              backgroundColor: 'rgba(15, 118, 110, 0.9)',
-              color: '#ffffff',
-              padding: '0.35rem 1.25rem',
-              borderRadius: '9999px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(201, 169, 110, 0.15)',
+              border: '1px solid rgba(201, 169, 110, 0.35)',
+              color: '#dfc285',
+              padding: '0.4rem 1.25rem',
+              borderRadius: '50px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              display: 'inline-block',
-              marginBottom: '1rem',
+              marginBottom: '1.25rem',
             }}
           >
-            Immersive 3D Experiences
-          </span>
+            <Sparkles size={14} style={{ color: '#c9a96e' }} />
+            <span>Immersive 3D Walkthroughs</span>
+          </div>
+
           <h1
             style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
-              fontFamily: 'serif',
-              fontWeight: 700,
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(2.3rem, 4.5vw, 3.4rem)',
+              fontWeight: 500,
               marginBottom: '1rem',
-              lineHeight: 1.2,
+              lineHeight: 1.15,
+              color: '#f4efe6',
             }}
           >
             Virtual Tours of Monarch Pass
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6, margin: '0 auto 1.75rem' }}>
-            Take an interactive walk inside our community and actual staged apartment layouts anytime, anywhere.
+
+          <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 2.25rem', maxWidth: '680px' }}>
+            Take an interactive walk inside our community grounds and actual staged apartment layouts anytime, from any device.
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={() => handleSchedule()}
               style={{
-                backgroundColor: '#ffffff',
-                color: 'var(--primary-color, #0f766e)',
-                padding: '0.75rem 1.75rem',
-                borderRadius: '6px',
-                fontSize: '0.95rem',
-                fontWeight: 600,
+                padding: '0.85rem 2rem',
+                borderRadius: '4px',
                 border: 'none',
+                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                color: '#08090f',
+                fontSize: '0.84rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                boxShadow: '0 4px 20px rgba(201, 169, 110, 0.35)',
               }}
             >
-              <Calendar size={18} />
+              <Calendar size={16} />
               <span>Schedule In-Person Tour</span>
             </button>
 
             <button
               onClick={handleFloorPlans}
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                color: '#ffffff',
-                padding: '0.75rem 1.75rem',
-                borderRadius: '6px',
-                fontSize: '0.95rem',
+                padding: '0.85rem 1.85rem',
+                borderRadius: '4px',
+                border: '1px solid rgba(201, 169, 110, 0.4)',
+                backgroundColor: 'transparent',
+                color: '#dfc285',
+                fontSize: '0.84rem',
                 fontWeight: 600,
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
               }}
             >
-              <Layers size={18} />
+              <Layers size={16} />
               <span>Floor Plans & Pricing</span>
             </button>
           </div>
@@ -139,7 +151,7 @@ export default function VirtualTourView({
       </section>
 
       {/* ── 2. TOUR SELECTION TABS ── */}
-      <section style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '1rem 0' }}>
+      <section style={{ backgroundColor: '#0c101c', borderBottom: '1px solid rgba(201, 169, 110, 0.15)', padding: '1rem 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           {TOURS.map((tour, idx) => {
             const isActive = idx === activeTourIndex;
@@ -148,22 +160,21 @@ export default function VirtualTourView({
                 key={tour.id}
                 onClick={() => setActiveTourIndex(idx)}
                 style={{
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '8px',
+                  padding: '0.65rem 1.4rem',
+                  borderRadius: '6px',
                   fontWeight: 600,
-                  fontSize: '0.92rem',
+                  fontSize: '0.86rem',
                   cursor: 'pointer',
-                  border: isActive ? '2px solid #0f766e' : '1px solid #cbd5e1',
-                  backgroundColor: isActive ? '#f0fdfa' : '#ffffff',
-                  color: isActive ? '#0f766e' : '#475569',
+                  border: isActive ? '1px solid #c9a96e' : '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: isActive ? 'rgba(201, 169, 110, 0.18)' : 'transparent',
+                  color: isActive ? '#dfc285' : '#8c8273',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  boxShadow: isActive ? '0 4px 12px rgba(15, 118, 110, 0.15)' : 'none',
                   transition: 'all 0.2s',
                 }}
               >
-                {idx === 0 ? <Compass size={18} /> : <Home size={18} />}
+                {idx === 0 ? <Compass size={16} style={{ color: '#c9a96e' }} /> : <Home size={16} style={{ color: '#c9a96e' }} />}
                 <span>{tour.title}</span>
               </button>
             );
@@ -172,7 +183,7 @@ export default function VirtualTourView({
       </section>
 
       {/* ── 3. INTERACTIVE 3D VIEWER CONTAINER ── */}
-      <section style={{ padding: '2.5rem 0' }}>
+      <section style={{ padding: '3.5rem 0' }}>
         <div className="container" style={{ maxWidth: '1100px' }}>
           {/* Active Tour Info Header */}
           <div
@@ -186,23 +197,25 @@ export default function VirtualTourView({
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                 <span
                   style={{
-                    backgroundColor: '#ccfbf1',
-                    color: '#0f766e',
-                    fontSize: '0.75rem',
+                    backgroundColor: 'rgba(201, 169, 110, 0.18)',
+                    color: '#dfc285',
+                    fontSize: '0.72rem',
                     fontWeight: 700,
                     padding: '2px 8px',
                     borderRadius: '4px',
+                    border: '1px solid rgba(201, 169, 110, 0.3)',
                     textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
                   }}
                 >
                   {activeTour.badge}
                 </span>
-                <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Powered by {activeTour.type}</span>
+                <span style={{ fontSize: '0.8rem', color: '#8c8273' }}>Powered by {activeTour.type}</span>
               </div>
-              <h2 style={{ fontSize: '1.45rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.65rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                 {activeTour.title}
               </h2>
             </div>
@@ -213,17 +226,17 @@ export default function VirtualTourView({
                 target="_blank"
                 rel="noreferrer"
                 style={{
-                  backgroundColor: '#f1f5f9',
-                  color: '#334155',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  fontSize: '0.85rem',
+                  backgroundColor: 'rgba(201, 169, 110, 0.1)',
+                  color: '#dfc285',
+                  padding: '0.55rem 1.15rem',
+                  borderRadius: '4px',
+                  fontSize: '0.82rem',
                   fontWeight: 600,
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.4rem',
                   textDecoration: 'none',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid rgba(201, 169, 110, 0.3)',
                 }}
               >
                 <span>Open Fullscreen in New Tab</span>
@@ -232,7 +245,7 @@ export default function VirtualTourView({
             </div>
           </div>
 
-          <p style={{ color: '#475569', fontSize: '0.92rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+          <p style={{ color: '#9e9282', fontSize: '0.94rem', marginBottom: '1.75rem', lineHeight: 1.6 }}>
             {activeTour.description}
           </p>
 
@@ -244,9 +257,9 @@ export default function VirtualTourView({
               height: '620px',
               borderRadius: '12px',
               overflow: 'hidden',
-              boxShadow: '0 20px 40px -15px rgba(0,0,0,0.2)',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#0f172a',
+              boxShadow: '0 25px 50px -10px rgba(0,0,0,0.8)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
+              backgroundColor: '#0a0d16',
             }}
           >
             <iframe
@@ -268,25 +281,25 @@ export default function VirtualTourView({
           <div
             style={{
               marginTop: '1.5rem',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'rgba(12, 16, 28, 0.75)',
+              border: '1px solid rgba(201, 169, 110, 0.15)',
               borderRadius: '8px',
               padding: '1rem 1.25rem',
               display: 'flex',
               alignItems: 'center',
               gap: '1.5rem',
               flexWrap: 'wrap',
-              fontSize: '0.85rem',
-              color: '#64748b',
+              fontSize: '0.84rem',
+              color: '#9e9282',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Sparkles size={16} style={{ color: '#0f766e' }} />
-              <span>Click and drag to rotate your 360-degree field of view</span>
+              <Sparkles size={15} style={{ color: '#c9a96e' }} />
+              <span>Click and drag inside viewer to rotate your 360-degree field of view</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <CheckCircle2 size={16} style={{ color: '#0f766e' }} />
-              <span>Select room hotspots to walk through interconnected rooms</span>
+              <CheckCircle2 size={15} style={{ color: '#c9a96e' }} />
+              <span>Select floor hotspots to walk through interconnected rooms</span>
             </div>
           </div>
         </div>

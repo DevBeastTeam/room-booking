@@ -91,19 +91,19 @@ export default function FloorPlansView() {
         {activeTab === 'gallery' ? (
           <div>
             {/* Introductory Paragraph */}
-            <div style={{ marginBottom: '1.75rem', color: '#334155', fontSize: '0.975rem', lineHeight: 1.6 }}>
-              Check out our 1-, 2-, 3-, and 4-bedroom apartments for rent in Fort Worth, TX and see which of our various layouts fits your lifestyle! We ensure that our stunning homes at Monarch Pass can accommodate your every need. Call today to schedule a tour!
+            <div style={{ marginBottom: '1.75rem', color: '#b5a999', fontSize: '0.975rem', lineHeight: 1.7 }}>
+              Discover our 1, 2, 3, and 4-bedroom luxury residences for rent in Fort Worth, TX. Each layout is designed with open-concept living, wood-style flooring, and high-efficiency features. Explore available units or calculate your exact monthly estimate below.
             </div>
 
-            {/* Lease Cost Calculator Blue Info Box */}
+            {/* Lease Cost Calculator Gold Info Box */}
             <div
               style={{
-                backgroundColor: '#e0f7fa',
-                border: '1px solid #b2ebf2',
-                borderRadius: '6px',
+                backgroundColor: 'rgba(201, 169, 110, 0.08)',
+                border: '1px solid rgba(201, 169, 110, 0.3)',
+                borderRadius: '8px',
                 padding: '1.25rem 1.5rem',
                 marginBottom: '2rem',
-                color: '#006064',
+                color: '#dfc285',
                 fontSize: '0.9rem',
                 lineHeight: 1.6,
                 display: 'flex',
@@ -111,9 +111,9 @@ export default function FloorPlansView() {
                 gap: '0.75rem',
               }}
             >
-              <Calculator size={22} style={{ color: '#00838f', flexShrink: 0, marginTop: '2px' }} />
+              <Calculator size={22} style={{ color: '#c9a96e', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong>Lease Cost Calculator:</strong> This calculator is designed to help estimate the Move-In Cost (including General and Special Fees) and the ongoing Monthly Cost of a lease. Please remember that the Move-In Cost and Monthly Cost will vary depending on the qualifications of the applicant, the price and amenities of the unit being rented, and the cost of any Special Fees that may apply to a specific unit.
+                <strong style={{ color: '#f4efe6' }}>Lease Cost Calculator:</strong> This calculator estimates Move-In Costs and ongoing Monthly Costs for any floor plan and lease term. Move-In Costs may vary based on applicant qualification, unit selection, and any optional add-ons (parking, washer/dryer, storage).
               </div>
             </div>
 

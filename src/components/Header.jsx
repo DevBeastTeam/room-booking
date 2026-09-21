@@ -15,16 +15,18 @@ import {
   Home,
   Sparkles,
   Compass,
-  CreditCard
+  CreditCard,
+  ArrowRight,
+  ExternalLink
 } from 'lucide-react';
 
-const FacebookIcon = ({ size = 16 }) => (
+const FacebookIcon = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
   </svg>
 );
 
-const InstagramIcon = ({ size = 16 }) => (
+const InstagramIcon = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
   </svg>
@@ -71,40 +73,39 @@ export default function Header({
   const handleNavContact = onNavigateContact || (() => { window.location.href = '/contact'; });
   const handleNavDashboard = onNavigateDashboard || (() => { window.location.href = '/dashboard'; });
   const handleNavAdmin = onNavigateAdmin || (() => { window.location.href = '/admin'; });
-  const handleContactSupport = onOpenContactSupport || (() => { window.dispatchEvent(new CustomEvent('open-contact-modal')); });
-  const handleScheduleTour = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
+  const handleScheduleTour = onOpenScheduleTour || ((bed = '', unit = '') => { 
+    window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); 
+  });
 
   const navLinks = [
-    { label: 'Home', active: isHomeActive, onClick: handleNavHome, href: '/' },
-    { label: 'Amenities', active: isAmenitiesActive, onClick: handleNavAmenities, href: '/amenities' },
-    { label: 'Floor Plans', active: isFloorPlansActive, onClick: handleNavFloorPlans, href: '/floor-plans' },
+    { label: 'Home', active: isHomeActive, onClick: handleNavHome, href: '/', id: 'tab-home' },
+    { label: 'Floor Plans', active: isFloorPlansActive, onClick: handleNavFloorPlans, href: '/floor-plans', id: 'tab-floor-plans' },
+    { label: 'Amenities', active: isAmenitiesActive, onClick: handleNavAmenities, href: '/amenities', id: 'tab-amenities' },
     { 
       label: 'Photos', 
-      active: isPhotosActive || isVirtualTourActive, 
-      onClick: handleNavPhotos,
-      href: '/photos',
-      badge: '26',
-      subLinks: [
-        { label: 'Photos', active: isPhotosActive, onClick: handleNavPhotos, href: '/photos' },
-        { label: 'Virtual Tour', active: isVirtualTourActive, onClick: handleNavVirtualTour, href: '/virtual-tour' },
-      ]
+      active: isPhotosActive, 
+      onClick: handleNavPhotos, 
+      href: '/photos', 
+      id: 'tab-photos',
+      badge: '26' 
     },
-    { label: 'Income Guidelines', active: isGuidelinesActive, onClick: handleNavGuidelines, href: '/income-guidelines' },
-    { label: 'Map', active: isMapActive, onClick: handleNavMap, href: '/map' },
-    { label: 'Contact Us', active: isContactActive, onClick: handleNavContact, href: '/contact' },
-    { label: 'FAQ', active: isFAQActive, onClick: handleNavFAQ, href: '/faq' },
-    { label: 'Schedule a Tour', active: false, onClick: () => handleScheduleTour() },
+    { label: 'Virtual Tour', active: isVirtualTourActive, onClick: handleNavVirtualTour, href: '/virtual-tour', id: 'tab-virtual-tour' },
+    { label: 'Income Guidelines', active: isGuidelinesActive, onClick: handleNavGuidelines, href: '/income-guidelines', id: 'tab-guidelines' },
+    { label: 'Location', active: isMapActive, onClick: handleNavMap, href: '/map', id: 'tab-map' },
+    { label: 'FAQ', active: isFAQActive, onClick: handleNavFAQ, href: '/faq', id: 'tab-faq' },
+    { label: 'Contact', active: isContactActive, onClick: handleNavContact, href: '/contact', id: 'tab-contact' },
   ];
 
   return (
-    <header className="header-wrapper" style={{ position: 'relative', width: '100%' }}>
-      {/* Top Utility Bar */}
+    <header className="header-wrapper" style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
+      {/* ── 1. Top Luxury Utility Bar ── */}
       <div 
         style={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          position: 'relative',
-          zIndex: 40,
+          backgroundColor: '#06070c',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.12)',
+          fontSize: '0.78rem',
+          letterSpacing: '0.03em',
+          color: '#a39886',
         }}
       >
         <div 
@@ -112,754 +113,728 @@ export default function Header({
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0.6rem 1.5rem',
-            gap: '1.25rem',
+            justifyContent: 'space-between',
+            padding: '0.5rem 1.5rem',
+            gap: '1rem',
           }}
         >
-          {/* Phone Number */}
-          <a 
-            href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: '#334155',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              textDecoration: 'underline',
-            }}
-          >
-            <Phone size={15} style={{ color: '#2c3038' }} />
-            <span>{siteSettings?.phone || '+1 817-857-8782'}</span>
-          </a>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
-
-          {/* Social Icons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Left: Quick Contact & Address */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
             <a 
-              href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarchPassAPTS'} 
-              target="_blank" 
-              rel="noreferrer"
-              aria-label="Facebook"
+              href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
               style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                border: '1px solid #334155',
-                color: '#334155',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'opacity 0.2s',
+                gap: '0.45rem',
+                color: '#e8e0d4',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'color 0.2s',
               }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--primary-color, #c9a96e)'}
+              onMouseLeave={e => e.currentTarget.style.color = '#e8e0d4'}
             >
-              <FacebookIcon size={16} />
+              <Phone size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
+              <span>{siteSettings?.phone || '(817) 857-8782'}</span>
             </a>
-            <a 
-              href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarchpass'} 
-              target="_blank" 
-              rel="noreferrer"
-              aria-label="Instagram"
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                border: '1px solid #334155',
-                color: '#334155',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'opacity 0.2s',
-              }}
-            >
-              <InstagramIcon size={16} />
-            </a>
+
+            <div style={{ display: 'none', md: 'flex', alignItems: 'center', gap: '0.4rem', color: '#82786a' }} className="hide-mobile">
+              <MapPin size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
+              <span>4500 Campus Dr, Fort Worth, TX 76119</span>
+            </div>
           </div>
 
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
-
-          {/* Translate | Traducir Button (Google Translate Integration) */}
-          <button
-            id="btn-translate"
-            onClick={() => {
-              const currentUrl = encodeURIComponent(window.location.href);
-              window.open(`https://translate.google.com/translate?sl=auto&tl=es&u=${currentUrl}`, '_blank');
-            }}
-            style={{
-              backgroundColor: '#4a4e57',
-              color: '#ffffff',
-              padding: '0.42rem 0.9rem',
-              borderRadius: '4px',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              cursor: 'pointer',
-              border: 'none',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#373a42'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#4a4e57'}
-            title="Translate Page to Spanish | Traducir al Español"
-          >
-            <span>TRANSLATE | TRADUCIR</span>
-          </button>
-
-          <div style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1' }} />
-
-          {/* Login Dropdown */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setIsLoginOpen(!isLoginOpen)}
-              style={{
-                backgroundColor: 'var(--primary-color, #0f766e)',
-                color: '#ffffff',
-                padding: '0.45rem 1rem',
-                borderRadius: '4px',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                cursor: 'pointer',
-                border: 'none',
-              }}
-            >
-              <User size={14} />
-              <span>Login</span>
-              <ChevronDown size={14} />
-            </button>
-
-            {isLoginOpen && (
-              <div
-                className="animate-slide-down"
+          {/* Right: Actions, Translate, Portals & Mobile Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Social Icons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <a 
+                href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarchPassAPTS'} 
+                target="_blank" 
+                rel="noreferrer"
+                aria-label="Facebook"
                 style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '120%',
-                  backgroundColor: '#ffffff',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.18)',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  minWidth: '220px',
-                  zIndex: 50,
-                  overflow: 'hidden',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(201, 169, 110, 0.2)',
+                  color: '#c9a96e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.2)';
+                  e.currentTarget.style.borderColor = '#c9a96e';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.2)';
                 }}
               >
-                <a
-                  href={siteSettings?.portals?.resident || 'https://monarchpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsLoginOpen(false)}
+                <FacebookIcon size={13} />
+              </a>
+
+              <a 
+                href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarchpass'} 
+                target="_blank" 
+                rel="noreferrer"
+                aria-label="Instagram"
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(201, 169, 110, 0.2)',
+                  color: '#c9a96e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.2)';
+                  e.currentTarget.style.borderColor = '#c9a96e';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.2)';
+                }}
+              >
+                <InstagramIcon size={13} />
+              </a>
+            </div>
+
+            <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+
+            {/* Translate Button */}
+            <button
+              id="btn-translate"
+              onClick={() => {
+                const currentUrl = encodeURIComponent(window.location.href);
+                window.open(`https://translate.google.com/translate?sl=auto&tl=es&u=${currentUrl}`, '_blank');
+              }}
+              style={{
+                backgroundColor: 'rgba(201, 169, 110, 0.08)',
+                color: '#dfc285',
+                padding: '0.28rem 0.65rem',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                cursor: 'pointer',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.2)';
+                e.currentTarget.style.borderColor = '#dfc285';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.08)';
+                e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.25)';
+              }}
+              title="Translate Page to Spanish | Traducir al Español"
+            >
+              <span>ESPAÑOL</span>
+            </button>
+
+            {/* Login Menu Dropdown */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setIsLoginOpen(!isLoginOpen)}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  color: '#f0ebe0',
+                  padding: '0.32rem 0.8rem',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  cursor: 'pointer',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color, #c9a96e)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'}
+              >
+                <User size={13} style={{ color: 'var(--primary-color, #c9a96e)' }} />
+                <span>Portals</span>
+                <ChevronDown size={12} />
+              </button>
+
+              {isLoginOpen && (
+                <div
+                  className="animate-slide-down"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.875rem',
-                    color: '#1e293b',
-                    borderBottom: '1px solid #f1f5f9',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    cursor: 'pointer',
+                    position: 'absolute',
+                    right: 0,
+                    top: '125%',
+                    backgroundColor: '#0c0f18',
+                    boxShadow: '0 15px 35px rgba(0,0,0,0.6), 0 0 0 1px rgba(201, 169, 110, 0.2)',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(201, 169, 110, 0.2)',
+                    minWidth: '240px',
+                    zIndex: 60,
+                    overflow: 'hidden',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                 >
-                  <span>Resident Portal</span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--primary-color, #0f766e)', backgroundColor: 'var(--primary-light, #ccfbf1)', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
-                </a>
-                <a
-                  href={siteSettings?.portals?.applicant || 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsLoginOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.75rem 1rem',
-                    fontSize: '0.875rem',
-                    color: '#1e293b',
-                    borderBottom: '1px solid #f1f5f9',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                >
-                  <span>Applicant Portal</span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--primary-color, #0f766e)', backgroundColor: 'var(--primary-light, #ccfbf1)', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
-                </a>
-                <a
-                  href="/dashboard"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsLoginOpen(false);
-                    handleNavDashboard();
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.65rem 1rem',
-                    fontSize: '0.825rem',
-                    color: 'var(--primary-color, #0f766e)',
-                    borderBottom: '1px solid #f1f5f9',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, #f0fdfa)'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                >
-                  <LayoutDashboard size={14} />
-                  <span>Resident Dashboard (Demo)</span>
-                </a>
-                <button
-                  onClick={() => {
-                    setIsLoginOpen(false);
-                    window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
-                      detail: { item: 'holding_deposit', amount: 250.00 }
-                    }));
-                  }}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.65rem 1rem',
-                    fontSize: '0.825rem',
-                    color: '#059669',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    borderBottom: '1px solid #f1f5f9',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#ecfdf5'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <CreditCard size={14} />
-                  <span>Pay Deposit / Rent (Paddle)</span>
-                </button>
-                <a
-                  href="/admin"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsLoginOpen(false);
-                    handleNavAdmin();
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.65rem 1rem',
-                    fontSize: '0.825rem',
-                    color: '#b45309',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fffbeb'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                >
-                  <ShieldCheck size={14} />
-                  <span>Admin Panel (Demo)</span>
-                </a>
-              </div>
-            )}
+                  <a
+                    href={siteSettings?.portals?.resident || 'https://monarchpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsLoginOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.82rem',
+                      color: '#f0ebe0',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <span>Resident Portal</span>
+                    <span style={{ fontSize: '0.65rem', color: '#c9a96e', backgroundColor: 'rgba(201, 169, 110, 0.15)', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
+                  </a>
+
+                  <a
+                    href={siteSettings?.portals?.applicant || 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsLoginOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem 1rem',
+                      fontSize: '0.82rem',
+                      color: '#f0ebe0',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <span>Applicant Portal</span>
+                    <span style={{ fontSize: '0.65rem', color: '#c9a96e', backgroundColor: 'rgba(201, 169, 110, 0.15)', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
+                  </a>
+
+                  <a
+                    href="/dashboard"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsLoginOpen(false);
+                      handleNavDashboard();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.7rem 1rem',
+                      fontSize: '0.82rem',
+                      color: '#dfc285',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <LayoutDashboard size={14} />
+                    <span>Resident Dashboard (Demo)</span>
+                  </a>
+
+                  <button
+                    onClick={() => {
+                      setIsLoginOpen(false);
+                      window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+                        detail: { item: 'holding_deposit', amount: 250.00 }
+                      }));
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.7rem 1rem',
+                      fontSize: '0.82rem',
+                      color: '#4ade80',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(74, 222, 128, 0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <CreditCard size={14} />
+                    <span>Pay Deposit / Rent (Paddle)</span>
+                  </button>
+
+                  <a
+                    href="/admin"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsLoginOpen(false);
+                      handleNavAdmin();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.7rem 1rem',
+                      fontSize: '0.82rem',
+                      color: '#f59e0b',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.1)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <ShieldCheck size={14} />
+                    <span>Admin Panel (Demo)</span>
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Hamburger Button */}
+            <button
+              onClick={() => setIsNavOpen(!isNavOpen)}
+              aria-label="Toggle navigation"
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid rgba(201, 169, 110, 0.3)',
+                color: '#e8e0d4',
+                padding: '0.35rem 0.6rem',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              {isNavOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
           </div>
-
-          {/* Hamburger Menu Toggle */}
-          <button
-            onClick={() => setIsNavOpen(!isNavOpen)}
-            aria-label="Toggle navigation"
-            style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#1e293b',
-              padding: '0.45rem 0.75rem',
-              borderRadius: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginLeft: '0.5rem',
-            }}
-          >
-            {isNavOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </div>
       </div>
 
-      {/* Hero Banner with Monarch Pass Logo & Title */}
-      <div
+      {/* ── 2. Primary Luxury Navigation Bar ── */}
+      <nav 
         style={{
-          position: 'relative',
-          height: '280px',
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.4)), url('${siteSettings?.heroImageUrl || 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg'}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem',
-          cursor: 'pointer',
-        }}
-        onClick={onNavigateHome || onNavigateFloorPlans}
-      >
-        {/* Monarch Pass Logo Badge */}
-        <div
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.88)',
-            padding: '0.75rem 2rem',
-            borderRadius: '6px',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(4px)',
-            marginBottom: '1rem',
-          }}
-        >
-          {siteSettings?.logoUrl ? (
-            <img
-              src={siteSettings.logoUrl}
-              alt={siteSettings?.siteName || 'Monarch Pass Apartments'}
-              style={{ maxHeight: '42px', width: 'auto', display: 'block' }}
-            />
-          ) : (
-            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-color, #0f766e)', letterSpacing: '0.02em' }}>
-              {siteSettings?.siteName || 'Monarch Pass Apartments'}
-            </span>
-          )}
-        </div>
-
-        {/* Hero Title */}
-        <h2
-          style={{
-            color: '#ffffff',
-            fontSize: '1.85rem',
-            fontFamily: 'serif',
-            fontWeight: 700,
-            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
-            textAlign: 'center',
-            margin: 0,
-          }}
-        >
-          {siteSettings?.tagline || 'Spacious 1-4 Bedroom Apartments in Fort Worth'}
-        </h2>
-      </div>
-
-      {/* Primary Navigation Tabs Bar */}
-      <nav
-        style={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 30,
+          backgroundColor: 'rgba(8, 9, 15, 0.94)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.16)',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)',
         }}
       >
-        <div
+        <div 
           className="container"
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            gap: '0.35rem',
-            padding: '0.4rem 1rem',
+            justifyContent: 'space-between',
+            height: '76px',
+            padding: '0 1.5rem',
+            gap: '1.5rem',
           }}
         >
-          {/* Home */}
+          {/* Brand Identity & Logo */}
           <a
-            id="tab-home"
             href="/"
-            onClick={(e) => { if (onNavigateHome) { e.preventDefault(); onNavigateHome(); } }}
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavHome();
+            }}
             style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isHomeActive ? 700 : 500,
-              color: isHomeActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isHomeActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isHomeActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
+              gap: '0.85rem',
               textDecoration: 'none',
+              flexShrink: 0,
             }}
           >
-            <Home size={15} />
-            <span>Home</span>
-          </a>
-
-          {/* Floor Plans */}
-          <a
-            id="tab-floor-plans"
-            href="/floor-plans"
-            onClick={(e) => { if (onNavigateFloorPlans) { e.preventDefault(); onNavigateFloorPlans(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isFloorPlansActive ? 700 : 500,
-              color: isFloorPlansActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isFloorPlansActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isFloorPlansActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <Layers size={15} />
-            <span>Floor Plans</span>
-          </a>
-
-          {/* Photos */}
-          <a
-            id="tab-photos"
-            href="/photos"
-            onClick={(e) => { if (onNavigatePhotos) { e.preventDefault(); onNavigatePhotos(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isPhotosActive ? 700 : 500,
-              color: isPhotosActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isPhotosActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isPhotosActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <Camera size={15} />
-            <span>Photos</span>
-            <span
+            {/* Elegant Monogram Crest */}
+            <div
               style={{
-                backgroundColor: isPhotosActive ? 'var(--primary-color, #0f766e)' : '#e2e8f0',
-                color: isPhotosActive ? '#ffffff' : '#475569',
-                fontSize: '0.7rem',
+                width: '44px',
+                height: '44px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 50%, #8c6e3b 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#08090f',
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: '1.55rem',
                 fontWeight: 700,
-                padding: '1px 6px',
-                borderRadius: '9999px',
+                boxShadow: '0 4px 16px rgba(201, 169, 110, 0.35)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                flexShrink: 0,
               }}
             >
-              26
-            </span>
+              M
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontSize: '1.35rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  color: '#f4efe6',
+                  lineHeight: 1.1,
+                }}
+              >
+                MONARCH PASS
+              </span>
+              <span
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: '0.62rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: '#c9a96e',
+                }}
+              >
+                Luxury Residences · Fort Worth
+              </span>
+            </div>
           </a>
 
-          {/* Income Guidelines */}
-          <a
-            id="tab-guidelines"
-            href="/income-guidelines"
-            onClick={(e) => { if (onNavigateGuidelines) { e.preventDefault(); onNavigateGuidelines(); } }}
+          {/* Desktop Navigation Links */}
+          <div
             style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isGuidelinesActive ? 700 : 500,
-              color: isGuidelinesActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isGuidelinesActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isGuidelinesActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
+              display: 'none',
               alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
+              gap: '0.35rem',
+              flex: 1,
+              justifyContent: 'center',
             }}
+            className="desktop-nav-container"
           >
-            <ShieldCheck size={15} />
-            <span>Income Guidelines</span>
-          </a>
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                id={link.id}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  link.onClick();
+                }}
+                style={{
+                  padding: '0.45rem 0.75rem',
+                  fontSize: '0.84rem',
+                  fontWeight: link.active ? 600 : 500,
+                  color: link.active ? '#dfc285' : '#b8ada0',
+                  textDecoration: 'none',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  position: 'relative',
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '0.02em',
+                }}
+                onMouseEnter={e => {
+                  if (!link.active) e.currentTarget.style.color = '#f0ebe0';
+                }}
+                onMouseLeave={e => {
+                  if (!link.active) e.currentTarget.style.color = '#b8ada0';
+                }}
+              >
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      backgroundColor: 'rgba(201, 169, 110, 0.2)',
+                      color: '#dfc285',
+                      padding: '1px 5px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
+                    }}
+                  >
+                    {link.badge}
+                  </span>
+                )}
+                {link.active && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '-2px',
+                      left: '0.75rem',
+                      right: '0.75rem',
+                      height: '2px',
+                      backgroundColor: '#c9a96e',
+                      borderRadius: '2px',
+                      boxShadow: '0 0 8px rgba(201, 169, 110, 0.6)',
+                    }}
+                  />
+                )}
+              </a>
+            ))}
+          </div>
 
-          {/* Amenities */}
-          <a
-            id="tab-amenities"
-            href="/amenities"
-            onClick={(e) => { if (onNavigateAmenities) { e.preventDefault(); onNavigateAmenities(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isAmenitiesActive ? 700 : 500,
-              color: isAmenitiesActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isAmenitiesActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isAmenitiesActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <Sparkles size={15} />
-            <span>Amenities</span>
-          </a>
+          {/* Right Action CTAs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+            <button
+              id="btn-schedule-tour"
+              onClick={() => handleScheduleTour()}
+              className="btn-outline-gold"
+              style={{
+                padding: '0.55rem 1.15rem',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                borderRadius: '4px',
+                border: '1px solid rgba(201, 169, 110, 0.45)',
+                backgroundColor: 'rgba(201, 169, 110, 0.06)',
+                color: '#dfc285',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                transition: 'all 0.25s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.18)';
+                e.currentTarget.style.borderColor = '#c9a96e';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'rgba(201, 169, 110, 0.06)';
+                e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.45)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <Calendar size={13} style={{ color: '#c9a96e' }} />
+              <span>Schedule Tour</span>
+            </button>
 
-          {/* Virtual Tour */}
-          <a
-            id="tab-virtual-tour"
-            href="/virtual-tour"
-            onClick={(e) => { if (onNavigateVirtualTour) { e.preventDefault(); onNavigateVirtualTour(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isVirtualTourActive ? 700 : 500,
-              color: isVirtualTourActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isVirtualTourActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isVirtualTourActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <Compass size={15} />
-            <span>Virtual Tour</span>
-          </a>
-
-          {/* Map & Directions */}
-          <a
-            id="tab-map"
-            href="/map"
-            onClick={(e) => { if (onNavigateMap) { e.preventDefault(); onNavigateMap(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isMapActive ? 700 : 500,
-              color: isMapActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isMapActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isMapActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <MapPin size={15} />
-            <span>Map</span>
-          </a>
-
-          {/* FAQ */}
-          <a
-            id="tab-faq"
-            href="/faq"
-            onClick={(e) => { if (onNavigateFAQ) { e.preventDefault(); onNavigateFAQ(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isFAQActive ? 700 : 500,
-              color: isFAQActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isFAQActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isFAQActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <HelpCircle size={15} />
-            <span>FAQ</span>
-          </a>
-
-          {/* Contact Us */}
-          <a
-            id="tab-contact"
-            href="/contact"
-            onClick={(e) => { if (onNavigateContact) { e.preventDefault(); onNavigateContact(); } }}
-            style={{
-              padding: '0.6rem 0.95rem',
-              fontSize: '0.9rem',
-              fontWeight: isContactActive ? 700 : 500,
-              color: isContactActive ? 'var(--primary-color, #0f766e)' : '#475569',
-              background: isContactActive ? 'var(--primary-light, #f0fdfa)' : 'transparent',
-              borderRadius: '6px',
-              border: isContactActive ? '1px solid var(--primary-border, #99f6e4)' : '1px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              transition: 'all 0.2s ease',
-              textDecoration: 'none',
-            }}
-          >
-            <Phone size={15} />
-            <span>Contact Us</span>
-          </a>
-
-          {/* Schedule a Tour CTA */}
-          <button
-            id="btn-schedule-tour"
-            onClick={() => handleScheduleTour()}
-            style={{
-              padding: '0.6rem 1.1rem',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              color: '#ffffff',
-              backgroundColor: 'var(--primary-color, #0f766e)',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              transition: 'background 0.2s ease',
-              marginLeft: '0.25rem',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #0d6460)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #0f766e)')}
-          >
-            <Calendar size={15} />
-            <span>Schedule a Tour</span>
-          </button>
+            <button
+              onClick={handleNavFloorPlans}
+              className="btn-gold"
+              style={{
+                padding: '0.55rem 1.25rem',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                borderRadius: '4px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                color: '#08090f',
+                cursor: 'pointer',
+                display: 'none',
+                sm: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                boxShadow: '0 4px 15px rgba(201, 169, 110, 0.3)',
+                transition: 'all 0.25s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(201, 169, 110, 0.45)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(201, 169, 110, 0.3)';
+              }}
+            >
+              <span>Explore Units</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* Fullscreen Overlay Navigation Drawer */}
+      {/* ── 3. Mobile Navigation Drawer ── */}
       {isNavOpen && (
         <div
-          className="animate-fade-in"
+          className="mobile-menu"
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'var(--nav-overlay-bg-rgba, rgba(104, 199, 183, 0.98))',
-            zIndex: 100,
+            top: '0',
+            backgroundColor: 'rgba(8, 9, 15, 0.98)',
+            backdropFilter: 'blur(25px)',
+            WebkitBackdropFilter: 'blur(25px)',
+            zIndex: 2000,
+            padding: '1.5rem',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backdropFilter: 'blur(8px)',
+            overflowY: 'auto',
           }}
         >
-          <button
-            onClick={() => setIsNavOpen(false)}
-            aria-label="Close navigation"
-            style={{
-              position: 'absolute',
-              top: '24px',
-              right: '32px',
-              color: '#ffffff',
-              backgroundColor: 'rgba(0,0,0,0.2)',
-              borderRadius: '50%',
-              width: '48px',
-              height: '48px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <X size={28} />
-          </button>
+          {/* Top Bar inside Mobile Drawer */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(201, 169, 110, 0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#08090f',
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontSize: '1.3rem',
+                  fontWeight: 700,
+                }}
+              >
+                M
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.2rem', fontWeight: 600, color: '#f4efe6' }}>
+                  MONARCH PASS
+                </span>
+                <span style={{ fontSize: '0.62rem', color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  Fort Worth, TX
+                </span>
+              </div>
+            </div>
 
-          <nav style={{ textAlign: 'center', width: '100%', maxWidth: '400px', maxHeight: '85vh', overflowY: 'auto' }}>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-              {navLinks.map((link, idx) => (
-                <li key={idx}>
-                  {link.subLinks ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
-                      <span
-                        style={{
-                          color: '#ffffff',
-                          fontSize: '1.45rem',
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          opacity: link.active ? 1 : 0.9,
-                          borderBottom: link.active ? '3px solid #ffffff' : 'none',
-                          paddingBottom: '2px',
-                        }}
-                      >
-                        {link.label}
-                      </span>
-                      <div style={{ display: 'flex', gap: '1.25rem', marginTop: '0.2rem' }}>
-                        {link.subLinks.map((sub, sIdx) => (
-                          <button
-                            key={sIdx}
-                            onClick={() => {
-                              setIsNavOpen(false);
-                              if (sub.onClick) sub.onClick();
-                            }}
-                            style={{
-                              background: 'rgba(255, 255, 255, 0.22)',
-                              border: sub.active ? '2px solid #ffffff' : '1px solid rgba(255, 255, 255, 0.4)',
-                              borderRadius: '20px',
-                              padding: '0.35rem 0.9rem',
-                              color: '#ffffff',
-                              fontSize: '0.95rem',
-                              fontWeight: 600,
-                              textTransform: 'uppercase',
-                              cursor: 'pointer',
-                              backdropFilter: 'blur(4px)',
-                            }}
-                          >
-                            {sub.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setIsNavOpen(false);
-                        if (link.onClick) link.onClick();
-                      }}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#ffffff',
-                        fontSize: '1.45rem',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.06em',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s, opacity 0.2s',
-                        display: 'inline-block',
-                        opacity: link.active ? 1 : 0.85,
-                        borderBottom: link.active ? '3px solid #ffffff' : 'none',
-                        paddingBottom: '4px',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                      onMouseLeave={e => e.currentTarget.style.opacity = link.active ? '1' : '0.85'}
-                    >
-                      {link.label}
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
+            <button
+              onClick={() => setIsNavOpen(false)}
+              aria-label="Close menu"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                padding: '0.5rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >
+              <X size={22} />
+            </button>
+          </div>
+
+          {/* Navigation Items List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                id={`mobile-${link.id}`}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsNavOpen(false);
+                  link.onClick();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.85rem 1rem',
+                  borderRadius: '6px',
+                  backgroundColor: link.active ? 'rgba(201, 169, 110, 0.12)' : 'transparent',
+                  border: link.active ? '1px solid rgba(201, 169, 110, 0.3)' : '1px solid transparent',
+                  color: link.active ? '#dfc285' : '#e8e0d4',
+                  fontSize: '1rem',
+                  fontWeight: link.active ? 600 : 500,
+                  textDecoration: 'none',
+                }}
+              >
+                <span>{link.label}</span>
+                {link.badge ? (
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: 'rgba(201, 169, 110, 0.2)',
+                      color: '#dfc285',
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                    }}
+                  >
+                    {link.badge}
+                  </span>
+                ) : (
+                  <ArrowRight size={16} style={{ opacity: 0.4 }} />
+                )}
+              </a>
+            ))}
+          </div>
+
+          {/* Bottom Actions inside Mobile Drawer */}
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <button
+              onClick={() => {
+                setIsNavOpen(false);
+                handleScheduleTour();
+              }}
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                color: '#08090f',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Calendar size={16} />
+              <span>Schedule a Guided Tour</span>
+            </button>
+
+            <a
+              href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#f0ebe0',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                textDecoration: 'none',
+              }}
+            >
+              <Phone size={16} style={{ color: '#c9a96e' }} />
+              <span>Call Leasing: {siteSettings?.phone || '(817) 857-8782'}</span>
+            </a>
+          </div>
         </div>
       )}
     </header>

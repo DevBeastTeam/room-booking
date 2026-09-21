@@ -11,7 +11,8 @@ import {
   ShoppingBag, 
   ExternalLink, 
   Phone, 
-  Calendar 
+  Calendar,
+  Sparkles
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -90,23 +91,9 @@ const POIS = [
     note: 'Acclaimed authentic Southern soul food, fried chicken, and peach cobbler.',
   },
   {
-    name: "Smokey's Ribs & Texas BBQ",
-    category: 'dining',
+    name: 'Planet Fitness Fort Worth',
+    category: 'health',
     distance: '2.4 miles',
-    address: 'Fort Worth, TX',
-    note: 'Slow-smoked Texas brisket, ribs, sausage, and traditional sides.',
-  },
-  {
-    name: 'Texas Health Resources - Fort Worth Hospital',
-    category: 'health',
-    distance: '7.2 miles',
-    address: '1301 Pennsylvania Ave, Fort Worth, TX 76104',
-    note: 'Level II Trauma hospital and comprehensive medical center.',
-  },
-  {
-    name: 'Planet Fitness Fort Worth South',
-    category: 'health',
-    distance: '2.6 miles',
     address: 'Fort Worth, TX',
     note: '24/7 fitness facility with cardio, weight training, and wellness rooms.',
   },
@@ -147,92 +134,101 @@ export default function MapDirectionsView({
   };
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#1e293b' }}>
+    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
       {/* ── 1. HERO HEADER ── */}
       <section
         style={{
           position: 'relative',
-          padding: '4rem 1rem',
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/60-web-or-mls-campus%20dr-2104-906.jpg')`,
+          padding: '5rem 1rem',
+          backgroundImage: `linear-gradient(rgba(8, 9, 15, 0.8), rgba(8, 9, 15, 0.9)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/60-web-or-mls-campus%20dr-2104-906.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           textAlign: 'center',
-          color: '#ffffff',
+          color: '#f4efe6',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
         }}
       >
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <span
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div
             style={{
-              backgroundColor: 'rgba(15, 118, 110, 0.9)',
-              color: '#ffffff',
-              padding: '0.35rem 1.25rem',
-              borderRadius: '9999px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(201, 169, 110, 0.15)',
+              border: '1px solid rgba(201, 169, 110, 0.35)',
+              color: '#dfc285',
+              padding: '0.4rem 1.25rem',
+              borderRadius: '50px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              display: 'inline-block',
-              marginBottom: '1rem',
+              marginBottom: '1.25rem',
             }}
           >
-            Fort Worth, TX
-          </span>
+            <Sparkles size={14} style={{ color: '#c9a96e' }} />
+            <span>Prime Southeast Fort Worth</span>
+          </div>
+
           <h1
             style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
-              fontFamily: 'serif',
-              fontWeight: 700,
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(2.3rem, 4.5vw, 3.4rem)',
+              fontWeight: 500,
               marginBottom: '1rem',
-              lineHeight: 1.2,
+              lineHeight: 1.15,
+              color: '#f4efe6',
             }}
           >
             Map & Driving Directions
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6, margin: '0 auto 1.5rem' }}>
-            Conveniently situated on Campus Drive near I-20 and I-35W in Southeast Fort Worth.
+
+          <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 1.75rem', maxWidth: '680px' }}>
+            Conveniently situated on Campus Drive with immediate access to I-20 and I-35W in Southeast Fort Worth.
           </p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.15)', padding: '0.5rem 1.25rem', borderRadius: '6px' }}>
-            <MapPin size={18} style={{ color: '#2dd4bf' }} />
-            <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{destinationAddress}</span>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(201, 169, 110, 0.15)', border: '1px solid rgba(201, 169, 110, 0.35)', padding: '0.55rem 1.4rem', borderRadius: '6px' }}>
+            <MapPin size={16} style={{ color: '#c9a96e' }} />
+            <span style={{ fontWeight: 600, fontSize: '0.92rem', color: '#f4efe6' }}>{destinationAddress}</span>
           </div>
         </div>
       </section>
 
       {/* ── 2. MAP & GET DIRECTIONS SECTION ── */}
-      <section style={{ padding: '3rem 0' }}>
+      <section style={{ padding: '4rem 0' }}>
         <div className="container">
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(320px, 380px) 1fr',
-              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '2.5rem',
               alignItems: 'start',
-              marginBottom: '3.5rem',
+              marginBottom: '4.5rem',
             }}
           >
             {/* Driving Directions Box */}
             <div
               style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
+                backgroundColor: 'rgba(14, 18, 30, 0.85)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
                 borderRadius: '12px',
-                padding: '2rem',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                padding: '2.25rem',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <Navigation size={22} style={{ color: '#0f766e' }} />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+                <Navigation size={22} style={{ color: '#c9a96e' }} />
+                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.65rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                   Get Driving Directions
                 </h3>
               </div>
-              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.5, marginBottom: '1.5rem' }}>
-                Enter your current location or address to get step-by-step navigation directly to Monarch Pass Apartments.
+              <p style={{ color: '#9e9282', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+                Enter your starting location or address to get step-by-step navigation directly to Monarch Pass Apartments.
               </p>
 
               <form onSubmit={handleGetDirections}>
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                     Your Starting Address
                   </label>
                   <input
@@ -242,25 +238,29 @@ export default function MapDirectionsView({
                     placeholder="e.g. Downtown Fort Worth, TX"
                     style={{
                       width: '100%',
-                      padding: '0.75rem 0.85rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(201, 169, 110, 0.25)',
                       borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
+                      padding: '0.75rem 0.9rem',
+                      color: '#f4efe6',
                       fontSize: '0.9rem',
+                      outline: 'none',
                     }}
                   />
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                     Destination
                   </label>
                   <div
                     style={{
-                      padding: '0.75rem 0.85rem',
-                      backgroundColor: '#f1f5f9',
+                      padding: '0.75rem 0.9rem',
+                      backgroundColor: 'rgba(8, 9, 15, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
                       borderRadius: '6px',
                       fontSize: '0.85rem',
-                      color: '#475569',
+                      color: '#dfc285',
                       fontWeight: 600,
                     }}
                   >
@@ -272,44 +272,44 @@ export default function MapDirectionsView({
                   type="submit"
                   style={{
                     width: '100%',
-                    backgroundColor: '#0f766e',
-                    color: '#ffffff',
-                    padding: '0.8rem',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    fontSize: '0.92rem',
+                    background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                    color: '#08090f',
+                    padding: '0.85rem',
+                    borderRadius: '4px',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
                     border: 'none',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
-                    transition: 'background 0.2s',
+                    boxShadow: '0 4px 15px rgba(201, 169, 110, 0.3)',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
                 >
-                  <Navigation size={16} />
+                  <Navigation size={15} />
                   <span>Open in Google Maps</span>
                   <ExternalLink size={14} />
                 </button>
               </form>
 
               {/* Office Contact Info */}
-              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.5rem' }}>
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(201, 169, 110, 0.15)' }}>
+                <div style={{ fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.5rem' }}>
                   Leasing Office
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#0f766e', fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
-                  <Phone size={16} />
-                  <a href="tel:+18176465785" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    +1 817-646-5785
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dfc285', fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+                  <Phone size={15} style={{ color: '#c9a96e' }} />
+                  <a href="tel:+18178578782" style={{ color: 'inherit', textDecoration: 'none' }}>
+                    (817) 857-8782
                   </a>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
-                  Mon - Fri: 9:00 AM - 6:00 PM<br />
-                  Sat: 10:00 AM - 5:00 PM<br />
-                  Sun: Closed
+                <div style={{ fontSize: '0.82rem', color: '#8c8273', lineHeight: 1.6 }}>
+                  Mon – Fri: 10:00 AM – 6:00 PM<br />
+                  Sat: 10:00 AM – 5:00 PM<br />
+                  Sun: 1:00 PM – 5:00 PM
                 </div>
               </div>
             </div>
@@ -320,9 +320,9 @@ export default function MapDirectionsView({
                 height: '520px',
                 borderRadius: '12px',
                 overflow: 'hidden',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#f1f5f9',
+                boxShadow: '0 25px 50px -10px rgba(0,0,0,0.8)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
+                backgroundColor: '#0a0d16',
               }}
             >
               <iframe
@@ -338,17 +338,19 @@ export default function MapDirectionsView({
 
           {/* ── 3. POINTS OF INTEREST BY CATEGORY ── */}
           <div>
-            <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 2rem' }}>
-              <h2 style={{ fontSize: '1.85rem', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
+            <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 2.5rem' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#c9a96e', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <span style={{ width: '20px', height: '1px', backgroundColor: '#c9a96e', display: 'inline-block' }} />
+                <span>Area Highlights</span>
+                <span style={{ width: '20px', height: '1px', backgroundColor: '#c9a96e', display: 'inline-block' }} />
+              </div>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', fontWeight: 500, color: '#f4efe6', margin: 0 }}>
                 Neighborhood & Points of Interest
               </h2>
-              <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-                Explore top employers, universities, parks, and dining options surrounding Monarch Pass.
-              </p>
             </div>
 
             {/* Category Filter Pills */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 const isActive = cat.id === activeCategory;
@@ -357,21 +359,22 @@ export default function MapDirectionsView({
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
                     style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '9999px',
-                      fontSize: '0.85rem',
+                      padding: '0.5rem 1.15rem',
+                      borderRadius: '30px',
+                      fontSize: '0.82rem',
                       fontWeight: 600,
+                      letterSpacing: '0.03em',
                       cursor: 'pointer',
-                      border: isActive ? '1px solid #0f766e' : '1px solid #cbd5e1',
-                      backgroundColor: isActive ? '#0f766e' : '#ffffff',
-                      color: isActive ? '#ffffff' : '#475569',
+                      border: isActive ? '1px solid #c9a96e' : '1px solid rgba(255,255,255,0.1)',
+                      backgroundColor: isActive ? 'rgba(201, 169, 110, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                      color: isActive ? '#dfc285' : '#8c8273',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.4rem',
                       transition: 'all 0.2s',
                     }}
                   >
-                    <Icon size={14} />
+                    <Icon size={14} style={{ color: isActive ? '#c9a96e' : '#8c8273' }} />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -383,29 +386,39 @@ export default function MapDirectionsView({
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: '1.25rem',
+                gap: '1.5rem',
               }}
             >
               {filteredPOIs.map((poi, idx) => (
                 <div
                   key={idx}
                   style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    padding: '1.25rem',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                    backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                    border: '1px solid rgba(201, 169, 110, 0.14)',
+                    borderRadius: '10px',
+                    padding: '1.5rem',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+                    transition: 'all 0.25s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.35)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.14)';
+                    e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.2rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                       {poi.name}
                     </h3>
                     <span
                       style={{
-                        backgroundColor: '#f1f5f9',
-                        color: '#0f766e',
-                        fontSize: '0.75rem',
+                        backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                        color: '#dfc285',
+                        border: '1px solid rgba(201, 169, 110, 0.3)',
+                        fontSize: '0.7rem',
                         fontWeight: 700,
                         padding: '2px 8px',
                         borderRadius: '4px',
@@ -416,11 +429,11 @@ export default function MapDirectionsView({
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#8c8273', marginBottom: '0.65rem' }}>
                     {poi.address}
                   </div>
 
-                  <p style={{ fontSize: '0.85rem', color: '#334155', margin: 0, lineHeight: 1.45 }}>
+                  <p style={{ fontSize: '0.86rem', color: '#b5a999', margin: 0, lineHeight: 1.5 }}>
                     {poi.note}
                   </p>
                 </div>

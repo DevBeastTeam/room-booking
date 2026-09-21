@@ -125,7 +125,7 @@ export default function PaddleCheckoutModal({
     setIsLoading(true);
 
     try {
-      const res = await verifyPaddleTransaction(activeTransaction.txn_id || activeTransaction.paddle_txn_id);
+      await verifyPaddleTransaction(activeTransaction.txn_id || activeTransaction.paddle_txn_id);
       setIsLoading(false);
       setIsSuccess(true);
     } catch {
@@ -144,22 +144,23 @@ export default function PaddleCheckoutModal({
         alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
-        backgroundColor: 'rgba(10, 13, 20, 0.82)',
+        backgroundColor: 'rgba(5, 7, 14, 0.85)',
         backdropFilter: 'blur(8px)',
       }}
       onClick={onClose}
     >
       <div
+        className="animate-slide-down"
         style={{
           width: '100%',
           maxWidth: '580px',
           maxHeight: '92vh',
           overflowY: 'auto',
-          backgroundColor: '#0f172a',
+          backgroundColor: '#0c101c',
           color: '#f8fafc',
           borderRadius: '18px',
-          border: '1px solid #1e293b',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+          border: '1px solid rgba(201, 169, 110, 0.35)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
           position: 'relative',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -167,41 +168,41 @@ export default function PaddleCheckoutModal({
         {/* Header Banner */}
         <div
           style={{
-            padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid #1e293b',
+            padding: '1.4rem 1.75rem',
+            borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
             borderTopLeftRadius: '18px',
             borderTopRightRadius: '18px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <div
               style={{
-                width: '40px',
-                height: '40px',
+                width: '42px',
+                height: '42px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #059669 0%, #0f766e 100%)',
+                background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
-                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)',
+                color: '#08090f',
+                boxShadow: '0 4px 15px rgba(201, 169, 110, 0.35)',
               }}
             >
               <Lock size={20} />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '-0.01em', color: '#ffffff' }}>
+              <div style={{ fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.01em', color: '#f8fafc', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
                 Monarch Pass Secure Checkout
               </div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span>Powered by Paddle Billing</span>
+                <span>Powered by Paddle Merchant Services</span>
                 <span>•</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>
-                  {paddleConfig?.is_sandbox ? 'Sandbox Testing Mode' : 'Live SSL Encrypted'}
+                <span style={{ color: '#dfc285', fontWeight: 600 }}>
+                  {paddleConfig?.is_sandbox ? 'Sandbox Testing Active' : '256-Bit SSL Encrypted'}
                 </span>
               </div>
             </div>
@@ -210,23 +211,24 @@ export default function PaddleCheckoutModal({
           <button
             onClick={onClose}
             style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#94a3b8',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
+              color: '#c9a96e',
               cursor: 'pointer',
-              padding: '0.4rem',
-              borderRadius: '8px',
+              padding: '6px',
+              borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              transition: 'all 0.2s',
             }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '1.5rem' }}>
+        <div style={{ padding: '1.75rem' }}>
           {isSuccess ? (
             /* Success Receipt View */
             <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
@@ -235,75 +237,70 @@ export default function PaddleCheckoutModal({
                   width: '72px',
                   height: '72px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(34, 197, 94, 0.15)',
-                  color: '#22c55e',
+                  backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                  color: '#dfc285',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 1.25rem',
-                  border: '2px solid rgba(34, 197, 94, 0.4)',
+                  border: '2px solid rgba(201, 169, 110, 0.4)',
                 }}
               >
                 <CheckCircle2 size={40} />
               </div>
 
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc', marginBottom: '0.4rem' }}>
-                Payment Confirmed!
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.4rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+                Payment Confirmed & Verified
               </h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.88rem', maxWidth: '380px', margin: '0 auto 1.5rem' }}>
-                Thank you! Your transaction has been recorded in the database and your reservation details are secured.
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
+                Thank you! Your transaction has been recorded securely and your reservation details are confirmed.
               </p>
 
               {/* Receipt Summary Card */}
               <div
                 style={{
-                  backgroundColor: '#1e293b',
+                  backgroundColor: 'rgba(16, 20, 34, 0.95)',
                   borderRadius: '12px',
-                  border: '1px solid #334155',
-                  padding: '1.25rem',
+                  border: '1px solid rgba(201, 169, 110, 0.3)',
+                  padding: '1.5rem',
                   textAlign: 'left',
                   marginBottom: '1.5rem',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.82rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.65rem', fontSize: '0.85rem' }}>
                   <span style={{ color: '#94a3b8' }}>Transaction ID:</span>
-                  <span style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>
+                  <span style={{ fontWeight: 700, color: '#dfc285', fontFamily: 'monospace' }}>
                     {activeTransaction?.txn_id || 'TXN-SUCCESS'}
                   </span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.82rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.65rem', fontSize: '0.85rem' }}>
                   <span style={{ color: '#94a3b8' }}>Item:</span>
                   <span style={{ fontWeight: 600, color: '#f8fafc' }}>{currentOption.title}</span>
                 </div>
                 {unitNumber && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.82rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.65rem', fontSize: '0.85rem' }}>
                     <span style={{ color: '#94a3b8' }}>Reserved Unit:</span>
-                    <span style={{ fontWeight: 600, color: '#fbbf24' }}>Unit #{unitNumber}</span>
+                    <span style={{ fontWeight: 700, color: '#dfc285' }}>Unit #{unitNumber}</span>
                   </div>
                 )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', fontSize: '0.82rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.65rem', fontSize: '0.85rem' }}>
                   <span style={{ color: '#94a3b8' }}>Payer:</span>
                   <span style={{ color: '#f8fafc' }}>{name} ({email})</span>
                 </div>
-                <div style={{ height: '1px', backgroundColor: '#334155', margin: '0.75rem 0' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 800 }}>
+                <div style={{ height: '1px', backgroundColor: 'rgba(201, 169, 110, 0.2)', margin: '0.85rem 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 800 }}>
                   <span style={{ color: '#f8fafc' }}>Total Paid:</span>
-                  <span style={{ color: '#4ade80' }}>${finalAmount.toFixed(2)} USD</span>
+                  <span style={{ color: '#dfc285' }}>${finalAmount.toFixed(2)} USD</span>
                 </div>
               </div>
 
               <button
                 onClick={onClose}
+                className="btn-gold"
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  backgroundColor: '#059669',
-                  color: '#ffffff',
-                  borderRadius: '10px',
-                  fontWeight: 700,
                   fontSize: '0.95rem',
-                  border: 'none',
-                  cursor: 'pointer',
                 }}
               >
                 Close Receipt & Continue
@@ -317,22 +314,23 @@ export default function PaddleCheckoutModal({
                   width: '60px',
                   height: '60px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                  color: '#3b82f6',
+                  backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                  color: '#dfc285',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 1.25rem',
+                  border: '1px solid rgba(201, 169, 110, 0.3)',
                 }}
               >
-                <CreditCard size={32} />
+                <CreditCard size={30} />
               </div>
 
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.4rem' }}>
-                Paddle Checkout Ready
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.4rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+                Paddle Checkout Session Initialized
               </h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.85rem', maxWidth: '420px', margin: '0 auto 1.25rem' }}>
-                A secure Paddle checkout session has been initialized. If the window did not open automatically, click below.
+              <p style={{ color: '#94a3b8', fontSize: '0.88rem', maxWidth: '420px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
+                A secure Paddle checkout window has opened. If your browser blocked the popup, click the button below.
               </p>
 
               {activeTransaction.checkout_url && (
@@ -340,6 +338,7 @@ export default function PaddleCheckoutModal({
                   href={activeTransaction.checkout_url}
                   target="_blank"
                   rel="noreferrer"
+                  className="btn-gold"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -347,12 +346,8 @@ export default function PaddleCheckoutModal({
                     gap: '0.5rem',
                     width: '100%',
                     padding: '0.9rem',
-                    backgroundColor: '#2563eb',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    borderRadius: '10px',
-                    textDecoration: 'none',
-                    marginBottom: '1rem',
+                    marginBottom: '1.25rem',
+                    fontSize: '0.95rem',
                   }}
                 >
                   <span>Open Paddle Checkout Page</span>
@@ -361,8 +356,8 @@ export default function PaddleCheckoutModal({
               )}
 
               {/* Simulation button for quick testing */}
-              <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '10px', padding: '1rem', marginTop: '1rem' }}>
-                <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 600, marginBottom: '0.5rem' }}>
+              <div style={{ backgroundColor: 'rgba(201, 169, 110, 0.08)', border: '1px solid rgba(201, 169, 110, 0.25)', borderRadius: '12px', padding: '1.25rem', marginTop: '1.25rem' }}>
+                <div style={{ fontSize: '0.82rem', color: '#dfc285', fontWeight: 700, marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Sandbox Quick Test Action
                 </div>
                 <button
@@ -370,22 +365,23 @@ export default function PaddleCheckoutModal({
                   disabled={isLoading}
                   style={{
                     width: '100%',
-                    padding: '0.75rem',
-                    backgroundColor: '#10b981',
-                    color: '#ffffff',
+                    padding: '0.85rem',
+                    backgroundColor: 'rgba(201, 169, 110, 0.2)',
+                    color: '#dfc285',
+                    border: '1px solid rgba(201, 169, 110, 0.4)',
                     borderRadius: '8px',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
-                    border: 'none',
+                    fontSize: '0.88rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '0.5rem',
+                    transition: 'all 0.2s',
                   }}
                 >
                   {isLoading ? <RefreshCw size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                  <span>Verify / Confirm Test Payment (Instant Database Save)</span>
+                  <span>Verify / Confirm Test Payment (Save to Database)</span>
                 </button>
               </div>
             </div>
@@ -393,11 +389,11 @@ export default function PaddleCheckoutModal({
             /* Main Form: Selection and Details */
             <form onSubmit={handleInitiatePayment}>
               {/* Payment Type Selector */}
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: '#94a3b8', marginBottom: '0.6rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: '#c9a96e', letterSpacing: '0.08em', marginBottom: '0.65rem' }}>
                   Select Payment Item
                 </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {PAYMENT_OPTIONS.map((opt) => {
                     const isSelected = selectedItem === opt.id;
                     const Icon = opt.icon;
@@ -409,25 +405,26 @@ export default function PaddleCheckoutModal({
                           setCustomAmount('');
                         }}
                         style={{
-                          padding: '0.9rem 1rem',
-                          borderRadius: '10px',
-                          border: `1.5px solid ${isSelected ? '#10b981' : '#334155'}`,
-                          backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.08)' : '#1e293b',
+                          padding: '1rem 1.25rem',
+                          borderRadius: '12px',
+                          border: `1.5px solid ${isSelected ? '#dfc285' : 'rgba(201, 169, 110, 0.2)'}`,
+                          backgroundColor: isSelected ? 'rgba(201, 169, 110, 0.12)' : 'rgba(16, 20, 34, 0.85)',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           transition: 'all 0.2s',
+                          boxShadow: isSelected ? '0 4px 15px rgba(201, 169, 110, 0.2)' : 'none',
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                           <div
                             style={{
-                              width: '34px',
-                              height: '34px',
+                              width: '38px',
+                              height: '38px',
                               borderRadius: '8px',
-                              backgroundColor: isSelected ? '#10b981' : '#334155',
-                              color: '#ffffff',
+                              backgroundColor: isSelected ? '#c9a96e' : 'rgba(255, 255, 255, 0.06)',
+                              color: isSelected ? '#08090f' : '#dfc285',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -436,17 +433,17 @@ export default function PaddleCheckoutModal({
                             <Icon size={18} />
                           </div>
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#ffffff' : '#e2e8f0' }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.92rem', color: isSelected ? '#ffffff' : '#e2e8f0' }}>
                               {opt.title}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                            <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
                               {opt.desc}
                             </div>
                           </div>
                         </div>
 
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontWeight: 800, fontSize: '1rem', color: isSelected ? '#34d399' : '#f8fafc' }}>
+                          <span style={{ fontWeight: 800, fontSize: '1.05rem', color: isSelected ? '#dfc285' : '#f8fafc' }}>
                             ${opt.amount.toFixed(2)}
                           </span>
                         </div>
@@ -457,9 +454,9 @@ export default function PaddleCheckoutModal({
               </div>
 
               {/* Applicant / Resident Information */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Full Legal Name *
                   </label>
                   <input
@@ -470,19 +467,19 @@ export default function PaddleCheckoutModal({
                     onChange={(e) => setName(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.7rem 0.85rem',
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
+                      padding: '0.75rem 0.85rem',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
                       borderRadius: '8px',
                       color: '#f8fafc',
-                      fontSize: '0.85rem',
+                      fontSize: '0.88rem',
                       outline: 'none',
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Email Address *
                   </label>
                   <input
@@ -493,21 +490,21 @@ export default function PaddleCheckoutModal({
                     onChange={(e) => setEmail(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.7rem 0.85rem',
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
+                      padding: '0.75rem 0.85rem',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
                       borderRadius: '8px',
                       color: '#f8fafc',
-                      fontSize: '0.85rem',
+                      fontSize: '0.88rem',
                       outline: 'none',
                     }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Phone Number
                   </label>
                   <input
@@ -517,19 +514,19 @@ export default function PaddleCheckoutModal({
                     onChange={(e) => setPhone(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.7rem 0.85rem',
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
+                      padding: '0.75rem 0.85rem',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
                       borderRadius: '8px',
                       color: '#f8fafc',
-                      fontSize: '0.85rem',
+                      fontSize: '0.88rem',
                       outline: 'none',
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.3rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Target Unit # (Optional)
                   </label>
                   <input
@@ -539,12 +536,12 @@ export default function PaddleCheckoutModal({
                     onChange={(e) => setUnitNumber(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '0.7rem 0.85rem',
-                      backgroundColor: '#1e293b',
-                      border: '1px solid #334155',
+                      padding: '0.75rem 0.85rem',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
                       borderRadius: '8px',
                       color: '#f8fafc',
-                      fontSize: '0.85rem',
+                      fontSize: '0.88rem',
                       outline: 'none',
                     }}
                   />
@@ -552,17 +549,17 @@ export default function PaddleCheckoutModal({
               </div>
 
               {errorMessage && (
-                <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#f87171', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.85rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#fca5a5', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                   <AlertCircle size={16} />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {/* Total Due & Submit Button */}
-              <div style={{ backgroundColor: '#1e293b', borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ backgroundColor: 'rgba(16, 20, 34, 0.95)', border: '1px solid rgba(201, 169, 110, 0.3)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Total Due Today</div>
-                  <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#34d399' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.06em' }}>Total Due Today</div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#dfc285' }}>
                     ${finalAmount.toFixed(2)} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>USD</span>
                   </div>
                 </div>
@@ -570,16 +567,10 @@ export default function PaddleCheckoutModal({
                 <button
                   type="submit"
                   disabled={isLoading}
+                  className="btn-gold"
                   style={{
-                    padding: '0.85rem 1.6rem',
-                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                    color: '#ffffff',
-                    fontWeight: 700,
+                    padding: '0.85rem 1.75rem',
                     fontSize: '0.92rem',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 4px 14px rgba(5, 150, 105, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
@@ -600,18 +591,18 @@ export default function PaddleCheckoutModal({
               </div>
 
               {/* One-Time Payment Assurance Banner */}
-              <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid #334155', borderRadius: '8px', padding: '0.65rem 0.85rem', marginBottom: '1rem', textAlign: 'center', fontSize: '0.78rem', color: '#94a3b8' }}>
-                <span style={{ color: '#38bdf8', fontWeight: 700 }}>Single One-Time Payment:</span> This transaction is billed once. There are <strong>no recurring subscriptions</strong> or automatic future deductions.
+              <div style={{ backgroundColor: 'rgba(201, 169, 110, 0.08)', border: '1px solid rgba(201, 169, 110, 0.25)', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1.25rem', textAlign: 'center', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                <span style={{ color: '#dfc285', fontWeight: 700 }}>Single One-Time Payment:</span> This charge is billed once. There are <strong>no recurring subscriptions</strong> or automatic future deductions.
               </div>
 
               {/* Security Badges */}
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.25rem', color: '#64748b', fontSize: '0.75rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <ShieldCheck size={14} color="#34d399" />
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem', color: '#94a3b8', fontSize: '0.78rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <ShieldCheck size={15} color="#dfc285" />
                   <span>256-Bit SSL Encryption</span>
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Check size={14} color="#38bdf8" />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Check size={15} color="#dfc285" />
                   <span>Paddle Merchant of Record</span>
                 </span>
               </div>

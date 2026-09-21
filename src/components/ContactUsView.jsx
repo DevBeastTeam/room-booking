@@ -8,7 +8,8 @@ import {
   CheckCircle2, 
   Calendar, 
   ShieldCheck, 
-  Building 
+  Building,
+  Sparkles
 } from 'lucide-react';
 import { saveSupportInquiry } from '../services/siteDataService';
 
@@ -77,80 +78,103 @@ export default function ContactUsView({
   };
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#1e293b' }}>
+    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
       {/* ── 1. HERO HEADER ── */}
       <section
         style={{
           position: 'relative',
-          padding: '4rem 1rem',
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/36-web-or-mls-4500%20campus%20dr%201005-s2104-002.jpg')`,
+          padding: '5rem 1rem',
+          backgroundImage: `linear-gradient(rgba(8, 9, 15, 0.8), rgba(8, 9, 15, 0.9)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/36-web-or-mls-4500%20campus%20dr%201005-s2104-002.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           textAlign: 'center',
-          color: '#ffffff',
+          color: '#f4efe6',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
         }}
       >
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <span
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div
             style={{
-              backgroundColor: 'rgba(15, 118, 110, 0.9)',
-              color: '#ffffff',
-              padding: '0.35rem 1.25rem',
-              borderRadius: '9999px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(201, 169, 110, 0.15)',
+              border: '1px solid rgba(201, 169, 110, 0.35)',
+              color: '#dfc285',
+              padding: '0.4rem 1.25rem',
+              borderRadius: '50px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              display: 'inline-block',
-              marginBottom: '1rem',
+              marginBottom: '1.25rem',
             }}
           >
-            We Are Here to Help
-          </span>
+            <Sparkles size={14} style={{ color: '#c9a96e' }} />
+            <span>Dedicated Leasing Assistance</span>
+          </div>
+
           <h1
             style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
-              fontFamily: 'serif',
-              fontWeight: 700,
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(2.3rem, 4.5vw, 3.4rem)',
+              fontWeight: 500,
               marginBottom: '1rem',
-              lineHeight: 1.2,
+              lineHeight: 1.15,
+              color: '#f4efe6',
             }}
           >
             Contact Monarch Pass
           </h1>
-          <p style={{ fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6, margin: '0 auto 1.5rem' }}>
-            Reach out to our on-site leasing office for current availability, rent rates, income qualification, or to schedule a private tour.
+
+          <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 1.5rem', maxWidth: '680px' }}>
+            Reach out to our on-site leasing specialists for unit availability, income qualification guidelines, or to reserve a private tour.
           </p>
         </div>
       </section>
 
       {/* ── 2. CONTACT CONTENT (TWO COLUMNS) ── */}
-      <section style={{ padding: '4rem 0' }}>
-        <div className="container" style={{ maxWidth: '1100px' }}>
+      <section style={{ padding: '4.5rem 0' }}>
+        <div className="container" style={{ maxWidth: '1120px' }}>
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(300px, 380px) 1fr',
-              gap: '3rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: '3.5rem',
               alignItems: 'start',
             }}
           >
             {/* Left Column: Office Details */}
             <div>
-              <h2 style={{ fontSize: '1.5rem', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c9a96e', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                <span style={{ width: '20px', height: '1px', backgroundColor: '#c9a96e', display: 'inline-block' }} />
+                <span>On-Site Management</span>
+              </div>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '2rem', fontWeight: 500, color: '#f4efe6', marginBottom: '1.5rem' }}>
                 Leasing Office Information
               </h2>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
                 {/* Address */}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                <div
+                  style={{
+                    backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                    border: '1px solid rgba(201, 169, 110, 0.15)',
+                    borderRadius: '10px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <div
                     style={{
                       width: '42px',
                       height: '42px',
                       borderRadius: '8px',
-                      backgroundColor: '#ccfbf1',
-                      color: '#0f766e',
+                      backgroundColor: 'rgba(201, 169, 110, 0.12)',
+                      border: '1px solid rgba(201, 169, 110, 0.25)',
+                      color: '#c9a96e',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -160,8 +184,8 @@ export default function ContactUsView({
                     <MapPin size={20} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>Address</div>
-                    <div style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                    <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Physical Address</div>
+                    <div style={{ color: '#a89d8e', fontSize: '0.9rem', lineHeight: 1.6 }}>
                       4500 Campus Drive<br />
                       Fort Worth, TX 76119
                     </div>
@@ -169,14 +193,25 @@ export default function ContactUsView({
                 </div>
 
                 {/* Phone */}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                <div
+                  style={{
+                    backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                    border: '1px solid rgba(201, 169, 110, 0.15)',
+                    borderRadius: '10px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <div
                     style={{
                       width: '42px',
                       height: '42px',
                       borderRadius: '8px',
-                      backgroundColor: '#ccfbf1',
-                      color: '#0f766e',
+                      backgroundColor: 'rgba(201, 169, 110, 0.12)',
+                      border: '1px solid rgba(201, 169, 110, 0.25)',
+                      color: '#c9a96e',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -186,28 +221,39 @@ export default function ContactUsView({
                     <Phone size={20} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>Phone Numbers</div>
+                    <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Direct Leasing Phone</div>
                     <a
                       href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
-                      style={{ color: '#0f766e', fontSize: '1rem', fontWeight: 700, textDecoration: 'none', display: 'block' }}
+                      style={{ color: '#c9a96e', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', display: 'block' }}
                     >
-                      {siteSettings?.phone || '+1 817-857-8782'}
+                      {siteSettings?.phone || '(817) 857-8782'}
                     </a>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>
-                      Main Office: <a href={`tel:${siteSettings?.secondaryPhone?.replace(/[^0-9+]/g, '') || '+18175311750'}`} style={{ color: '#0f766e', fontWeight: 600 }}>{siteSettings?.secondaryPhone || '+1 817-531-1750'}</a>
+                    <div style={{ fontSize: '0.82rem', color: '#7a7063', marginTop: '4px' }}>
+                      Main Office: <a href={`tel:${siteSettings?.secondaryPhone?.replace(/[^0-9+]/g, '') || '+18175311750'}`} style={{ color: '#dfc285', textDecoration: 'none' }}>{siteSettings?.secondaryPhone || '(817) 531-1750'}</a>
                     </div>
                   </div>
                 </div>
 
                 {/* Email */}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                <div
+                  style={{
+                    backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                    border: '1px solid rgba(201, 169, 110, 0.15)',
+                    borderRadius: '10px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <div
                     style={{
                       width: '42px',
                       height: '42px',
                       borderRadius: '8px',
-                      backgroundColor: '#ccfbf1',
-                      color: '#0f766e',
+                      backgroundColor: 'rgba(201, 169, 110, 0.12)',
+                      border: '1px solid rgba(201, 169, 110, 0.25)',
+                      color: '#c9a96e',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -217,10 +263,10 @@ export default function ContactUsView({
                     <Mail size={20} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>Email</div>
+                    <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Email Inquiries</div>
                     <a
                       href={`mailto:${siteSettings?.email || 'leasing@monarchpassapts.com'}`}
-                      style={{ color: '#0f766e', fontSize: '0.9rem', textDecoration: 'none' }}
+                      style={{ color: '#dfc285', fontSize: '0.9rem', textDecoration: 'none' }}
                     >
                       {siteSettings?.email || 'leasing@monarchpassapts.com'}
                     </a>
@@ -228,14 +274,25 @@ export default function ContactUsView({
                 </div>
 
                 {/* Hours */}
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                <div
+                  style={{
+                    backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                    border: '1px solid rgba(201, 169, 110, 0.15)',
+                    borderRadius: '10px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <div
                     style={{
                       width: '42px',
                       height: '42px',
                       borderRadius: '8px',
-                      backgroundColor: '#ccfbf1',
-                      color: '#0f766e',
+                      backgroundColor: 'rgba(201, 169, 110, 0.12)',
+                      border: '1px solid rgba(201, 169, 110, 0.25)',
+                      color: '#c9a96e',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -245,11 +302,11 @@ export default function ContactUsView({
                     <Clock size={20} />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>Office Hours</div>
-                    <div style={{ color: '#475569', fontSize: '0.88rem', lineHeight: 1.5 }}>
-                      <strong>Monday – Friday:</strong> {siteSettings?.officeHours?.monFri || '10:00 AM – 6:00 PM'}<br />
-                      <strong>Saturday:</strong> {siteSettings?.officeHours?.sat || '10:00 AM – 5:00 PM'}<br />
-                      <strong>Sunday:</strong> {siteSettings?.officeHours?.sun || '1:00 PM – 5:00 PM'}
+                    <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.4rem' }}>Office Hours</div>
+                    <div style={{ color: '#a89d8e', fontSize: '0.86rem', lineHeight: 1.6 }}>
+                      <div><strong style={{ color: '#f4efe6' }}>Mon – Fri:</strong> {siteSettings?.officeHours?.monFri || '10:00 AM – 6:00 PM'}</div>
+                      <div><strong style={{ color: '#f4efe6' }}>Saturday:</strong> {siteSettings?.officeHours?.sat || '10:00 AM – 5:00 PM'}</div>
+                      <div><strong style={{ color: '#f4efe6' }}>Sunday:</strong> {siteSettings?.officeHours?.sun || '1:00 PM – 5:00 PM'}</div>
                     </div>
                   </div>
                 </div>
@@ -258,20 +315,20 @@ export default function ContactUsView({
               {/* Cushman & Wakefield badge */}
               <div
                 style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
+                  backgroundColor: 'rgba(12, 16, 28, 0.75)',
+                  border: '1px solid rgba(201, 169, 110, 0.2)',
+                  borderRadius: '10px',
                   padding: '1.25rem',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                  <Building size={16} style={{ color: '#0f766e' }} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
+                  <Building size={16} style={{ color: '#c9a96e' }} />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#c9a96e', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                     Professionally Managed
                   </span>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                  Monarch Pass Apartments is proudly managed by Cushman & Wakefield, ensuring top-tier maintenance and resident services.
+                <p style={{ fontSize: '0.84rem', color: '#9e9282', margin: 0, lineHeight: 1.6 }}>
+                  Monarch Pass Apartments is proudly managed by Cushman & Wakefield, ensuring attentive customer care and prompt maintenance response.
                 </p>
               </div>
             </div>
@@ -279,22 +336,23 @@ export default function ContactUsView({
             {/* Right Column: Contact Inquiry Form */}
             <div
               style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
+                backgroundColor: 'rgba(14, 18, 30, 0.85)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
+                borderRadius: '14px',
                 padding: '2.5rem',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.06)',
+                boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
               }}
             >
               {formSubmitted ? (
-                <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+                <div style={{ textAlign: 'center', padding: '3.5rem 1rem' }}>
                   <div
                     style={{
                       width: '64px',
                       height: '64px',
                       borderRadius: '50%',
-                      backgroundColor: '#ccfbf1',
-                      color: '#0f766e',
+                      backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                      border: '1px solid rgba(201, 169, 110, 0.35)',
+                      color: '#c9a96e',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -303,21 +361,23 @@ export default function ContactUsView({
                   >
                     <CheckCircle2 size={36} />
                   </div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
-                    Message Sent Successfully!
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.85rem', fontWeight: 600, color: '#f4efe6', marginBottom: '0.5rem' }}>
+                    Message Sent Successfully
                   </h3>
-                  <p style={{ color: '#475569', fontSize: '0.95rem', maxWidth: '420px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-                    Thank you for reaching out to Monarch Pass. A member of our leasing staff will contact you shortly via email or phone.
+                  <p style={{ color: '#a89d8e', fontSize: '0.95rem', maxWidth: '420px', margin: '0 auto 2rem', lineHeight: 1.6 }}>
+                    Thank you for contacting Monarch Pass. Our leasing team will respond via email or telephone within one business day.
                   </p>
                   <button
                     onClick={handleReset}
                     style={{
-                      backgroundColor: '#0f766e',
-                      color: '#ffffff',
-                      padding: '0.65rem 1.5rem',
-                      borderRadius: '6px',
-                      fontWeight: 600,
-                      fontSize: '0.9rem',
+                      padding: '0.75rem 1.75rem',
+                      borderRadius: '4px',
+                      background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                      color: '#08090f',
+                      fontWeight: 700,
+                      fontSize: '0.84rem',
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
                       border: 'none',
                       cursor: 'pointer',
                     }}
@@ -327,16 +387,16 @@ export default function ContactUsView({
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
-                  <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.75rem', fontWeight: 600, color: '#f4efe6', margin: '0 0 0.5rem' }}>
                     Send Us a Message
                   </h3>
-                  <p style={{ color: '#64748b', fontSize: '0.88rem', margin: '0 0 1.75rem' }}>
-                    Fill out the form below and we will get back to you within 24 business hours.
+                  <p style={{ color: '#8c8273', fontSize: '0.88rem', margin: '0 0 2rem' }}>
+                    Complete the form below and an on-site representative will follow up promptly.
                   </p>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         First Name *
                       </label>
                       <input
@@ -347,16 +407,19 @@ export default function ContactUsView({
                         placeholder="John"
                         style={{
                           width: '100%',
-                          padding: '0.7rem 0.85rem',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 0.9rem',
+                          color: '#f4efe6',
                           fontSize: '0.9rem',
+                          outline: 'none',
                         }}
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Last Name
                       </label>
                       <input
@@ -366,10 +429,13 @@ export default function ContactUsView({
                         placeholder="Doe"
                         style={{
                           width: '100%',
-                          padding: '0.7rem 0.85rem',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 0.9rem',
+                          color: '#f4efe6',
                           fontSize: '0.9rem',
+                          outline: 'none',
                         }}
                       />
                     </div>
@@ -377,7 +443,7 @@ export default function ContactUsView({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Email Address *
                       </label>
                       <input
@@ -388,16 +454,19 @@ export default function ContactUsView({
                         placeholder="john@example.com"
                         style={{
                           width: '100%',
-                          padding: '0.7rem 0.85rem',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 0.9rem',
+                          color: '#f4efe6',
                           fontSize: '0.9rem',
+                          outline: 'none',
                         }}
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Phone Number
                       </label>
                       <input
@@ -407,10 +476,13 @@ export default function ContactUsView({
                         placeholder="(817) 000-0000"
                         style={{
                           width: '100%',
-                          padding: '0.7rem 0.85rem',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 0.9rem',
+                          color: '#f4efe6',
                           fontSize: '0.9rem',
+                          outline: 'none',
                         }}
                       />
                     </div>
@@ -418,7 +490,7 @@ export default function ContactUsView({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Desired Move-In Date
                       </label>
                       <input
@@ -427,28 +499,33 @@ export default function ContactUsView({
                         onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })}
                         style={{
                           width: '100%',
-                          padding: '0.7rem 0.85rem',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 0.9rem',
+                          color: '#f4efe6',
                           fontSize: '0.9rem',
+                          outline: 'none',
                         }}
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                        Interested Bedroom Layout
+                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                        Preferred Residence Layout
                       </label>
                       <select
                         value={formData.bedrooms}
                         onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
                         style={{
                           width: '100%',
-                          padding: '0.7rem 0.85rem',
+                          backgroundColor: '#0a0d16',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
                           borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
+                          padding: '0.75rem 0.9rem',
+                          color: '#f4efe6',
                           fontSize: '0.9rem',
-                          backgroundColor: '#ffffff',
+                          outline: 'none',
                         }}
                       >
                         <option value="1 Bed">1 Bedroom (703 Sq Ft)</option>
@@ -460,20 +537,23 @@ export default function ContactUsView({
                   </div>
 
                   <div style={{ marginBottom: '1.25rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                      Message or Questions
+                    <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      Questions or Special Inquiries
                     </label>
                     <textarea
                       rows={4}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Ask about current availability, pet policies, income qualifications, or move-in specials..."
+                      placeholder="Ask about current availability, pet deposit, income qualification, or tour dates..."
                       style={{
                         width: '100%',
-                        padding: '0.7rem 0.85rem',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(201, 169, 110, 0.25)',
                         borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
+                        padding: '0.75rem 0.9rem',
+                        color: '#f4efe6',
                         fontSize: '0.9rem',
+                        outline: 'none',
                         resize: 'vertical',
                       }}
                     />
@@ -487,8 +567,8 @@ export default function ContactUsView({
                       onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
                       style={{ marginTop: '3px' }}
                     />
-                    <label htmlFor="contact-consent" style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>
-                      I agree to receive calls and text messages from Monarch Pass regarding my inquiry at the contact number provided. Message & data rates may apply.
+                    <label htmlFor="contact-consent" style={{ fontSize: '0.8rem', color: '#8c8273', lineHeight: 1.5 }}>
+                      I agree to receive calls and text messages from Monarch Pass regarding my inquiry at the contact number provided. Message and data rates may apply.
                     </label>
                   </div>
 
@@ -497,43 +577,44 @@ export default function ContactUsView({
                       type="button"
                       onClick={() => handleSchedule()}
                       style={{
-                        backgroundColor: '#ffffff',
-                        color: '#0f766e',
-                        border: '1px solid #0f766e',
-                        padding: '0.75rem 1.25rem',
-                        borderRadius: '6px',
-                        fontSize: '0.9rem',
+                        backgroundColor: 'transparent',
+                        color: '#dfc285',
+                        border: '1px solid rgba(201, 169, 110, 0.4)',
+                        padding: '0.75rem 1.4rem',
+                        borderRadius: '4px',
+                        fontSize: '0.84rem',
                         fontWeight: 600,
+                        letterSpacing: '0.04em',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '0.4rem',
+                        gap: '0.45rem',
                       }}
                     >
-                      <Calendar size={16} />
-                      <span>Schedule a Tour</span>
+                      <Calendar size={15} />
+                      <span>Schedule a Tour Instead</span>
                     </button>
 
                     <button
                       type="submit"
                       style={{
-                        backgroundColor: '#0f766e',
-                        color: '#ffffff',
+                        padding: '0.8rem 2rem',
+                        borderRadius: '4px',
                         border: 'none',
-                        padding: '0.75rem 1.85rem',
-                        borderRadius: '6px',
-                        fontSize: '0.92rem',
-                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                        color: '#08090f',
+                        fontSize: '0.84rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '0.5rem',
                         cursor: 'pointer',
-                        transition: 'background 0.2s',
+                        boxShadow: '0 4px 15px rgba(201, 169, 110, 0.3)',
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
                     >
-                      <Send size={16} />
+                      <Send size={15} />
                       <span>Submit Inquiry</span>
                     </button>
                   </div>

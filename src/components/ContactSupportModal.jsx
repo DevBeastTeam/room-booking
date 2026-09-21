@@ -72,8 +72,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-        backdropFilter: 'blur(5px)',
+        backgroundColor: 'rgba(5, 7, 14, 0.85)',
+        backdropFilter: 'blur(8px)',
         zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
@@ -87,24 +87,25 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
       <div
         className="animate-fade-in"
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: '#0c101c',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '620px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
           overflow: 'hidden',
-          border: '1px solid #e2e8f0',
+          border: '1px solid rgba(201, 169, 110, 0.35)',
         }}
       >
         {/* Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #0f766e, #115e59)',
+            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
+            borderBottom: '1px solid rgba(201, 169, 110, 0.25)',
             padding: '1.5rem 1.75rem',
-            color: '#ffffff',
+            color: '#f8fafc',
             position: 'relative',
             display: 'flex',
             alignItems: 'center',
@@ -117,19 +118,22 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 width: 44,
                 height: 44,
                 borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                border: '1px solid rgba(201, 169, 110, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backdropFilter: 'blur(4px)',
+                color: '#dfc285',
               }}
             >
-              <MessageSquare size={22} color="#ffffff" />
+              <MessageSquare size={22} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>Contact & Support</h3>
-              <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', opacity: 0.9 }}>
-                {siteSettings?.siteName || 'Monarch Pass Apartments'} · Leasing Office
+              <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 600, fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+                Contact & Support Concierge
+              </h3>
+              <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: '#dfc285' }}>
+                {siteSettings?.siteName || 'Monarch Pass Residences'} · Executive Leasing Office
               </p>
             </div>
           </div>
@@ -138,8 +142,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
             onClick={onClose}
             aria-label="Close modal"
             style={{
-              background: 'rgba(255, 255, 255, 0.18)',
-              border: 'none',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
               borderRadius: '50%',
               width: 36,
               height: 36,
@@ -147,11 +151,9 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#ffffff',
-              transition: 'background 0.2s',
+              color: '#c9a96e',
+              transition: 'all 0.2s',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.18)')}
           >
             <X size={18} />
           </button>
@@ -166,8 +168,9 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                   width: 64,
                   height: 64,
                   borderRadius: '50%',
-                  backgroundColor: '#dcfce7',
-                  color: '#16a34a',
+                  backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                  border: '1px solid rgba(201, 169, 110, 0.4)',
+                  color: '#dfc285',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -177,68 +180,58 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 <CheckCircle size={36} />
               </div>
 
-              <h4 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                Message Received!
+              <h4 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#f8fafc', margin: '0 0 0.5rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+                Inquiry Successfully Logged
               </h4>
-              <p style={{ color: '#475569', fontSize: '0.92rem', lineHeight: 1.6, maxWidth: '420px', margin: '0 auto 1.5rem' }}>
-                Thank you for contacting us! Your inquiry (Reference: <strong>{submittedId}</strong>) has been submitted to the leasing management team. We will get back to you shortly.
+              <p style={{ color: '#94a3b8', fontSize: '0.92rem', lineHeight: 1.6, maxWidth: '440px', margin: '0 auto 1.5rem' }}>
+                Thank you for contacting us! Your inquiry (Reference: <strong style={{ color: '#dfc285' }}>{submittedId}</strong>) has been routed to our on-site management team.
               </p>
 
               <div
                 style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'rgba(16, 20, 34, 0.95)',
+                  border: '1px solid rgba(201, 169, 110, 0.25)',
                   borderRadius: '10px',
-                  padding: '1rem',
-                  fontSize: '0.85rem',
-                  color: '#64748b',
-                  marginBottom: '1.75rem',
+                  padding: '1.25rem',
+                  fontSize: '0.88rem',
+                  color: '#94a3b8',
+                  marginBottom: '2rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.4rem',
+                  gap: '0.6rem',
                   textAlign: 'left',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Clock size={15} style={{ color: '#0f766e' }} />
-                  <span>Expected response: <strong>Within 2-4 business hours</strong></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <Clock size={16} style={{ color: '#dfc285' }} />
+                  <span>Expected response: <strong style={{ color: '#f4efe6' }}>Within 2-4 business hours</strong></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Phone size={15} style={{ color: '#0f766e' }} />
-                  <span>Immediate assistance: <a href={`tel:${siteSettings?.phone || '+18176465785'}`} style={{ color: '#0f766e', fontWeight: 600 }}>{siteSettings?.phone || '+1 817-646-5785'}</a></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <Phone size={16} style={{ color: '#dfc285' }} />
+                  <span>Immediate assistance: <a href={`tel:${siteSettings?.phone || '+18178578782'}`} style={{ color: '#dfc285', fontWeight: 700 }}>{siteSettings?.phone || '(817) 857-8782'}</a></span>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                 <button
                   onClick={handleReset}
+                  className="btn-outline-gold"
                   style={{
                     padding: '0.65rem 1.25rem',
-                    borderRadius: '8px',
-                    backgroundColor: '#f1f5f9',
-                    color: '#334155',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
+                    fontSize: '0.85rem',
                   }}
                 >
-                  Send Another Message
+                  Send Another Inquiry
                 </button>
                 <button
                   onClick={onClose}
+                  className="btn-gold"
                   style={{
-                    padding: '0.65rem 1.5rem',
-                    borderRadius: '8px',
-                    backgroundColor: '#0f766e',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontSize: '0.875rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
+                    padding: '0.65rem 1.75rem',
+                    fontSize: '0.85rem',
                   }}
                 >
-                  Close
+                  Done
                 </button>
               </div>
             </div>
@@ -247,31 +240,31 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
               {/* Info banner */}
               <div
                 style={{
-                  backgroundColor: '#f0fdfa',
-                  border: '1px solid #ccfbf1',
+                  backgroundColor: 'rgba(201, 169, 110, 0.1)',
+                  border: '1px solid rgba(201, 169, 110, 0.25)',
                   borderRadius: '10px',
-                  padding: '0.85rem 1rem',
+                  padding: '0.85rem 1.1rem',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.75rem',
                   fontSize: '0.85rem',
-                  color: '#115e59',
+                  color: '#dfc285',
                 }}
               >
-                <Sparkles size={18} style={{ color: '#0f766e', flexShrink: 0 }} />
+                <Sparkles size={18} style={{ color: '#c9a96e', flexShrink: 0 }} />
                 <span>
-                  Have a question about leasing, current specials, or community guidelines? Send our team a message below!
+                  Questions about leasing rates, current Move-in Specials, or Affordable Housing qualifications? Send our team a message below!
                 </span>
               </div>
 
               {/* Name & Email Row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                     Full Name <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <User size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                    <User size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#c9a96e' }} />
                     <input
                       type="text"
                       required
@@ -280,9 +273,11 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '0.6rem 0.75rem 0.6rem 2.3rem',
+                        padding: '0.65rem 0.75rem 0.65rem 2.4rem',
                         borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
+                        border: '1px solid rgba(201, 169, 110, 0.3)',
+                        backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                        color: '#f4efe6',
                         fontSize: '0.9rem',
                         outline: 'none',
                         boxSizing: 'border-box',
@@ -292,11 +287,11 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                     Email Address <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                    <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#c9a96e' }} />
                     <input
                       type="email"
                       required
@@ -305,9 +300,11 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '0.6rem 0.75rem 0.6rem 2.3rem',
+                        padding: '0.65rem 0.75rem 0.65rem 2.4rem',
                         borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
+                        border: '1px solid rgba(201, 169, 110, 0.3)',
+                        backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                        color: '#f4efe6',
                         fontSize: '0.9rem',
                         outline: 'none',
                         boxSizing: 'border-box',
@@ -320,11 +317,11 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
               {/* Phone & Category Row */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                     Phone Number
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                    <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#c9a96e' }} />
                     <input
                       type="tel"
                       placeholder="+1 (817) 000-0000"
@@ -332,9 +329,11 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '0.6rem 0.75rem 0.6rem 2.3rem',
+                        padding: '0.65rem 0.75rem 0.65rem 2.4rem',
                         borderRadius: '8px',
-                        border: '1px solid #cbd5e1',
+                        border: '1px solid rgba(201, 169, 110, 0.3)',
+                        backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                        color: '#f4efe6',
                         fontSize: '0.9rem',
                         outline: 'none',
                         boxSizing: 'border-box',
@@ -344,25 +343,26 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
-                    Topic / Category
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                    Topic / Department
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '0.6rem 0.75rem',
+                      padding: '0.65rem 0.75rem',
                       borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
+                      border: '1px solid rgba(201, 169, 110, 0.3)',
                       fontSize: '0.9rem',
-                      backgroundColor: '#ffffff',
+                      backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                      color: '#f4efe6',
                       outline: 'none',
                       boxSizing: 'border-box',
                     }}
                   >
                     {categories.map((c) => (
-                      <option key={c} value={c}>
+                      <option key={c} value={c} style={{ backgroundColor: '#0c101c' }}>
                         {c}
                       </option>
                     ))}
@@ -372,20 +372,22 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
 
               {/* Subject */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
-                  Subject
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  Subject Line
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Schedule a tour for 2-bedroom next Tuesday"
+                  placeholder="e.g. Inquiring about 2-Bedroom availability next month"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   style={{
                     width: '100%',
-                    padding: '0.6rem 0.75rem',
+                    padding: '0.65rem 0.75rem',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid rgba(201, 169, 110, 0.3)',
                     fontSize: '0.9rem',
+                    backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                    color: '#f4efe6',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
@@ -394,21 +396,23 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
 
               {/* Message */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
-                  Your Message <span style={{ color: '#ef4444' }}>*</span>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+                  Message Details <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <textarea
                   required
                   rows={4}
-                  placeholder="Tell us what you need help with, preferred move-in dates, unit preferences, etc."
+                  placeholder="Tell us about your timeline, household size, or specific questions..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   style={{
                     width: '100%',
                     padding: '0.75rem',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid rgba(201, 169, 110, 0.3)',
                     fontSize: '0.9rem',
+                    backgroundColor: 'rgba(8, 10, 18, 0.75)',
+                    color: '#f4efe6',
                     outline: 'none',
                     resize: 'vertical',
                     boxSizing: 'border-box',
@@ -418,19 +422,14 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
               </div>
 
               {/* Submit Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.85rem', marginTop: '0.5rem' }}>
                 <button
                   type="button"
                   onClick={onClose}
+                  className="btn-outline-gold"
                   style={{
                     padding: '0.65rem 1.25rem',
-                    borderRadius: '8px',
-                    backgroundColor: '#f1f5f9',
-                    color: '#475569',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
+                    fontSize: '0.85rem',
                   }}
                 >
                   Cancel
@@ -438,23 +437,17 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 <button
                   type="submit"
                   disabled={isSubmitting}
+                  className="btn-gold"
                   style={{
                     padding: '0.65rem 1.5rem',
-                    borderRadius: '8px',
-                    backgroundColor: isSubmitting ? '#94a3b8' : '#0f766e',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontSize: '0.875rem',
-                    fontWeight: 700,
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    fontSize: '0.85rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    boxShadow: '0 4px 12px rgba(15, 118, 110, 0.25)',
                   }}
                 >
                   <Send size={15} />
-                  <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                  <span>{isSubmitting ? 'Sending...' : 'Transmit Message'}</span>
                 </button>
               </div>
             </form>

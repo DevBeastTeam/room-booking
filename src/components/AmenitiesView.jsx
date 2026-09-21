@@ -72,144 +72,134 @@ export default function AmenitiesView({
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'community' | 'apartment'
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#1e293b' }}>
+    <div style={{ backgroundColor: '#08090f', color: '#e8e0d4', minHeight: '100vh' }}>
       {/* ── 1. AMENITIES HERO BANNER ── */}
       <section
         style={{
           position: 'relative',
-          padding: '4.5rem 1rem',
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg')`,
+          padding: '5rem 1rem',
+          backgroundImage: `linear-gradient(rgba(8, 9, 15, 0.8), rgba(8, 9, 15, 0.9)), url('https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           textAlign: 'center',
-          color: '#ffffff',
+          color: '#f4efe6',
+          borderBottom: '1px solid rgba(201, 169, 110, 0.15)',
         }}
       >
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <span
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div
             style={{
-              backgroundColor: 'rgba(15, 118, 110, 0.9)',
-              color: '#ffffff',
-              padding: '0.35rem 1.25rem',
-              borderRadius: '9999px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(201, 169, 110, 0.15)',
+              border: '1px solid rgba(201, 169, 110, 0.35)',
+              color: '#dfc285',
+              padding: '0.4rem 1.25rem',
+              borderRadius: '50px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              display: 'inline-block',
-              marginBottom: '1rem',
+              marginBottom: '1.25rem',
             }}
           >
-            Community & Home Features
-          </span>
+            <Sparkles size={14} style={{ color: '#c9a96e' }} />
+            <span>Community & Residence Perks</span>
+          </div>
+
           <h1
             style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
-              fontFamily: 'serif',
-              fontWeight: 700,
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(2.3rem, 4.5vw, 3.4rem)',
+              fontWeight: 500,
+              color: '#f4efe6',
               marginBottom: '1rem',
-              lineHeight: 1.2,
+              lineHeight: 1.15,
             }}
           >
-            Amenities at Monarch Pass
+            Curated Amenities at Monarch Pass
           </h1>
-          <p style={{ fontSize: '1.1rem', color: '#cbd5e1', lineHeight: 1.6, margin: '0 auto 2rem' }}>
-            From our refreshing community splash park to open-concept apartments with modern finishes, discover every comfort designed for you in Fort Worth, TX.
+
+          <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 2.25rem', maxWidth: '680px' }}>
+            From our private community splash park and manicured courtyards to chef-style kitchens with wood-style flooring, experience every comfort designed for elevated living in Fort Worth, TX.
           </p>
 
           <button
-            onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
+            onClick={() => handleSchedule()}
             style={{
-              backgroundColor: '#0f766e',
-              color: '#ffffff',
-              padding: '0.8rem 1.8rem',
-              borderRadius: '6px',
-              fontSize: '0.95rem',
-              fontWeight: 600,
+              padding: '0.85rem 2rem',
+              borderRadius: '4px',
               border: 'none',
+              background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+              color: '#08090f',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+              boxShadow: '0 4px 20px rgba(201, 169, 110, 0.35)',
+              transition: 'all 0.2s',
             }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
           >
-            <Calendar size={18} />
+            <Calendar size={16} />
             <span>Schedule an In-Person Tour</span>
           </button>
         </div>
       </section>
 
       {/* ── 2. FILTER TABS BAR ── */}
-      <section style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '1rem 0' }}>
+      <section style={{ backgroundColor: '#0c101c', borderBottom: '1px solid rgba(201, 169, 110, 0.15)', padding: '1rem 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setActiveTab('all')}
-            style={{
-              padding: '0.6rem 1.5rem',
-              borderRadius: '6px',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              border: activeTab === 'all' ? '1px solid #0f766e' : '1px solid #cbd5e1',
-              backgroundColor: activeTab === 'all' ? '#0f766e' : '#ffffff',
-              color: activeTab === 'all' ? '#ffffff' : '#475569',
-              transition: 'all 0.2s',
-            }}
-          >
-            All Amenities ({COMMUNITY_AMENITIES.length + APARTMENT_AMENITIES.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab('community')}
-            style={{
-              padding: '0.6rem 1.5rem',
-              borderRadius: '6px',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              border: activeTab === 'community' ? '1px solid #0f766e' : '1px solid #cbd5e1',
-              backgroundColor: activeTab === 'community' ? '#0f766e' : '#ffffff',
-              color: activeTab === 'community' ? '#ffffff' : '#475569',
-              transition: 'all 0.2s',
-            }}
-          >
-            Community Amenities ({COMMUNITY_AMENITIES.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab('apartment')}
-            style={{
-              padding: '0.6rem 1.5rem',
-              borderRadius: '6px',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              border: activeTab === 'apartment' ? '1px solid #0f766e' : '1px solid #cbd5e1',
-              backgroundColor: activeTab === 'apartment' ? '#0f766e' : '#ffffff',
-              color: activeTab === 'apartment' ? '#ffffff' : '#475569',
-              transition: 'all 0.2s',
-            }}
-          >
-            Apartment Amenities ({APARTMENT_AMENITIES.length})
-          </button>
+          {[
+            { id: 'all', label: `All Amenities (${COMMUNITY_AMENITIES.length + APARTMENT_AMENITIES.length})` },
+            { id: 'community', label: `Community Amenities (${COMMUNITY_AMENITIES.length})` },
+            { id: 'apartment', label: `Apartment Amenities (${APARTMENT_AMENITIES.length})` },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '0.55rem 1.4rem',
+                  borderRadius: '4px',
+                  fontWeight: 600,
+                  fontSize: '0.84rem',
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  border: isActive ? '1px solid #c9a96e' : '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: isActive ? 'rgba(201, 169, 110, 0.18)' : 'transparent',
+                  color: isActive ? '#dfc285' : '#8c8273',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </section>
 
       {/* ── 3. MAIN AMENITIES CONTENT ── */}
-      <section style={{ padding: '3.5rem 0' }}>
+      <section style={{ padding: '4rem 0' }}>
         <div className="container">
           {/* Section: Community Amenities */}
           {(activeTab === 'all' || activeTab === 'community') && (
             <div style={{ marginBottom: '4rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span style={{ width: '4px', height: '24px', backgroundColor: '#0f766e', borderRadius: '2px' }} />
-                <h2 style={{ fontSize: '1.65rem', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                <span style={{ width: '4px', height: '24px', backgroundColor: '#c9a96e', borderRadius: '2px' }} />
+                <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.85rem', fontWeight: 500, color: '#f4efe6', margin: 0 }}>
                   Community Amenities
                 </h2>
               </div>
-              <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '2rem' }}>
-                Active recreation and social conveniences curated for the entire family.
+              <p style={{ color: '#9e9282', fontSize: '0.94rem', marginBottom: '2rem' }}>
+                Active recreation, private outdoor spaces, and social conveniences curated for the entire family.
               </p>
 
               <div
@@ -224,44 +214,47 @@ export default function AmenitiesView({
                   return (
                     <div
                       key={idx}
+                      className="amenity-card"
                       style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e2e8f0',
+                        backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                        border: '1px solid rgba(201, 169, 110, 0.14)',
                         borderRadius: '10px',
                         padding: '1.5rem',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '0.75rem',
-                        boxShadow: '0 2px 5px rgba(0,0,0,0.03)',
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        transition: 'all 0.25s ease',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-3px)';
-                        e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.06)';
+                        e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.35)';
+                        e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.03)';
+                        e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.14)';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
                       <div
                         style={{
-                          width: '46px',
-                          height: '46px',
+                          width: '44px',
+                          height: '44px',
                           borderRadius: '8px',
-                          backgroundColor: '#ccfbf1',
-                          color: '#0f766e',
+                          backgroundColor: 'rgba(201, 169, 110, 0.12)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
+                          color: '#c9a96e',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
                       >
-                        <Icon size={22} />
+                        <Icon size={20} />
                       </div>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                      <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.25rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                         {item.name}
                       </h3>
-                      <p style={{ fontSize: '0.88rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+                      <p style={{ fontSize: '0.86rem', color: '#9e9282', margin: 0, lineHeight: 1.6 }}>
                         {item.desc}
                       </p>
                     </div>
@@ -275,13 +268,13 @@ export default function AmenitiesView({
           {(activeTab === 'all' || activeTab === 'apartment') && (
             <div style={{ marginBottom: '4rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span style={{ width: '4px', height: '24px', backgroundColor: '#0f766e', borderRadius: '2px' }} />
-                <h2 style={{ fontSize: '1.65rem', fontFamily: 'serif', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  Apartment Interior Amenities
+                <span style={{ width: '4px', height: '24px', backgroundColor: '#c9a96e', borderRadius: '2px' }} />
+                <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.85rem', fontWeight: 500, color: '#f4efe6', margin: 0 }}>
+                  Apartment Interior Finishes
                 </h2>
               </div>
-              <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '2rem' }}>
-                Modern conveniences and comfortable details in every 1, 2, 3, and 4-bedroom layout.
+              <p style={{ color: '#9e9282', fontSize: '0.94rem', marginBottom: '2rem' }}>
+                Designer finishes, energy-efficient appliances, and comfortable details in every 1, 2, 3, and 4-bedroom layout.
               </p>
 
               <div
@@ -296,44 +289,47 @@ export default function AmenitiesView({
                   return (
                     <div
                       key={idx}
+                      className="amenity-card"
                       style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e2e8f0',
+                        backgroundColor: 'rgba(14, 18, 30, 0.75)',
+                        border: '1px solid rgba(201, 169, 110, 0.14)',
                         borderRadius: '10px',
                         padding: '1.5rem',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '0.75rem',
-                        boxShadow: '0 2px 5px rgba(0,0,0,0.03)',
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        transition: 'all 0.25s ease',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-3px)';
-                        e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.06)';
+                        e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.35)';
+                        e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.03)';
+                        e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.14)';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
                       <div
                         style={{
-                          width: '46px',
-                          height: '46px',
+                          width: '44px',
+                          height: '44px',
                           borderRadius: '8px',
-                          backgroundColor: '#e0f2fe',
-                          color: '#0369a1',
+                          backgroundColor: 'rgba(201, 169, 110, 0.12)',
+                          border: '1px solid rgba(201, 169, 110, 0.25)',
+                          color: '#c9a96e',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
                       >
-                        <Icon size={22} />
+                        <Icon size={20} />
                       </div>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                      <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.25rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                         {item.name}
                       </h3>
-                      <p style={{ fontSize: '0.88rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+                      <p style={{ fontSize: '0.86rem', color: '#9e9282', margin: 0, lineHeight: 1.6 }}>
                         {item.desc}
                       </p>
                     </div>
@@ -346,62 +342,63 @@ export default function AmenitiesView({
           {/* ── 4. PET POLICY CALLOUT BOX ── */}
           <div
             style={{
-              backgroundColor: '#fffbeb',
-              border: '1px solid #fde68a',
+              backgroundColor: 'rgba(12, 16, 28, 0.85)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
               borderRadius: '12px',
-              padding: '2rem',
+              padding: '2.25rem',
               marginBottom: '3.5rem',
               display: 'grid',
-              gridTemplateColumns: 'minmax(200px, 240px) 1fr',
-              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '2.5rem',
               alignItems: 'center',
             }}
           >
-            <div style={{ textAlign: 'center', borderRight: '1px solid #fef3c7', paddingRight: '1.5rem' }}>
+            <div style={{ textAlign: 'center', borderRight: '1px solid rgba(201,169,110,0.15)', paddingRight: '1rem' }}>
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '60px',
+                  height: '60px',
                   borderRadius: '50%',
-                  backgroundColor: '#fef3c7',
-                  color: '#b45309',
+                  backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                  border: '1px solid rgba(201, 169, 110, 0.35)',
+                  color: '#c9a96e',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 1rem',
                 }}
               >
-                <Dog size={32} />
+                <Dog size={28} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#92400e', margin: 0 }}>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.45rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                 Pet Policy
               </h3>
-              <span style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>
-                Pets Welcomed!
+              <span style={{ fontSize: '0.78rem', color: '#c9a96e', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
+                Pets Welcomed
               </span>
             </div>
 
-            <div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem', marginBottom: '1rem' }}>
+            <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
-                  <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#92400e', fontWeight: 700 }}>Max Pets</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#78350f' }}>2 Pets Max per Unit</div>
+                  <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c9a96e', fontWeight: 700 }}>Max Pets</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f4efe6' }}>2 Pets Max</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#92400e', fontWeight: 700 }}>One-Time Pet Fee</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#78350f' }}>$350 (Non-refundable)</div>
+                  <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c9a96e', fontWeight: 700 }}>One-Time Fee</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f4efe6' }}>$350</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#92400e', fontWeight: 700 }}>Monthly Pet Rent</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#78350f' }}>$20.00 / month / pet</div>
+                  <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c9a96e', fontWeight: 700 }}>Monthly Rent</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f4efe6' }}>$20 / mo / pet</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#92400e', fontWeight: 700 }}>Pet Deposit</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#78350f' }}>$150.00 (Refundable)</div>
+                  <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c9a96e', fontWeight: 700 }}>Deposit</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f4efe6' }}>$150 (Refundable)</div>
                 </div>
               </div>
-              <p style={{ fontSize: '0.88rem', color: '#78350f', margin: 0, lineHeight: 1.6 }}>
-                <strong>Important Policy Notes:</strong> Dogs and cats are welcome. Breed restrictions apply (including Pit Bulls, Staffordshire Terriers, Rottweilers, German Shepherds, Doberman Pinschers, and Chows). Assistance animals are exempt from pet fees and restrictions with proper documentation.
+              <p style={{ fontSize: '0.85rem', color: '#9e9282', margin: 0, lineHeight: 1.6 }}>
+                <strong>Important Policy Notes:</strong> Dogs and cats are welcome. Breed restrictions apply. Assistance animals are exempt from pet fees and restrictions with proper documentation.
               </p>
             </div>
           </div>
@@ -409,10 +406,11 @@ export default function AmenitiesView({
           {/* ── 5. BOTTOM CTA BANNER ── */}
           <div
             style={{
-              backgroundColor: '#0f766e',
+              background: 'linear-gradient(135deg, rgba(12, 16, 28, 0.95) 0%, rgba(20, 26, 44, 0.9) 100%)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
               borderRadius: '12px',
               padding: '2.5rem',
-              color: '#ffffff',
+              color: '#f4efe6',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -421,11 +419,11 @@ export default function AmenitiesView({
             }}
           >
             <div>
-              <h3 style={{ fontSize: '1.5rem', fontFamily: 'serif', fontWeight: 700, margin: '0 0 0.5rem' }}>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.75rem', fontWeight: 500, color: '#f4efe6', margin: '0 0 0.5rem' }}>
                 Find Your Ideal Home Layout
               </h3>
-              <p style={{ color: '#ccfbf1', margin: 0, fontSize: '0.95rem' }}>
-                Compare 1, 2, 3, and 4-bedroom floor plans, see move-in specials, and calculate costs.
+              <p style={{ color: '#a89d8e', margin: 0, fontSize: '0.94rem' }}>
+                Compare 1, 2, 3, and 4-bedroom floor plans, see availability, and calculate exact lease estimates.
               </p>
             </div>
 
@@ -433,40 +431,44 @@ export default function AmenitiesView({
               <button
                 onClick={handleFloorPlans}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#0f766e',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  fontSize: '0.92rem',
+                  background: 'linear-gradient(135deg, #dfc285 0%, #c9a96e 100%)',
+                  color: '#08090f',
+                  padding: '0.8rem 1.65rem',
+                  borderRadius: '4px',
+                  fontWeight: 700,
+                  fontSize: '0.84rem',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
                   border: 'none',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
+                  gap: '0.5rem',
                 }}
               >
                 <span>View Floor Plans</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={15} />
               </button>
 
               <button
                 onClick={() => handleSchedule()}
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  color: '#ffffff',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '6px',
+                  backgroundColor: 'transparent',
+                  color: '#dfc285',
+                  padding: '0.8rem 1.65rem',
+                  borderRadius: '4px',
                   fontWeight: 600,
-                  fontSize: '0.92rem',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  fontSize: '0.84rem',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  border: '1px solid rgba(201, 169, 110, 0.4)',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
+                  gap: '0.5rem',
                 }}
               >
-                <Calendar size={16} />
+                <Calendar size={15} />
                 <span>Schedule a Tour</span>
               </button>
             </div>

@@ -19,8 +19,8 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-        backdropFilter: 'blur(5px)',
+        backgroundColor: 'rgba(5, 7, 14, 0.85)',
+        backdropFilter: 'blur(8px)',
         zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
@@ -34,28 +34,28 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
       <div
         className="animate-fade-in"
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: '#0c101c',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '720px',
           maxHeight: '85vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
           overflow: 'hidden',
-          border: '1px solid #e2e8f0',
+          border: '1px solid rgba(201, 169, 110, 0.35)',
         }}
       >
         {/* Modal Header */}
         <div
           style={{
-            backgroundColor: '#1e293b',
-            color: '#ffffff',
+            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.25) 0%, rgba(12, 16, 28, 0.95) 100%)',
+            color: '#f8fafc',
             padding: '1.25rem 1.75rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid #334155',
+            borderBottom: '1px solid rgba(201, 169, 110, 0.2)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -64,22 +64,23 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
                 width: 40,
                 height: 40,
                 borderRadius: '10px',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: 'rgba(201, 169, 110, 0.15)',
+                border: '1px solid rgba(201, 169, 110, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
               {pageType === 'privacy' ? (
-                <Shield size={20} color="#68c7b7" />
+                <Shield size={20} color="#dfc285" />
               ) : pageType === 'accessibility' ? (
-                <Shield size={20} color="#38bdf8" />
+                <Shield size={20} color="#93c5fd" />
               ) : (
-                <FileText size={20} color="#fbbf24" />
+                <FileText size={20} color="#dfc285" />
               )}
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>{page.title}</h3>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, fontFamily: '"Cormorant Garamond", Georgia, serif' }}>{page.title}</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
                 <Calendar size={12} />
                 <span>Last updated: {page.lastUpdated}</span>
@@ -92,15 +93,15 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
               onClick={handlePrint}
               aria-label="Print policy"
               style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                border: 'none',
-                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
+                borderRadius: '6px',
                 padding: '0.45rem 0.75rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
                 cursor: 'pointer',
-                color: '#ffffff',
+                color: '#dfc285',
                 fontSize: '0.8rem',
                 fontWeight: 600,
               }}
@@ -112,8 +113,8 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
               onClick={onClose}
               aria-label="Close modal"
               style={{
-                background: 'rgba(255, 255, 255, 0.12)',
-                border: 'none',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(201, 169, 110, 0.25)',
                 borderRadius: '50%',
                 width: 34,
                 height: 34,
@@ -121,7 +122,7 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                color: '#ffffff',
+                color: '#c9a96e',
               }}
             >
               <X size={18} />
@@ -130,12 +131,12 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '1.75rem', overflowY: 'auto', flex: 1 }}>
+        <div style={{ padding: '1.75rem', overflowY: 'auto', flex: 1, backgroundColor: 'rgba(8, 10, 18, 0.75)' }}>
           <div
             style={{
-              color: '#334155',
+              color: '#cbd5e1',
               fontSize: '0.925rem',
-              lineHeight: 1.7,
+              lineHeight: 1.8,
               whiteSpace: 'pre-wrap',
               fontFamily: 'inherit',
             }}
@@ -148,29 +149,25 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
         <div
           style={{
             padding: '1rem 1.75rem',
-            backgroundColor: '#f8fafc',
-            borderTop: '1px solid #e2e8f0',
+            backgroundColor: 'rgba(16, 20, 34, 0.95)',
+            borderTop: '1px solid rgba(201, 169, 110, 0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             fontSize: '0.82rem',
-            color: '#64748b',
+            color: '#94a3b8',
           }}
         >
-          <span>Monarch Pass Apartments · Cushman & Wakefield Management</span>
+          <span>Monarch Pass Residences · Cushman & Wakefield Management</span>
           <button
             onClick={onClose}
+            className="btn-gold"
             style={{
-              padding: '0.5rem 1.25rem',
-              borderRadius: '6px',
-              backgroundColor: '#0f766e',
-              color: '#ffffff',
-              border: 'none',
-              fontWeight: 600,
-              cursor: 'pointer',
+              padding: '0.5rem 1.4rem',
+              fontSize: '0.85rem',
             }}
           >
-            I Understand
+            Acknowledge
           </button>
         </div>
       </div>
