@@ -162,6 +162,7 @@ const SUPPORT_INQUIRIES_KEY = 'monarch_support_inquiries';
 
 // ── Site Settings ─────────────────────────────────────────────────────────────
 export function getSiteSettings() {
+  if (typeof window === 'undefined') return DEFAULT_SITE_SETTINGS;
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SITE_SETTINGS;
@@ -200,6 +201,7 @@ export function resetSiteSettings() {
 
 // ── Legal Pages ───────────────────────────────────────────────────────────────
 export function getLegalPages() {
+  if (typeof window === 'undefined') return DEFAULT_LEGAL_PAGES;
   try {
     const raw = localStorage.getItem(LEGAL_PAGES_KEY);
     if (!raw) return DEFAULT_LEGAL_PAGES;
@@ -210,6 +212,7 @@ export function getLegalPages() {
 }
 
 export function saveLegalPages(pages) {
+  if (typeof window === 'undefined') return false;
   try {
     localStorage.setItem(LEGAL_PAGES_KEY, JSON.stringify(pages));
     window.dispatchEvent(new CustomEvent('legal-pages-updated', { detail: pages }));
@@ -221,6 +224,7 @@ export function saveLegalPages(pages) {
 
 // ── Support Inquiries ─────────────────────────────────────────────────────────
 export function getSupportInquiries() {
+  if (typeof window === 'undefined') return DEFAULT_SUPPORT_INQUIRIES;
   try {
     const raw = localStorage.getItem(SUPPORT_INQUIRIES_KEY);
     if (!raw) return DEFAULT_SUPPORT_INQUIRIES;

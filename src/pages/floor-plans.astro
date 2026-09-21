@@ -1,0 +1,54 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FloorPlansView from '../components/FloorPlansView.jsx';
+
+const floorPlanSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  'name': 'Monarch Pass Apartment Floor Plans',
+  'itemListElement': [
+    {
+      '@type': 'ListItem',
+      'position': 1,
+      'name': 'One Bedroom (Aventine)',
+      'description': '1 Bed, 1 Bath, 614 sq ft, starting at $888/mo',
+    },
+    {
+      '@type': 'ListItem',
+      'position': 2,
+      'name': 'Two Bedroom (Cortesia)',
+      'description': '2 Beds, 1 Bath, 786 sq ft, starting at $860/mo',
+    },
+    {
+      '@type': 'ListItem',
+      'position': 3,
+      'name': 'Three Bedroom (Bravada)',
+      'description': '3 Beds, 2 Baths, 1,024 sq ft, starting at $1,195/mo',
+    },
+    {
+      '@type': 'ListItem',
+      'position': 4,
+      'name': 'Four Bedroom (Palacio)',
+      'description': '4 Beds, 2 Baths, 1,280 sq ft, starting at $1,340/mo',
+    },
+  ],
+};
+---
+
+<Layout
+  title="Floor Plans & Pricing | Monarch Pass Apartments Fort Worth TX"
+  description="Explore 1, 2, 3, and 4-bedroom apartments in Fort Worth, TX. View floor plans, square footage, starting prices from $860, and calculate your exact monthly move-in costs."
+  currentView="floorplans"
+  schemaData={floorPlanSchema}
+>
+  <div class="sr-only">
+    <h1>1, 2, 3 & 4 Bedroom Apartment Floor Plans in Fort Worth, TX</h1>
+    <p>
+      Discover spacious floor plans at Monarch Pass Apartments in Fort Worth. Choose from our 1-bedroom (614 sq ft),
+      2-bedroom (786 sq ft), 3-bedroom (1,024 sq ft), and 4-bedroom (1,280 sq ft) layouts.
+      All apartments feature modern wood-style plank flooring, central heat and air conditioning, and walk-in closets.
+    </p>
+  </div>
+
+  <FloorPlansView client:load />
+</Layout>

@@ -213,6 +213,7 @@ export const PHOTO_GALLERY_IMAGES = [
 ];
 
 export default function PhotoGallery({ onOpenTourModal }) {
+  const handleTourModal = onOpenTourModal || (() => { window.dispatchEvent(new CustomEvent('open-schedule-tour')); });
   const [currentPage, setCurrentPage] = useState(0); // 0, 1, 2, 3
   const [activeCategory, setActiveCategory] = useState('All');
   const [lightboxIndex, setLightboxIndex] = useState(null); // index in filtered list
@@ -555,7 +556,7 @@ export default function PhotoGallery({ onOpenTourModal }) {
           </p>
         </div>
         <button
-          onClick={onOpenTourModal}
+          onClick={handleTourModal}
           style={{
             padding: '0.65rem 1.4rem',
             backgroundColor: '#0f766e',
@@ -568,44 +569,49 @@ export default function PhotoGallery({ onOpenTourModal }) {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            boxShadow: '0 4px 12px rgba(15, 118, 110, 0.2)',
+            boxShadow: '0 2px 8px rgba(15, 118, 110, 0.3)',
+            transition: 'background 0.2s',
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0d6460')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f766e')}
         >
-          <Calendar size={16} /> Schedule a Tour
+          <Calendar size={16} />
+          <span>Schedule an In-Person Tour</span>
         </button>
       </div>
 
-      {/* ========================================================================= */}
-      {/* FULLSCREEN LIGHTBOX MODAL */}
-      {/* ========================================================================= */}
-      {lightboxIndex !== null && filteredImages[lightboxIndex] && (
+      {/* ── LIGHTBOX MODAL ── */}
+      {lightboxIndex !== null && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Enlarged photo preview"
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(10, 14, 23, 0.95)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 2000,
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            zIndex: 9999,
             display: 'flex',
             flexDirection: 'column',
+            justifyContent: 'space-between',
+            backdropFilter: 'blur(8px)',
           }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setLightboxIndex(null);
-          }}
+          onClick={closeLightbox}
         >
-          {/* Lightbox Top Header */}
+          {/* Lightbox Top Bar */}
           <div
             style={{
-              padding: '1rem 1.75rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              padding: '1rem 1.5rem',
               color: '#ffffff',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div>
-              <div style={{ fontSize: '1rem', fontWeight: 700 }}>
+              <div style={{ fontWeight: 700, fontSize: '1rem', color: '#f8fafc' }}>
                 {filteredImages[lightboxIndex].title}
               </div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
@@ -615,7 +621,7 @@ export default function PhotoGallery({ onOpenTourModal }) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button
-                onClick={onOpenTourModal}
+                onClick={handleTourModal}
                 style={{
                   padding: '0.45rem 1rem',
                   backgroundColor: '#0f766e',

@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ContactUsView from '../components/ContactUsView.jsx';
+
+const contactSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  'name': 'Contact Monarch Pass Apartments Leasing Office',
+  'description': 'Contact the leasing office at Monarch Pass Apartments in Fort Worth, TX. Call +1-817-857-8782 or visit us at 4500 Campus Dr, Fort Worth, TX 76119.',
+  'mainEntity': {
+    '@type': 'ApartmentComplex',
+    'name': 'Monarch Pass Apartments',
+    'telephone': '+1-817-857-8782',
+    'email': 'leasing@monarchpassapts.com',
+    'address': {
+      '@type': 'PostalAddress',
+      'streetAddress': '4500 Campus Dr',
+      'addressLocality': 'Fort Worth',
+      'addressRegion': 'TX',
+      'postalCode': '76119',
+      'addressCountry': 'US',
+    },
+  },
+};
+---
+
+<Layout
+  title="Contact Us & Leasing Office | Monarch Pass Apartments Fort Worth"
+  description="Get in touch with the leasing team at Monarch Pass Apartments in Fort Worth, TX. Call +1 (817) 857-8782, send an inquiry, or schedule an in-person guided tour."
+  currentView="contact"
+  schemaData={contactSchema}
+>
+  <div class="sr-only">
+    <h1>Contact Monarch Pass Apartments Leasing Office</h1>
+    <p>
+      Have questions about availability, pricing, or income qualifications?
+      Our professional Cushman & Wakefield on-site management team is ready to assist you.
+      Call +1 817-857-8782 or +1 817-531-1750, email leasing@monarchpassapts.com,
+      or visit us at 4500 Campus Dr, Fort Worth, TX 76119.
+    </p>
+  </div>
+
+  <ContactUsView client:load />
+</Layout>

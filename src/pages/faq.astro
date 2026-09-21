@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FAQView from '../components/FAQView.jsx';
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  'mainEntity': [
+    {
+      '@type': 'Question',
+      'name': 'Where is Monarch Pass Apartments located?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Monarch Pass is located at 4500 Campus Drive, Fort Worth, TX 76119, right off Campus Drive and walking distance from Tarrant County College South Campus.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'What are your leasing office hours?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Our on-site leasing office is open Monday through Friday from 10:00 AM to 6:00 PM, Saturday from 10:00 AM to 5:00 PM, and Sunday from 1:00 PM to 5:00 PM.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'What is the Affordable Housing / AMI program at Monarch Pass?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Monarch Pass participates in an affordable housing program that offers high-quality apartment homes at below-market rates for qualifying households based on Area Median Income (AMI) guidelines.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'Is Monarch Pass Apartments pet-friendly?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Yes, Monarch Pass is pet-friendly! We welcome up to 2 pets per apartment home. Breed restrictions and pet rent apply.',
+      },
+    },
+    {
+      '@type': 'Question',
+      'name': 'What amenities are included with rent?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Amenities include a community splash park, grilling stations, fitness center, resident business clubhouse, clothes care center, playground, and 24-hour maintenance.',
+      },
+    },
+  ],
+};
+---
+
+<Layout
+  title="Frequently Asked Questions (FAQ) | Monarch Pass Apartments Fort Worth"
+  description="Find answers to common questions about leasing, floor plans, income guidelines, pet policies, and amenities at Monarch Pass Apartments in Fort Worth, TX."
+  currentView="faq"
+  schemaData={faqSchema}
+>
+  <div class="sr-only">
+    <h1>Frequently Asked Questions About Monarch Pass Apartments</h1>
+    <p>
+      Get answers to common resident and applicant questions regarding living at Monarch Pass Apartments in Fort Worth, TX.
+      Learn about our leasing qualification process, office hours, pet fees, and community amenities.
+    </p>
+  </div>
+
+  <FAQView client:load />
+</Layout>

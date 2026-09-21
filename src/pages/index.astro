@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HomeView from '../components/HomeView.jsx';
+---
+
+<Layout
+  title="Monarch Pass Apartments | 1-4 Bedroom Apartments in Fort Worth, TX"
+  description="Discover modern 1, 2, 3, and 4-bedroom apartments at Monarch Pass in Fort Worth, TX. Enjoy community splash park, resident clubhouse, wood-style plank flooring, and affordable living."
+  currentView="home"
+>
+  <!-- Semantic SEO Overview for Search Engines & Screen Readers -->
+  <header class="sr-only">
+    <h1>Monarch Pass Apartments in Fort Worth, Texas</h1>
+    <p>
+      Monarch Pass Apartments offers affordable 1, 2, 3, and 4-bedroom apartments for rent in Southeast Fort Worth, TX.
+      Located at 4500 Campus Dr, Fort Worth, TX 76119. Rent ranges from $898 to $1,390 per month.
+    </p>
+  </header>
+
+  <HomeView client:load />
+</Layout>

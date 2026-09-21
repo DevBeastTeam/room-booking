@@ -47,6 +47,15 @@ export default function HomeView({
   onOpenScheduleTour,
   siteSettings,
 }) {
+  const handleFloorPlans = onNavigateFloorPlans || (() => { window.location.href = '/floor-plans'; });
+  const handlePhotos = onNavigatePhotos || (() => { window.location.href = '/photos'; });
+  const handleGuidelines = onNavigateGuidelines || (() => { window.location.href = '/income-guidelines'; });
+  const handleAmenities = onNavigateAmenities || (() => { window.location.href = '/amenities'; });
+  const handleVirtualTour = onNavigateVirtualTour || (() => { window.location.href = '/virtual-tour'; });
+  const handleMap = onNavigateMap || (() => { window.location.href = '/map'; });
+  const handleContact = onNavigateContact || (() => { window.location.href = '/contact'; });
+  const handleSchedule = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -74,9 +83,25 @@ export default function HomeView({
     setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
   };
 
-  const handleSubmitContact = (e) => {
+  const handleSubmitContact = async (e) => {
     e.preventDefault();
     if (!formData.firstName || !formData.email) return;
+
+    try {
+      await fetch('/api/contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+          phone: formData.phone,
+          subject: `Home Inquiry - ${formData.bedrooms}`,
+          message: formData.message,
+        }),
+      });
+    } catch (err) {
+      console.log('PHP API call fallback', err);
+    }
 
     saveSupportInquiry({
       name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -197,7 +222,7 @@ export default function HomeView({
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button
-              onClick={onNavigateFloorPlans}
+              onClick={handleFloorPlans}
               style={{
                 backgroundColor: 'var(--primary-color, #0f766e)',
                 color: '#ffffff',
@@ -221,10 +246,10 @@ export default function HomeView({
             </button>
 
             <button
-              onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
+              onClick={() => handleSchedule()}
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                color: 'var(--primary-color, #0f766e)',
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
                 padding: '0.85rem 1.85rem',
                 borderRadius: '6px',
                 fontSize: '1rem',
@@ -232,16 +257,22 @@ export default function HomeView({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                border: 'none',
+                border: '2px solid rgba(255, 255, 255, 0.7)',
                 cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
+                backdropFilter: 'blur(4px)',
                 transition: 'all 0.2s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)')}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                e.currentTarget.style.borderColor = '#ffffff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.7)';
+              }}
             >
               <Calendar size={18} />
-              <span>Schedule a Tour</span>
+              <span>Schedule Guided Tour</span>
             </button>
           </div>
         </div>

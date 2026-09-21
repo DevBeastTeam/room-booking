@@ -33,6 +33,9 @@ export default function IncomeGuidelines({
   onOpenContactSupport,
   siteSettings,
 }) {
+  const handleFloorPlans = onNavigateFloorPlans || (() => { window.location.href = '/floor-plans'; });
+  const handleContactSupport = onOpenContactSupport || (() => { window.dispatchEvent(new CustomEvent('open-contact-modal')); });
+
   // Interactive Eligibility Checker state
   const [calcSize, setCalcSize] = useState(2);
   const [calcIncome, setCalcIncome] = useState('');
@@ -455,7 +458,7 @@ export default function IncomeGuidelines({
               <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  onClick={onNavigateFloorPlans}
+                  onClick={handleFloorPlans}
                   style={{
                     backgroundColor: '#0f766e',
                     color: '#ffffff',
@@ -471,7 +474,7 @@ export default function IncomeGuidelines({
                 </button>
                 <button
                   type="button"
-                  onClick={onOpenContactSupport}
+                  onClick={handleContactSupport}
                   style={{
                     backgroundColor: '#ffffff',
                     color: '#0f766e',
@@ -528,7 +531,7 @@ export default function IncomeGuidelines({
             <div>
               <button
                 type="button"
-                onClick={onNavigateFloorPlans}
+                onClick={handleFloorPlans}
                 style={{
                   backgroundColor: '#4a4e57',
                   color: '#ffffff',
@@ -627,7 +630,7 @@ export default function IncomeGuidelines({
             <div>
               <button
                 type="button"
-                onClick={onOpenContactSupport}
+                onClick={handleContactSupport}
                 style={{
                   backgroundColor: '#0f766e',
                   color: '#ffffff',
@@ -673,7 +676,7 @@ export default function IncomeGuidelines({
         </p>
         <button
           type="button"
-          onClick={onOpenContactSupport}
+          onClick={handleContactSupport}
           style={{
             backgroundColor: '#4a4e57',
             color: '#ffffff',

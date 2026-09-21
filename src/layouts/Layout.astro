@@ -1,0 +1,151 @@
+---
+import Header from '../components/Header.jsx';
+import Footer from '../components/Footer.jsx';
+import SiteModals from '../components/SiteModals.jsx';
+import '../index.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentView?: string;
+  canonicalUrl?: string;
+  schemaData?: Record<string, any>;
+  hideHeaderFooter?: boolean;
+}
+
+const {
+  title = 'Monarch Pass Apartments | 1-4 Bedroom Apartments in Fort Worth, TX',
+  description = 'Welcome to Monarch Pass Apartments in Fort Worth, TX. Discover affordable luxury with 1, 2, 3, and 4-bedroom floor plans, swimming pool, resident clubhouse, and modern amenities.',
+  currentView = 'home',
+  canonicalUrl,
+  schemaData,
+  hideHeaderFooter = false,
+} = Astro.props;
+
+const siteUrl = 'https://monarchpassapts.com';
+const canonical = canonicalUrl || new URL(Astro.url.pathname, siteUrl).href;
+const heroImage = 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg';
+
+const baseApartmentSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ApartmentComplex',
+  'name': 'Monarch Pass Apartments',
+  'description': description,
+  'url': canonical,
+  'telephone': '+1-817-857-8782',
+  'image': heroImage,
+  'address': {
+    '@type': 'PostalAddress',
+    'streetAddress': '4500 Campus Dr',
+    'addressLocality': 'Fort Worth',
+    'addressRegion': 'TX',
+    'postalCode': '76119',
+    'addressCountry': 'US',
+  },
+  'geo': {
+    '@type': 'GeoCoordinates',
+    'latitude': 32.6841,
+    'longitude': -97.2882,
+  },
+  'priceRange': '$898 - $1,390',
+  'petsAllowed': 'True',
+  'openingHoursSpecification': [
+    {
+      '@type': 'OpeningHoursSpecification',
+      'dayOfWeek': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      'opens': '10:00',
+      'closes': '18:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      'dayOfWeek': 'Saturday',
+      'opens': '10:00',
+      'closes': '17:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      'dayOfWeek': 'Sunday',
+      'opens': '13:00',
+      'closes': '17:00',
+    },
+  ],
+};
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={heroImage} />
+    <meta property="og:site_name" content="Monarch Pass Apartments" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={heroImage} />
+
+    <!-- Favicon & Touch Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts Preconnect & Load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Theme Initialization Script (Prevents flash of default colors) -->
+    <script is:inline>
+      (function() {
+        try {
+          var raw = localStorage.getItem('monarch_custom_theme_config');
+          if (raw) {
+            var c = JSON.parse(raw);
+            var r = document.documentElement;
+            if (c.primary) r.style.setProperty('--primary-color', c.primary);
+            if (c.primaryHover) r.style.setProperty('--primary-hover', c.primaryHover);
+            if (c.primaryDark) r.style.setProperty('--primary-dark', c.primaryDark);
+            if (c.primaryLight) r.style.setProperty('--primary-light', c.primaryLight);
+            if (c.primaryBorder) r.style.setProperty('--primary-border', c.primaryBorder);
+            if (c.secondary) r.style.setProperty('--secondary-color', c.secondary);
+            if (c.secondaryHover) r.style.setProperty('--secondary-hover', c.secondaryHover);
+            if (c.secondaryDark) r.style.setProperty('--secondary-dark', c.secondaryDark);
+            if (c.secondaryLight) r.style.setProperty('--secondary-light', c.secondaryLight);
+            if (c.navOverlayBg) r.style.setProperty('--nav-overlay-bg', c.navOverlayBg);
+            if (c.dark) r.style.setProperty('--dark-color', c.dark);
+          }
+        } catch(e){}
+      })();
+    </script>
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(baseApartmentSchema)} />
+    {schemaData && (
+      <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+    )}
+  </head>
+  <body style="min-height: 100vh; display: flex; flexDirection: column; backgroundColor: #ffffff;">
+    {!hideHeaderFooter && <Header client:load currentView={currentView} />}
+    
+    <main style="flex: 1;">
+      <slot />
+    </main>
+
+    {!hideHeaderFooter && <Footer client:load />}
+    {!hideHeaderFooter && <SiteModals client:idle />}
+  </body>
+</html>

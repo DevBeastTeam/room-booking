@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MapDirectionsView from '../components/MapDirectionsView.jsx';
+
+const mapSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Place',
+  'name': 'Monarch Pass Apartments Location & Neighborhood',
+  'hasMap': 'https://maps.app.goo.gl/E71XfBiE8dE9bAjV6',
+  'address': {
+    '@type': 'PostalAddress',
+    'streetAddress': '4500 Campus Dr',
+    'addressLocality': 'Fort Worth',
+    'addressRegion': 'TX',
+    'postalCode': '76119',
+    'addressCountry': 'US',
+  },
+  'geo': {
+    '@type': 'GeoCoordinates',
+    'latitude': 32.6841,
+    'longitude': -97.2882,
+  },
+};
+---
+
+<Layout
+  title="Map & Directions | Monarch Pass Apartments Fort Worth TX"
+  description="Get directions to Monarch Pass Apartments located at 4500 Campus Dr, Fort Worth, TX 76119. Explore nearby schools, dining, major employers, and parks in Tarrant County."
+  currentView="map"
+  schemaData={mapSchema}
+>
+  <div class="sr-only">
+    <h1>Map & Driving Directions to Monarch Pass Apartments</h1>
+    <p>
+      Monarch Pass Apartments is conveniently located at 4500 Campus Dr, Fort Worth, TX 76119, right across from
+      Tarrant County College South Campus and minutes from I-20 and I-35W.
+      Easily commute to downtown Fort Worth, Alcon Laboratories, GXO Logistics, and local dining destinations.
+    </p>
+  </div>
+
+  <MapDirectionsView client:load />
+</Layout>

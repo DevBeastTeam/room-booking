@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AmenitiesView from '../components/AmenitiesView.jsx';
+
+const amenitiesSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ApartmentComplex',
+  'name': 'Monarch Pass Apartments Amenities',
+  'amenityFeature': [
+    { '@type': 'LocationFeatureSpecification', 'name': 'Community Splash Park', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Grilling Stations & Picnic Areas', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Courtyard & Manicured Green Spaces', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Fully Equipped Fitness Center', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Children\'s Playground', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Covered & Reserved Parking', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'On-Site Clothes Care Center', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Resident Business Center & Clubhouse', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Pet-Friendly Community', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Wood-Style Plank Flooring', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Energy-Efficient Appliances', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Central Air Conditioning & Heating', 'value': 'True' },
+    { '@type': 'LocationFeatureSpecification', 'name': 'Spacious Walk-In Closets', 'value': 'True' },
+  ],
+};
+---
+
+<Layout
+  title="Apartment & Community Amenities | Monarch Pass Apartments Fort Worth"
+  description="Explore 29 premium amenities at Monarch Pass Apartments in Fort Worth, TX. Featuring splash park, fitness center, clubhouse, playground, wood-style flooring, and pet-friendly living."
+  currentView="amenities"
+  schemaData={amenitiesSchema}
+>
+  <div class="sr-only">
+    <h1>Apartment & Community Amenities at Monarch Pass</h1>
+    <p>
+      Monarch Pass Apartments in Fort Worth features 29 exceptional amenities designed for convenience and lifestyle.
+      Our pet-friendly community offers a splash park, fitness center, on-site laundry facilities, resident business center,
+      covered parking, and 24-hour emergency maintenance. In each apartment, enjoy wood-style plank flooring,
+      walk-in closets, energy-efficient appliances, and central air conditioning.
+    </p>
+  </div>
+
+  <AmenitiesView client:load />
+</Layout>

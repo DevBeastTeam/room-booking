@@ -41,6 +41,9 @@ export default function VirtualTourView({
   onNavigateFloorPlans,
   onOpenScheduleTour,
 }) {
+  const handleFloorPlans = onNavigateFloorPlans || (() => { window.location.href = '/floor-plans'; });
+  const handleSchedule = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
+
   const [activeTourIndex, setActiveTourIndex] = useState(0);
   const activeTour = TOURS[activeTourIndex];
 
@@ -92,10 +95,10 @@ export default function VirtualTourView({
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
+              onClick={() => handleSchedule()}
               style={{
-                backgroundColor: '#0f766e',
-                color: '#ffffff',
+                backgroundColor: '#ffffff',
+                color: 'var(--primary-color, #0f766e)',
                 padding: '0.75rem 1.75rem',
                 borderRadius: '6px',
                 fontSize: '0.95rem',
@@ -113,7 +116,7 @@ export default function VirtualTourView({
             </button>
 
             <button
-              onClick={onNavigateFloorPlans}
+              onClick={handleFloorPlans}
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 color: '#ffffff',

@@ -14,8 +14,7 @@ import {
   HelpCircle,
   Home,
   Sparkles,
-  Compass,
-  Building
+  Compass
 } from 'lucide-react';
 
 const FacebookIcon = ({ size = 16 }) => (
@@ -60,25 +59,40 @@ export default function Header({
   const isFAQActive = currentView === 'faq';
   const isContactActive = currentView === 'contact';
 
+  const handleNavHome = onNavigateHome || (() => { window.location.href = '/'; });
+  const handleNavFloorPlans = onNavigateFloorPlans || (() => { window.location.href = '/floor-plans'; });
+  const handleNavPhotos = onNavigatePhotos || (() => { window.location.href = '/photos'; });
+  const handleNavGuidelines = onNavigateGuidelines || (() => { window.location.href = '/income-guidelines'; });
+  const handleNavAmenities = onNavigateAmenities || (() => { window.location.href = '/amenities'; });
+  const handleNavVirtualTour = onNavigateVirtualTour || (() => { window.location.href = '/virtual-tour'; });
+  const handleNavMap = onNavigateMap || (() => { window.location.href = '/map'; });
+  const handleNavFAQ = onNavigateFAQ || (() => { window.location.href = '/faq'; });
+  const handleNavContact = onNavigateContact || (() => { window.location.href = '/contact'; });
+  const handleNavDashboard = onNavigateDashboard || (() => { window.location.href = '/dashboard'; });
+  const handleNavAdmin = onNavigateAdmin || (() => { window.location.href = '/admin'; });
+  const handleContactSupport = onOpenContactSupport || (() => { window.dispatchEvent(new CustomEvent('open-contact-modal')); });
+  const handleScheduleTour = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
+
   const navLinks = [
-    { label: 'Home', active: isHomeActive, onClick: onNavigateHome },
-    { label: 'Amenities', active: isAmenitiesActive, onClick: onNavigateAmenities },
-    { label: 'Floor Plans', active: isFloorPlansActive, onClick: onNavigateFloorPlans },
+    { label: 'Home', active: isHomeActive, onClick: handleNavHome, href: '/' },
+    { label: 'Amenities', active: isAmenitiesActive, onClick: handleNavAmenities, href: '/amenities' },
+    { label: 'Floor Plans', active: isFloorPlansActive, onClick: handleNavFloorPlans, href: '/floor-plans' },
     { 
       label: 'Photos', 
       active: isPhotosActive || isVirtualTourActive, 
-      onClick: onNavigatePhotos,
+      onClick: handleNavPhotos,
+      href: '/photos',
       badge: '26',
       subLinks: [
-        { label: 'Photos', active: isPhotosActive, onClick: onNavigatePhotos },
-        { label: 'Virtual Tour', active: isVirtualTourActive, onClick: onNavigateVirtualTour },
+        { label: 'Photos', active: isPhotosActive, onClick: handleNavPhotos, href: '/photos' },
+        { label: 'Virtual Tour', active: isVirtualTourActive, onClick: handleNavVirtualTour, href: '/virtual-tour' },
       ]
     },
-    { label: 'Income Guidelines', active: isGuidelinesActive, onClick: onNavigateGuidelines },
-    { label: 'Map', active: isMapActive, onClick: onNavigateMap },
-    { label: 'Contact Us', active: isContactActive, onClick: onNavigateContact },
-    { label: 'FAQ', active: isFAQActive, onClick: onNavigateFAQ },
-    { label: 'Schedule a Tour', active: false, onClick: onOpenScheduleTour },
+    { label: 'Income Guidelines', active: isGuidelinesActive, onClick: handleNavGuidelines, href: '/income-guidelines' },
+    { label: 'Map', active: isMapActive, onClick: handleNavMap, href: '/map' },
+    { label: 'Contact Us', active: isContactActive, onClick: handleNavContact, href: '/contact' },
+    { label: 'FAQ', active: isFAQActive, onClick: handleNavFAQ, href: '/faq' },
+    { label: 'Schedule a Tour', active: false, onClick: () => handleScheduleTour() },
   ];
 
   return (
@@ -284,8 +298,12 @@ export default function Header({
                   <span style={{ fontSize: '0.7rem', color: 'var(--primary-color, #0f766e)', backgroundColor: 'var(--primary-light, #ccfbf1)', padding: '2px 6px', borderRadius: '4px' }}>SecureCafe</span>
                 </a>
                 <a
-                  href="#resident-dashboard"
-                  onClick={(e) => { e.preventDefault(); setIsLoginOpen(false); onNavigateDashboard && onNavigateDashboard(); }}
+                  href="/dashboard"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsLoginOpen(false);
+                    handleNavDashboard();
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -305,8 +323,12 @@ export default function Header({
                   <span>Resident Dashboard (Demo)</span>
                 </a>
                 <a
-                  href="#admin-panel"
-                  onClick={(e) => { e.preventDefault(); setIsLoginOpen(false); onNavigateAdmin && onNavigateAdmin(); }}
+                  href="/admin"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsLoginOpen(false);
+                    handleNavAdmin();
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -432,9 +454,10 @@ export default function Header({
           }}
         >
           {/* Home */}
-          <button
+          <a
             id="tab-home"
-            onClick={onNavigateHome}
+            href="/"
+            onClick={(e) => { if (onNavigateHome) { e.preventDefault(); onNavigateHome(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -448,16 +471,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <Home size={15} />
             <span>Home</span>
-          </button>
+          </a>
 
           {/* Floor Plans */}
-          <button
+          <a
             id="tab-floor-plans"
-            onClick={onNavigateFloorPlans}
+            href="/floor-plans"
+            onClick={(e) => { if (onNavigateFloorPlans) { e.preventDefault(); onNavigateFloorPlans(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -471,16 +496,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <Layers size={15} />
             <span>Floor Plans</span>
-          </button>
+          </a>
 
           {/* Photos */}
-          <button
+          <a
             id="tab-photos"
-            onClick={onNavigatePhotos}
+            href="/photos"
+            onClick={(e) => { if (onNavigatePhotos) { e.preventDefault(); onNavigatePhotos(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -494,6 +521,7 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <Camera size={15} />
@@ -510,12 +538,13 @@ export default function Header({
             >
               26
             </span>
-          </button>
+          </a>
 
           {/* Income Guidelines */}
-          <button
+          <a
             id="tab-guidelines"
-            onClick={onNavigateGuidelines}
+            href="/income-guidelines"
+            onClick={(e) => { if (onNavigateGuidelines) { e.preventDefault(); onNavigateGuidelines(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -529,16 +558,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <ShieldCheck size={15} />
             <span>Income Guidelines</span>
-          </button>
+          </a>
 
           {/* Amenities */}
-          <button
+          <a
             id="tab-amenities"
-            onClick={onNavigateAmenities}
+            href="/amenities"
+            onClick={(e) => { if (onNavigateAmenities) { e.preventDefault(); onNavigateAmenities(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -552,16 +583,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <Sparkles size={15} />
             <span>Amenities</span>
-          </button>
+          </a>
 
           {/* Virtual Tour */}
-          <button
+          <a
             id="tab-virtual-tour"
-            onClick={onNavigateVirtualTour}
+            href="/virtual-tour"
+            onClick={(e) => { if (onNavigateVirtualTour) { e.preventDefault(); onNavigateVirtualTour(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -575,16 +608,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <Compass size={15} />
             <span>Virtual Tour</span>
-          </button>
+          </a>
 
           {/* Map & Directions */}
-          <button
+          <a
             id="tab-map"
-            onClick={onNavigateMap}
+            href="/map"
+            onClick={(e) => { if (onNavigateMap) { e.preventDefault(); onNavigateMap(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -598,16 +633,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <MapPin size={15} />
             <span>Map</span>
-          </button>
+          </a>
 
           {/* FAQ */}
-          <button
+          <a
             id="tab-faq"
-            onClick={onNavigateFAQ}
+            href="/faq"
+            onClick={(e) => { if (onNavigateFAQ) { e.preventDefault(); onNavigateFAQ(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -621,16 +658,18 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <HelpCircle size={15} />
             <span>FAQ</span>
-          </button>
+          </a>
 
           {/* Contact Us */}
-          <button
+          <a
             id="tab-contact"
-            onClick={onNavigateContact}
+            href="/contact"
+            onClick={(e) => { if (onNavigateContact) { e.preventDefault(); onNavigateContact(); } }}
             style={{
               padding: '0.6rem 0.95rem',
               fontSize: '0.9rem',
@@ -644,16 +683,17 @@ export default function Header({
               alignItems: 'center',
               gap: '0.4rem',
               transition: 'all 0.2s ease',
+              textDecoration: 'none',
             }}
           >
             <Phone size={15} />
             <span>Contact Us</span>
-          </button>
+          </a>
 
           {/* Schedule a Tour CTA */}
           <button
             id="btn-schedule-tour"
-            onClick={onOpenScheduleTour}
+            onClick={() => handleScheduleTour()}
             style={{
               padding: '0.6rem 1.1rem',
               fontSize: '0.9rem',
@@ -665,8 +705,7 @@ export default function Header({
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              boxShadow: '0 2px 6px rgba(15, 118, 110, 0.3)',
+              gap: '0.45rem',
               transition: 'background 0.2s ease',
               marginLeft: '0.25rem',
             }}

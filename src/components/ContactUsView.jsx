@@ -16,6 +16,8 @@ export default function ContactUsView({
   onOpenScheduleTour,
   siteSettings,
 }) {
+  const handleSchedule = onOpenScheduleTour || (() => { window.dispatchEvent(new CustomEvent('open-schedule-tour')); });
+
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -28,9 +30,25 @@ export default function ContactUsView({
     consent: true,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.firstName || !formData.email) return;
+
+    try {
+      await fetch('/api/contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+          phone: formData.phone,
+          subject: `Contact Page Inquiry - ${formData.bedrooms} (Move-in: ${formData.moveInDate || 'Flexible'})`,
+          message: formData.message || 'General leasing inquiry submitted via Contact Us page.',
+        }),
+      });
+    } catch (err) {
+      console.log('PHP API fallback', err);
+    }
 
     saveSupportInquiry({
       name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -477,7 +495,7 @@ export default function ContactUsView({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <button
                       type="button"
-                      onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
+                      onClick={() => handleSchedule()}
                       style={{
                         backgroundColor: '#ffffff',
                         color: '#0f766e',

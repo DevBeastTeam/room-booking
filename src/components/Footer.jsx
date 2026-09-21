@@ -181,8 +181,8 @@ export default function Footer({
           }}
         >
           <a
-            href="#home"
-            onClick={(e) => { e.preventDefault(); if (onNavigateHome) onNavigateHome(); }}
+            href="/"
+            onClick={(e) => { if (onNavigateHome) { e.preventDefault(); onNavigateHome(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -190,8 +190,8 @@ export default function Footer({
             Home
           </a>
           <a
-            href="#amenities"
-            onClick={(e) => { e.preventDefault(); if (onNavigateAmenities) onNavigateAmenities(); }}
+            href="/amenities"
+            onClick={(e) => { if (onNavigateAmenities) { e.preventDefault(); onNavigateAmenities(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -199,8 +199,8 @@ export default function Footer({
             Amenities
           </a>
           <a
-            href="#floor-plans"
-            onClick={(e) => { e.preventDefault(); if (onNavigateFloorPlans) onNavigateFloorPlans(); }}
+            href="/floor-plans"
+            onClick={(e) => { if (onNavigateFloorPlans) { e.preventDefault(); onNavigateFloorPlans(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -208,8 +208,8 @@ export default function Footer({
             Floor Plans
           </a>
           <a
-            href="#photos"
-            onClick={(e) => { e.preventDefault(); if (onNavigatePhotos) onNavigatePhotos(); }}
+            href="/photos"
+            onClick={(e) => { if (onNavigatePhotos) { e.preventDefault(); onNavigatePhotos(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -217,8 +217,8 @@ export default function Footer({
             Photos
           </a>
           <a
-            href="#virtual-tour"
-            onClick={(e) => { e.preventDefault(); if (onNavigateVirtualTour) onNavigateVirtualTour(); }}
+            href="/virtual-tour"
+            onClick={(e) => { if (onNavigateVirtualTour) { e.preventDefault(); onNavigateVirtualTour(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -226,8 +226,8 @@ export default function Footer({
             Virtual Tour
           </a>
           <a
-            href="#income-guidelines"
-            onClick={(e) => { e.preventDefault(); if (onNavigateGuidelines) onNavigateGuidelines(); }}
+            href="/income-guidelines"
+            onClick={(e) => { if (onNavigateGuidelines) { e.preventDefault(); onNavigateGuidelines(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -235,8 +235,8 @@ export default function Footer({
             Income Guidelines
           </a>
           <a
-            href="#maps"
-            onClick={(e) => { e.preventDefault(); if (onNavigateMap) onNavigateMap(); }}
+            href="/map"
+            onClick={(e) => { if (onNavigateMap) { e.preventDefault(); onNavigateMap(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -244,8 +244,8 @@ export default function Footer({
             Map
           </a>
           <a
-            href="#contact-us"
-            onClick={(e) => { e.preventDefault(); if (onNavigateContact) onNavigateContact(); else if (onOpenContactSupport) onOpenContactSupport(); }}
+            href="/contact"
+            onClick={(e) => { if (onNavigateContact) { e.preventDefault(); onNavigateContact(); } else if (onOpenContactSupport) { e.preventDefault(); onOpenContactSupport(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -253,8 +253,8 @@ export default function Footer({
             Contact Us
           </a>
           <a
-            href="#faq"
-            onClick={(e) => { e.preventDefault(); if (onNavigateFAQ) onNavigateFAQ(); }}
+            href="/faq"
+            onClick={(e) => { if (onNavigateFAQ) { e.preventDefault(); onNavigateFAQ(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -283,7 +283,11 @@ export default function Footer({
           </a>
           <a
             href="#terms-conditions"
-            onClick={(e) => { e.preventDefault(); if (onOpenLegal) onOpenLegal('terms'); }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (onOpenLegal) onOpenLegal('terms');
+              else window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { pageType: 'terms' } }));
+            }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}
@@ -292,7 +296,11 @@ export default function Footer({
           </a>
           <a
             href="#privacy-policy"
-            onClick={(e) => { e.preventDefault(); if (onOpenLegal) onOpenLegal('privacy'); }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (onOpenLegal) onOpenLegal('privacy');
+              else window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { pageType: 'privacy' } }));
+            }}
             style={{ transition: 'color 0.2s', cursor: 'pointer' }}
             onMouseEnter={(e) => (e.target.style.color = '#ffffff')}
             onMouseLeave={(e) => (e.target.style.color = '#94a3b8')}

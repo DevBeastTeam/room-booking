@@ -102,6 +102,9 @@ export default function FAQView({
   onNavigateGuidelines,
   onOpenScheduleTour,
 }) {
+  const handleGuidelines = onNavigateGuidelines || (() => { window.location.href = '/income-guidelines'; });
+  const handleSchedule = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
+
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [openItems, setOpenItems] = useState({});
@@ -334,7 +337,7 @@ export default function FAQView({
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <a
-                href="tel:+18176465785"
+                href="tel:+18178578782"
                 style={{
                   backgroundColor: '#0f766e',
                   color: '#ffffff',
@@ -349,11 +352,11 @@ export default function FAQView({
                 }}
               >
                 <Phone size={16} />
-                <span>Call (817) 646-5785</span>
+                <span>Call (817) 857-8782</span>
               </a>
 
               <button
-                onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
+                onClick={() => handleSchedule()}
                 style={{
                   backgroundColor: '#ffffff',
                   color: '#0f766e',

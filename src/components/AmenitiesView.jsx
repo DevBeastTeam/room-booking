@@ -66,6 +66,9 @@ export default function AmenitiesView({
   onNavigateFloorPlans,
   onOpenScheduleTour,
 }) {
+  const handleFloorPlans = onNavigateFloorPlans || (() => { window.location.href = '/floor-plans'; });
+  const handleSchedule = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
+
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'community' | 'apartment'
 
   return (
@@ -428,7 +431,7 @@ export default function AmenitiesView({
 
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <button
-                onClick={onNavigateFloorPlans}
+                onClick={handleFloorPlans}
                 style={{
                   backgroundColor: '#ffffff',
                   color: '#0f766e',
@@ -448,7 +451,7 @@ export default function AmenitiesView({
               </button>
 
               <button
-                onClick={() => onOpenScheduleTour && onOpenScheduleTour()}
+                onClick={() => handleSchedule()}
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.15)',
                   color: '#ffffff',

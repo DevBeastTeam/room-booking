@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+import VirtualTourView from '../components/VirtualTourView.jsx';
+
+const virtualTourSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Place',
+  'name': 'Monarch Pass Virtual Tours',
+  'description': 'Interactive 360 virtual tour and 3D walkthroughs of 2-bedroom and 4-bedroom apartments at Monarch Pass in Fort Worth, TX.',
+  'hasMap': 'https://tour.tourbuilder.com/?tour=62aca4fd2039d022020bc5de&sourceId=1001',
+};
+---
+
+<Layout
+  title="3D Virtual Tours & 360 Walkthrough | Monarch Pass Apartments"
+  description="Experience immersive 360-degree virtual tours and 3D walkthroughs of Monarch Pass Apartments in Fort Worth, TX. Tour our community grounds, 2-bed and 4-bed floor plans online."
+  currentView="virtualtour"
+  schemaData={virtualTourSchema}
+>
+  <div class="sr-only">
+    <h1>3D Virtual Tours & 360 Walkthroughs of Monarch Pass</h1>
+    <p>
+      Take a 3D tour of Monarch Pass Apartments from any phone, tablet, or desktop.
+      Explore our open-concept 4-bedroom (1,328 sq ft) and 2-bedroom (991 sq ft) model units,
+      our refreshing splash park, outdoor grilling stations, manicured courtyards, and resident clubhouse.
+    </p>
+  </div>
+
+  <VirtualTourView client:load />
+</Layout>

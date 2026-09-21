@@ -416,6 +416,7 @@ const NAV_ITEMS = [
 
 // ── Main export ────────────────────────────────────────────────────────────────
 export default function UserDashboard({ onBack }) {
+  const handleBack = onBack || (() => { window.location.href = '/'; });
   const [activeSection, setActiveSection] = useState('overview');
 
   const sectionMap = {
@@ -471,7 +472,7 @@ export default function UserDashboard({ onBack }) {
 
         {/* Bottom actions */}
         <div style={{ padding: '1rem 0.75rem', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-          <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: '100%', textAlign: 'left' }}>
+          <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: '100%', textAlign: 'left' }}>
             <LogOut size={17} /> Back to Website
           </button>
         </div>

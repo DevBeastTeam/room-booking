@@ -2526,6 +2526,7 @@ export default function AdminPanel({
   supportInquiries: propSupportInquiries,
   onUpdateSupportInquiries,
 }) {
+  const handleBack = onBack || (() => { window.location.href = '/'; });
   const [activeSection, setActiveSection] = useState('overview');
   const [supportInquiries, setSupportInquiries] = useState(() => propSupportInquiries || getSupportInquiries());
   const [siteSettings, setSiteSettings] = useState(() => propSiteSettings || getSiteSettings());
@@ -2648,7 +2649,7 @@ export default function AdminPanel({
         {/* Footer */}
         <div style={{ padding: '0.85rem 0.65rem', borderTop: `1px solid ${A.border}` }}>
           <button
-            onClick={onBack}
+            onClick={handleBack}
             style={{
               display: 'flex',
               alignItems: 'center',
