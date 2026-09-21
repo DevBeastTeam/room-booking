@@ -28,8 +28,9 @@ if ($isSandbox && !empty($envVars['PADDLE_SANDBOX_API_KEY'])) {
     $paddleClientToken = $envVars['PADDLE_SANDBOX_CLIENT_SIDE_TOKEN'] ?? '';
     $baseApiUrl = 'https://sandbox-api.paddle.com/';
 } else {
-    $paddleApiKey = $envVars['PADDLE_API_KEY'] ?? 'PADDLE_LIVE_KEY_FROM_ENV';
-    $paddleClientToken = $envVars['PADDLE_CLIENT_SIDE_TOKEN'] ?? 'PADDLE_CLIENT_TOKEN_FROM_ENV';
+    // Keys MUST be set in backend/config/.env — never hardcode here
+    $paddleApiKey = $envVars['PADDLE_API_KEY'] ?? '';
+    $paddleClientToken = $envVars['PADDLE_CLIENT_SIDE_TOKEN'] ?? '';
     $baseApiUrl = 'https://api.paddle.com/';
 }
 
