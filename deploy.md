@@ -2,15 +2,46 @@
 
 ---
 
+### 📂 Frontend aur Backend Kahan Rakhna Hai? (Direct Connection Concept)
+
+> **💡 Sab Se Zaroori Baat:** Aap ko Frontend aur Backend ko alag-alag server ya alag folders mein rakhne ki **bilkul zaroorat nahi hai**.
+> 
+> Jab aap `npm run build` chalate hain, to build command **Frontend (HTML/React)** aur **Backend (PHP/API)** dono ko ek hi folder **`dist/`** ke andar automatically pack kar deta hai.
+> 
+> Aap ko sirf **`dist` folder ka sara saman** Hostinger ke **`public_html`** folder mein upload karna hai!
+
+#### Hostinger `public_html` ke andar ka structure aesa dikhega:
+```text
+public_html/
+├── index.html              <-- Frontend (Home Page)
+├── floor-plans/            <-- Frontend (Floor plans page)
+├── amenities/              <-- Frontend (Amenities page)
+├── _astro/                 <-- Frontend (React JS & CSS bundles)
+├── .htaccess               <-- Connector (Frontend aur Backend ko jorta hai)
+├── api/                    <-- Backend (API Endpoints)
+└── backend/                <-- Backend (PHP Database logic & .env file)
+    ├── api/                <-- Backend Endpoints
+    ├── config/.env         <-- Database Password & Config
+    └── migrations/         <-- Database SQL file
+```
+
+#### Yeh Direct Connect Kesy Hota Hai?
+1. Koi Node.js server ya alag port chalane ki zaroorat nahi.
+2. Visitor jab website par button dabata hai (e.g. Schedule Tour ya Contact Form), to Frontend React code seedha `/backend/api/contact.php` ko request bhejta hai.
+3. Hostinger ka Apache web server aur PHP us request ko execute karke MySQL Database mein data save kar dete hain.
+4. **Result:** Frontend aur Backend 100% directly connect rehte hain!
+
+---
+
 ### ⚡ Step 1: Local Machine Build (2 Minutes)
 
-Apne computer terminal mein yeh commands chalayein:
+Apne computer terminal mein project folder ke andar yeh commands chalayein:
 
 ```bash
-# 1. Build project:
+# 1. Production build generate karein:
 npm run build
 
-# 2. dist folder ke andar ki tamaam files ko zip karein:
+# 2. dist folder ke andar mojood tamaam files ko zip karein:
 cd dist
 zip -r ../deploy.zip . -x ".*"
 cd ..
@@ -48,7 +79,7 @@ cd ..
 ### ⚙️ Step 4: Database Credentials Set Karein (`.env`)
 
 1. Hostinger File Manager mein jayein:
-   - Path: `public_html/backend/config/.env`
+   - File Path: `public_html/backend/config/.env`
 2. `.env` file par right-click karke **Edit** karein:
    ```ini
    DB_HOST=localhost
