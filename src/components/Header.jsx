@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Phone, 
   User, 
@@ -17,8 +17,11 @@ import {
   Compass,
   CreditCard,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { getThemeMode, toggleThemeMode } from '../config/themeConfig';
 
 const FacebookIcon = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -51,6 +54,20 @@ export default function Header({
 }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [themeMode, setLocalThemeMode] = useState(() => getThemeMode());
+
+  useEffect(() => {
+    const handleThemeChange = (e) => {
+      if (e.detail?.mode) setLocalThemeMode(e.detail.mode);
+    };
+    window.addEventListener('theme-mode-changed', handleThemeChange);
+    return () => window.removeEventListener('theme-mode-changed', handleThemeChange);
+  }, []);
+
+  const handleToggleTheme = () => {
+    const next = toggleThemeMode();
+    setLocalThemeMode(next);
+  };
 
   const isHomeActive = currentView === 'home';
   const isFloorPlansActive = currentView === 'floorplans' || currentView === 'estimator';
@@ -208,6 +225,38 @@ export default function Header({
             </div>
 
             <div style={{ width: '1px', height: '14px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+
+            {/* Theme Switcher Button (Dark / Light) */}
+            <button
+              id="btn-theme-toggle"
+              onClick={handleToggleTheme}
+              aria-label={`Switch to ${themeMode === 'dark' ? 'Light' : 'Dark'} luxury theme`}
+              style={{
+                backgroundColor: themeMode === 'light' ? 'rgba(164, 124, 42, 0.12)' : 'rgba(201, 169, 110, 0.12)',
+                color: themeMode === 'light' ? '#a47c2a' : '#dfc285',
+                padding: '0.28rem 0.65rem',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                cursor: 'pointer',
+                border: themeMode === 'light' ? '1px solid rgba(164, 124, 42, 0.3)' : '1px solid rgba(201, 169, 110, 0.25)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'none';
+              }}
+              title={themeMode === 'dark' ? 'Switch to Light Luxury Theme' : 'Switch to Dark Luxury Theme'}
+            >
+              {themeMode === 'dark' ? <Sun size={13} style={{ color: '#dfc285' }} /> : <Moon size={13} style={{ color: '#a47c2a' }} />}
+              <span>{themeMode === 'dark' ? 'LIGHT' : 'DARK'}</span>
+            </button>
 
             {/* Translate Button */}
             <button
@@ -734,6 +783,43 @@ export default function Header({
               }}
             >
               <X size={22} />
+            </button>
+          </div>
+
+          {/* Mobile Theme Toggle */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.75rem 1rem',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(201, 169, 110, 0.1)',
+              border: '1px solid rgba(201, 169, 110, 0.25)',
+              marginBottom: '1.25rem',
+            }}
+          >
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
+              Appearance Theme
+            </span>
+            <button
+              onClick={handleToggleTheme}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                backgroundColor: 'var(--primary-color, #c9a96e)',
+                color: 'var(--btn-gold-text, #08090f)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.4rem 0.85rem',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              {themeMode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+              <span>{themeMode === 'dark' ? 'Light Theme' : 'Dark Theme'}</span>
             </button>
           </div>
 

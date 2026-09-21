@@ -108,25 +108,35 @@ const baseApartmentSchema = {
       rel="stylesheet"
     />
 
-    <!-- Theme Initialization Script (Prevents flash of default colors) -->
+    <!-- Theme Initialization Script (Instant Theme Apply to prevent flash) -->
     <script is:inline>
       (function() {
         try {
-          var raw = localStorage.getItem('monarch_custom_theme_config');
+          var mode = localStorage.getItem('monarch_theme_mode') || 'dark';
+          var r = document.documentElement;
+          r.setAttribute('data-theme', mode);
+
+          var raw = localStorage.getItem('monarch_theme_palettes');
           if (raw) {
-            var c = JSON.parse(raw);
-            var r = document.documentElement;
-            if (c.primary) r.style.setProperty('--primary-color', c.primary);
-            if (c.primaryHover) r.style.setProperty('--primary-hover', c.primaryHover);
-            if (c.primaryDark) r.style.setProperty('--primary-dark', c.primaryDark);
-            if (c.primaryLight) r.style.setProperty('--primary-light', c.primaryLight);
-            if (c.primaryBorder) r.style.setProperty('--primary-border', c.primaryBorder);
-            if (c.secondary) r.style.setProperty('--secondary-color', c.secondary);
-            if (c.secondaryHover) r.style.setProperty('--secondary-hover', c.secondaryHover);
-            if (c.secondaryDark) r.style.setProperty('--secondary-dark', c.secondaryDark);
-            if (c.secondaryLight) r.style.setProperty('--secondary-light', c.secondaryLight);
-            if (c.navOverlayBg) r.style.setProperty('--nav-overlay-bg', c.navOverlayBg);
-            if (c.dark) r.style.setProperty('--dark-color', c.dark);
+            var palettes = JSON.parse(raw);
+            var active = mode === 'light' ? palettes.light : palettes.dark;
+            if (active) {
+              if (active.bgPage) r.style.setProperty('--bg-page', active.bgPage);
+              if (active.bgSurface) r.style.setProperty('--bg-surface', active.bgSurface);
+              if (active.bgElevated) r.style.setProperty('--bg-elevated', active.bgElevated);
+              if (active.cardBg) r.style.setProperty('--card-bg', active.cardBg);
+              if (active.primary) r.style.setProperty('--primary-color', active.primary);
+              if (active.primaryHover) r.style.setProperty('--primary-hover', active.primaryHover);
+              if (active.primaryDark) r.style.setProperty('--primary-dark', active.primaryDark);
+              if (active.primaryLight) r.style.setProperty('--primary-light', active.primaryLight);
+              if (active.primaryBorder) r.style.setProperty('--primary-border', active.primaryBorder);
+              if (active.secondary) r.style.setProperty('--secondary-color', active.secondary);
+              if (active.textMain) r.style.setProperty('--text-main', active.textMain);
+              if (active.textMuted) r.style.setProperty('--text-muted', active.textMuted);
+              if (active.border) r.style.setProperty('--border-color', active.border);
+              if (active.glassBorder) r.style.setProperty('--glass-border', active.glassBorder);
+              if (active.navBg) r.style.setProperty('--nav-bg', active.navBg);
+            }
           }
         } catch(e){}
       })();
@@ -138,7 +148,7 @@ const baseApartmentSchema = {
       <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
     )}
   </head>
-  <body style="min-height: 100vh; display: flex; flex-direction: column; background-color: #08090f; color: #f0ebe0;">
+  <body style="min-height: 100vh; display: flex; flex-direction: column; background-color: var(--bg-page, #08090f); color: var(--text-main, #f0ebe0); transition: background-color 0.25s ease, color 0.25s ease;">
     {!hideHeaderFooter && <Header client:load currentView={currentView} />}
     
     <main style="flex: 1;">
