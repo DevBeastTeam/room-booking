@@ -324,19 +324,14 @@ section { position: relative; }
 }
 
 /* ── Mobile Menu ─────────────────────────────────────────────── */
-.mobile-menu {
-  position: fixed;
-  inset: 0; z-index: 999;
-  background: rgba(8, 9, 15, 0.98);
-  display: flex; flex-direction: column;
-  padding: 1.5rem 2rem;
-  backdrop-filter: blur(30px);
-  animation: slideInRight 0.3s ease;
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
 
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ── Hero Section ────────────────────────────────────────────── */

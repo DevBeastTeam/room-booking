@@ -5,8 +5,8 @@ import { Shield, Lock, User, Eye, EyeOff, AlertCircle, Database, LogIn, Key } fr
 // ── Hardcoded Credentials ──────────────────────────────────────────────────────
 // Admin credentials (fixed)
 const ADMIN_USERS = [
-  { username: 'admin',          email: 'admin@monarchpass.com', password: 'admin@2026', role: 'Admin',     name: 'Property Admin'  },
-  { username: 'manager',        email: 'manager@monarchpass.com',password: 'manager123', role: 'Manager',   name: 'Property Manager' },
+  { username: 'admin', email: 'admin@monarchpass.com', password: 'admin@2026', role: 'Admin', name: 'Property Admin' },
+  { username: 'manager', email: 'manager@monarchpass.com', password: 'manager123', role: 'Manager', name: 'Property Manager' },
 ];
 
 // Dev user: password = current day of month (e.g., if day is 21 → password "21")
@@ -69,18 +69,18 @@ function clearSession() {
 
 // ── Design Tokens ──────────────────────────────────────────────────────────────
 const S = {
-  bg:       '#08090f',
-  card:     '#0d1117',
-  card2:    '#111827',
-  border:   '#1f2d44',
-  accent:   '#5ec4b6',
-  amber:    '#f59e0b',
-  red:      '#ef4444',
-  green:    '#22c55e',
-  blue:     '#3b82f6',
-  purple:   '#a855f7',
-  text:     '#e2e8f0',
-  muted:    '#6b7fa3',
+  bg: '#08090f',
+  card: '#0d1117',
+  card2: '#111827',
+  border: '#1f2d44',
+  accent: '#5ec4b6',
+  amber: '#f59e0b',
+  red: '#ef4444',
+  green: '#22c55e',
+  blue: '#3b82f6',
+  purple: '#a855f7',
+  text: '#e2e8f0',
+  muted: '#6b7fa3',
 };
 
 // ── Input Field ───────────────────────────────────────────────────────────────
@@ -131,22 +131,7 @@ function DevHintCard() {
       background: `${S.purple}15`, border: `1px solid ${S.purple}40`,
       borderRadius: 10, padding: '0.85rem 1rem', marginBottom: '1.25rem',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-        <Key size={14} color={S.purple} />
-        <span style={{ color: S.purple, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Developer Login Hint
-        </span>
-      </div>
-      <div style={{ color: S.muted, fontSize: '0.78rem', lineHeight: 1.6 }}>
-        Username: <code style={{ color: S.text, background: S.card2, padding: '1px 6px', borderRadius: 4 }}>dev</code>
-        {' '}or{' '}
-        <code style={{ color: S.text, background: S.card2, padding: '1px 6px', borderRadius: 4 }}>dev@gmail.com</code>
-        <br />
-        Password: <strong style={{ color: S.amber }}>Aaj ka date number</strong>
-        {' '}(today = <code style={{ color: S.accent, background: S.card2, padding: '1px 6px', borderRadius: 4 }}>{day}</code>)
-        <br />
-        <span style={{ color: `${S.muted}88`, fontSize: '0.7rem' }}>* Password har roz midnight ko automatically badal jata hai</span>
-      </div>
+
     </div>
   );
 }
@@ -156,8 +141,8 @@ function AdminLoginForm({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showDevHint, setShowDevHint] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
@@ -345,12 +330,7 @@ function AdminLoginForm({ onLoginSuccess }) {
             <span style={{ color: S.text }}>admin</span> / <span style={{ color: S.accent }}>admin@2026</span>
             <br />
             <span style={{ color: S.text }}>manager</span> / <span style={{ color: S.accent }}>manager123</span>
-            <br />
-            <span style={{ color: S.purple }}>dev</span> / <span style={{ color: S.amber }}>aaj ka date number</span>
-            {' '}
-            <span style={{ color: `${S.muted}88` }}>
-              (= <strong style={{ color: S.amber }}>{new Date().getDate()}</strong> today)
-            </span>
+
           </div>
         </div>
       </div>
@@ -362,8 +342,8 @@ function AdminLoginForm({ onLoginSuccess }) {
 function SessionBar({ user, onLogout }) {
   const roleColors = {
     Developer: S.purple,
-    Admin:     S.accent,
-    Manager:   S.amber,
+    Admin: S.accent,
+    Manager: S.amber,
   };
   const color = roleColors[user.role] || S.accent;
   const today = new Date().getDate();
@@ -403,7 +383,7 @@ function SessionBar({ user, onLogout }) {
 // ── Main Gated Export ──────────────────────────────────────────────────────────
 export default function AdminGate() {
   const [session, setSession] = useState(null);
-  const [ready, setReady]     = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     // Check existing session on mount (client-only)

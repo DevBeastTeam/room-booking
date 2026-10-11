@@ -114,6 +114,7 @@ export default function Header({
   ];
 
   return (
+    <>
     <header className="header-wrapper" style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
       {/* ── 1. Top Luxury Utility Bar ── */}
       <div 
@@ -259,40 +260,6 @@ export default function Header({
               <span>{themeMode === 'dark' ? 'LIGHT' : 'DARK'}</span>
             </button>
 
-            {/* Translate Button */}
-            <button
-              id="btn-translate"
-              onClick={() => {
-                const currentUrl = encodeURIComponent(window.location.href);
-                window.open(`https://translate.google.com/translate?sl=auto&tl=es&u=${currentUrl}`, '_blank');
-              }}
-              style={{
-                backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.08))',
-                color: 'var(--primary-color, #dfc285)',
-                padding: '0.28rem 0.65rem',
-                borderRadius: '4px',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                cursor: 'pointer',
-                border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.25))',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = 'var(--card-inner-bg, rgba(201, 169, 110, 0.2))';
-                e.currentTarget.style.borderColor = 'var(--primary-color, #dfc285)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.08))';
-                e.currentTarget.style.borderColor = 'var(--primary-border, rgba(201, 169, 110, 0.25))';
-              }}
-              title="Translate Page to Spanish | Traducir al Español"
-            >
-              <span>ESPAÑOL</span>
-            </button>
 
             {/* Login Menu Dropdown */}
             <div style={{ position: 'relative' }}>
@@ -336,53 +303,6 @@ export default function Header({
                     overflow: 'hidden',
                   }}
                 >
-                  <a
-                    href={siteSettings?.portals?.resident || 'https://monarchpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsLoginOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.82rem',
-                      color: 'var(--text-main, #f0ebe0)',
-                      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.1))'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <span>Resident Portal</span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--primary-color, #c9a96e)', backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.15))', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
-                  </a>
-
-                  <a
-                    href={siteSettings?.portals?.applicant || 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsLoginOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.75rem 1rem',
-                      fontSize: '0.82rem',
-                      color: 'var(--text-main, #f0ebe0)',
-                      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--primary-light, rgba(201, 169, 110, 0.1))'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <span>Applicant Portal</span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--primary-color, #c9a96e)', backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.15))', padding: '2px 6px', borderRadius: '3px' }}>SecureCafe</span>
-                  </a>
 
                   <a
                     href="/dashboard"
@@ -726,207 +646,232 @@ export default function Header({
         </div>
       </nav>
 
-      {/* ── 3. Mobile Navigation Drawer ── */}
+    </header>
+
+      {/* ── 3. Mobile Navigation Drawer (Right-Side Sheet) ── */}
       {isNavOpen && (
-        <div
-          className="mobile-menu"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            top: '0',
-            backgroundColor: 'var(--nav-overlay-bg, rgba(8, 9, 15, 0.98))',
-            backdropFilter: 'blur(25px)',
-            WebkitBackdropFilter: 'blur(25px)',
-            zIndex: 2000,
-            padding: '1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowY: 'auto',
-          }}
-        >
-          {/* Top Bar inside Mobile Drawer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.2))' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setIsNavOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.55)',
+              backdropFilter: 'blur(4px)',
+              WebkitBackdropFilter: 'blur(4px)',
+              zIndex: 1999,
+              animation: 'fadeInOverlay 0.25s ease',
+            }}
+          />
+
+          {/* Right Panel */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: '300px',
+              maxWidth: '90vw',
+              backgroundColor: 'var(--modal-bg, #0c0f18)',
+              borderLeft: '1px solid var(--card-border, rgba(201, 169, 110, 0.15))',
+              zIndex: 2000,
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              animation: 'slideInFromRight 0.3s cubic-bezier(0.32,0.72,0,1)',
+            }}
+          >
+            {/* Top Bar inside Mobile Drawer */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.2))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '6px',
+                    background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--btn-gold-text, #08090f)',
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  M
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
+                    MONARCH PASS
+                  </span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--primary-color, #c9a96e)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Fort Worth, TX
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsNavOpen(false)}
+                aria-label="Close menu"
                 style={{
-                  width: '38px',
-                  height: '38px',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.08))',
+                  border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
+                  color: 'var(--text-main, #ffffff)',
+                  padding: '0.4rem',
                   borderRadius: '6px',
-                  background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--btn-gold-text, #08090f)',
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: '1.3rem',
-                  fontWeight: 700,
                 }}
               >
-                M
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
-                  MONARCH PASS
-                </span>
-                <span style={{ fontSize: '0.62rem', color: 'var(--primary-color, #c9a96e)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Fort Worth, TX
-                </span>
-              </div>
+                <X size={20} />
+              </button>
             </div>
 
-            <button
-              onClick={() => setIsNavOpen(false)}
-              aria-label="Close menu"
-              style={{
-                backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.08))',
-                border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
-                color: 'var(--text-main, #ffffff)',
-                padding: '0.5rem',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
-            >
-              <X size={22} />
-            </button>
-          </div>
-
-          {/* Mobile Theme Toggle */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.75rem 1rem',
-              borderRadius: '8px',
-              backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.1))',
-              border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.25))',
-              marginBottom: '1.25rem',
-            }}
-          >
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
-              Appearance Theme
-            </span>
-            <button
-              onClick={handleToggleTheme}
+            {/* Mobile Theme Toggle */}
+            <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                backgroundColor: 'var(--primary-color, #c9a96e)',
-                color: 'var(--btn-gold-text, #08090f)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '0.4rem 0.85rem',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
+                justifyContent: 'space-between',
+                padding: '0.65rem 0.9rem',
+                borderRadius: '8px',
+                backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.1))',
+                border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.25))',
+                marginBottom: '1.25rem',
               }}
             >
-              {themeMode === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-              <span>{themeMode === 'dark' ? 'Light Theme' : 'Dark Theme'}</span>
-            </button>
-          </div>
-
-          {/* Navigation Items List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                id={`mobile-${link.id}`}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsNavOpen(false);
-                  link.onClick();
-                }}
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
+                Theme
+              </span>
+              <button
+                onClick={handleToggleTheme}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0.85rem 1rem',
+                  gap: '0.35rem',
+                  backgroundColor: 'var(--primary-color, #c9a96e)',
+                  color: 'var(--btn-gold-text, #08090f)',
+                  border: 'none',
                   borderRadius: '6px',
-                  backgroundColor: link.active ? 'var(--primary-light, rgba(201, 169, 110, 0.12))' : 'transparent',
-                  border: link.active ? '1px solid var(--primary-border, rgba(201, 169, 110, 0.3))' : '1px solid transparent',
-                  color: link.active ? 'var(--primary-color, #dfc285)' : 'var(--text-main, #e8e0d4)',
-                  fontSize: '1rem',
-                  fontWeight: link.active ? 600 : 500,
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {themeMode === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+                <span>{themeMode === 'dark' ? 'Light' : 'Dark'}</span>
+              </button>
+            </div>
+
+            {/* Navigation Items List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '1.5rem' }}>
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  id={`mobile-${link.id}`}
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsNavOpen(false);
+                    link.onClick();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.75rem 0.9rem',
+                    borderRadius: '6px',
+                    backgroundColor: link.active ? 'var(--primary-light, rgba(201, 169, 110, 0.12))' : 'transparent',
+                    border: link.active ? '1px solid var(--primary-border, rgba(201, 169, 110, 0.3))' : '1px solid transparent',
+                    color: link.active ? 'var(--primary-color, #dfc285)' : 'var(--text-main, #e8e0d4)',
+                    fontSize: '0.92rem',
+                    fontWeight: link.active ? 600 : 500,
+                    textDecoration: 'none',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  <span>{link.label}</span>
+                  {link.badge ? (
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.2))',
+                        color: 'var(--primary-color, #dfc285)',
+                        padding: '2px 7px',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      {link.badge}
+                    </span>
+                  ) : (
+                    <ArrowRight size={14} style={{ opacity: 0.35 }} />
+                  )}
+                </a>
+              ))}
+            </div>
+
+            {/* Bottom Actions */}
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.65rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))' }}>
+              <button
+                onClick={() => {
+                  setIsNavOpen(false);
+                  handleScheduleTour();
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  borderRadius: '6px',
+                  background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
+                  color: 'var(--btn-gold-text, #08090f)',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <Calendar size={15} />
+                <span>Schedule a Tour</span>
+              </button>
+
+              <a
+                href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  borderRadius: '6px',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.06))',
+                  border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
+                  color: 'var(--text-main, #f0ebe0)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
                   textDecoration: 'none',
                 }}
               >
-                <span>{link.label}</span>
-                {link.badge ? (
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.2))',
-                      color: 'var(--primary-color, #dfc285)',
-                      padding: '2px 8px',
-                      borderRadius: '10px',
-                    }}
-                  >
-                    {link.badge}
-                  </span>
-                ) : (
-                  <ArrowRight size={16} style={{ opacity: 0.4 }} />
-                )}
+                <Phone size={15} style={{ color: 'var(--primary-color, #c9a96e)' }} />
+                <span>{siteSettings?.phone || '(817) 857-8782'}</span>
               </a>
-            ))}
+            </div>
           </div>
-
-          {/* Bottom Actions inside Mobile Drawer */}
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color, rgba(255, 255, 255, 0.08))' }}>
-            <button
-              onClick={() => {
-                setIsNavOpen(false);
-                handleScheduleTour();
-              }}
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                borderRadius: '6px',
-                background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
-                color: 'var(--btn-gold-text, #08090f)',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <Calendar size={16} />
-              <span>Schedule a Guided Tour</span>
-            </button>
-
-            <a
-              href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                borderRadius: '6px',
-                backgroundColor: 'var(--card-inner-bg, rgba(255, 255, 255, 0.06))',
-                border: '1px solid var(--card-border, rgba(255, 255, 255, 0.15))',
-                color: 'var(--text-main, #f0ebe0)',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                textDecoration: 'none',
-              }}
-            >
-              <Phone size={16} style={{ color: 'var(--primary-color, #c9a96e)' }} />
-              <span>Call Leasing: {siteSettings?.phone || '(817) 857-8782'}</span>
-            </a>
-          </div>
-        </div>
+        </>
       )}
-    </header>
+    </>
   );
 }

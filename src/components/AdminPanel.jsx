@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Home, Users, FileText, Wrench, DollarSign, BarChart2, Settings,
   LogOut, CheckCircle, XCircle, Clock,
@@ -7,7 +7,7 @@ import {
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
   Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw, Wand2,
-  Database, Sun, Moon
+  Database, Sun, Moon, Inbox, MessageSquare, UserCircle
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -19,6 +19,14 @@ import {
   saveSupportInquiries,
   addSupportInquiry
 } from '../services/siteDataService';
+import {
+  getAllSessions,
+  sendAdminReply,
+  markSessionRead,
+  deleteSession,
+  getTotalUnread,
+  formatTs,
+} from '../services/chatService';
 import {
   THEME_CONFIG,
   DEFAULT_DARK_PALETTE,
@@ -578,7 +586,193 @@ function EmailLogsSection() {
   );
 }
 
+
+// ── Live Chat Section ──────────────────────────────────────────────────────────
+function LiveChatSection() {
+  const [sessions, setSessions] = useState({});
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [search, setSearch] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const loadSessions = () => {
+    setSessions(getAllSessions());
+  };
+
+  useEffect(() => {
+    loadSessions();
+    const interval = setInterval(loadSessions, 3000);
+    const onUpdate = () => loadSessions();
+    window.addEventListener('chat-sessions-updated', onUpdate);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('chat-sessions-updated', onUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [sessions, selectedUserId]);
+
+  const sessionList = Object.values(sessions)
+    .filter(s => {
+      if (!search.trim()) return true;
+      return (
+        s.displayName?.toLowerCase().includes(search.toLowerCase()) ||
+        s.email?.toLowerCase().includes(search.toLowerCase()) ||
+        s.userId?.toLowerCase().includes(search.toLowerCase())
+      );
+    })
+    .sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
+
+  const totalUnread = Object.values(sessions).reduce((sum, s) => sum + (s.unread || 0), 0);
+  const selectedSession = selectedUserId ? sessions[selectedUserId] : null;
+
+  const handleSelectSession = (userId) => {
+    setSelectedUserId(userId);
+    markSessionRead(userId);
+    loadSessions();
+  };
+
+  const handleSendReply = (e) => {
+    e.preventDefault();
+    if (!replyText.trim() || !selectedUserId) return;
+    sendAdminReply(selectedUserId, replyText.trim());
+    setReplyText('');
+    loadSessions();
+  };
+
+  const handleDelete = (userId) => {
+    if (!window.confirm('Delete this chat session?')) return;
+    deleteSession(userId);
+    if (selectedUserId === userId) setSelectedUserId(null);
+    loadSessions();
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <SectionTitle>Live Chat Inbox</SectionTitle>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {totalUnread > 0 && (
+            <span style={{ backgroundColor: A.danger, color: '#fff', borderRadius: 12, padding: '0.2rem 0.65rem', fontSize: '0.72rem', fontWeight: 800 }}>
+              {totalUnread} unread
+            </span>
+          )}
+          <button onClick={loadSessions} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', backgroundColor: `${A.accent}22`, color: A.accentLt, border: `1px solid ${A.accent}55`, borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+            <RefreshCw size={13} /> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1rem', height: '580px' }}>
+        {/* Left: Session List */}
+        <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ padding: '0.75rem', borderBottom: `1px solid ${A.border}` }}>
+            <div style={{ position: 'relative' }}>
+              <Search size={13} style={{ position: 'absolute', left: 8, top: 10, color: A.muted }} />
+              <input type="text" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)}
+                style={{ width: '100%', padding: '0.4rem 0.6rem 0.4rem 1.75rem', backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, color: A.text, fontSize: '0.78rem', outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {sessionList.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: A.muted, fontSize: '0.82rem' }}>
+                <MessageSquare size={28} style={{ opacity: 0.3, marginBottom: '0.5rem' }} />
+                <div>No chat sessions yet.</div>
+                <div style={{ fontSize: '0.72rem', marginTop: '0.3rem' }}>Customers will appear here when they start a chat.</div>
+              </div>
+            ) : sessionList.map(s => (
+              <button key={s.userId} onClick={() => handleSelectSession(s.userId)}
+                style={{ width: '100%', padding: '0.85rem 0.9rem', borderBottom: `1px solid ${A.border}`, backgroundColor: selectedUserId === s.userId ? `${A.accent}18` : 'transparent', border: 'none', borderBottom: `1px solid ${A.border}`, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.65rem' }}
+              >
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${A.accent}88, ${A.teal}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.82rem', fontWeight: 800, color: A.bg }}>
+                  {(s.displayName || 'G')[0].toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: selectedUserId === s.userId ? A.accent : A.text, fontWeight: 700, fontSize: '0.83rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.displayName || 'Guest'}</span>
+                    {s.unread > 0 && <span style={{ backgroundColor: A.danger, color: '#fff', borderRadius: 10, padding: '1px 6px', fontSize: '0.62rem', fontWeight: 800, flexShrink: 0 }}>{s.unread}</span>}
+                  </div>
+                  <div style={{ color: A.muted, fontSize: '0.7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.email || s.userId}</div>
+                  <div style={{ color: A.muted, fontSize: '0.67rem', marginTop: '0.15rem', fontStyle: 'italic' }}>
+                    {s.messages?.length > 0 ? s.messages[s.messages.length - 1].text.slice(0, 38) + '...' : 'No messages yet'}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Conversation */}
+        <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {!selectedSession ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: A.muted }}>
+              <MessageSquare size={40} style={{ opacity: 0.25, marginBottom: '0.75rem' }} />
+              <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>Select a conversation</div>
+              <div style={{ fontSize: '0.78rem', marginTop: '0.3rem' }}>Choose a user from the left to view their chat</div>
+            </div>
+          ) : (
+            <>
+              <div style={{ padding: '0.9rem 1.1rem', borderBottom: `1px solid ${A.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, ${A.accent}88, ${A.teal}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 800, color: A.bg }}>
+                    {(selectedSession.displayName || 'G')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ color: A.text, fontWeight: 700, fontSize: '0.9rem' }}>{selectedSession.displayName || 'Guest'}</div>
+                    <div style={{ color: A.muted, fontSize: '0.72rem' }}>{selectedSession.email ? `📧 ${selectedSession.email}` : `🆔 ${selectedSession.userId}`}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span style={{ color: A.muted, fontSize: '0.72rem' }}>{selectedSession.messages?.length || 0} messages</span>
+                  <button onClick={() => handleDelete(selectedSession.userId)} title="Delete conversation"
+                    style={{ padding: '0.35rem 0.55rem', backgroundColor: `${A.danger}22`, color: A.danger, border: `1px solid ${A.danger}44`, borderRadius: 6, cursor: 'pointer' }}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', backgroundColor: A.bg }}>
+                {(!selectedSession.messages || selectedSession.messages.length === 0) ? (
+                  <div style={{ textAlign: 'center', color: A.muted, fontSize: '0.82rem', marginTop: '2rem' }}>No messages yet.</div>
+                ) : selectedSession.messages.map((m, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: m.sender === 'admin' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ fontSize: '0.67rem', color: A.muted, marginBottom: '2px', padding: '0 4px' }}>
+                      {m.sender === 'admin' ? '🏢 You (Admin)' : `👤 ${selectedSession.displayName}`} · {formatTs(m.ts)}
+                    </div>
+                    <div style={{
+                      background: m.sender === 'admin' ? `linear-gradient(135deg, ${A.accent}, #d97706)` : A.card2,
+                      color: m.sender === 'admin' ? '#0a0d14' : A.text,
+                      border: m.sender === 'admin' ? 'none' : `1px solid ${A.border}`,
+                      padding: '0.65rem 0.9rem',
+                      borderRadius: m.sender === 'admin' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                      maxWidth: '75%', fontSize: '0.85rem', lineHeight: 1.5, fontWeight: m.sender === 'admin' ? 600 : 400,
+                    }}>
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <form onSubmit={handleSendReply} style={{ padding: '0.75rem 0.85rem', borderTop: `1px solid ${A.border}`, display: 'flex', gap: '0.6rem', flexShrink: 0, backgroundColor: A.card }}>
+                <input type="text" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={`Reply to ${selectedSession.displayName}...`}
+                  style={{ flex: 1, padding: '0.5rem 0.75rem', backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, color: A.text, fontSize: '0.85rem', outline: 'none' }} />
+                <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: `linear-gradient(135deg, ${A.accent}, #d97706)`, color: '#0a0d14', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+                  <Send size={14} /> Send
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Contact Support Section ────────────────────────────────────────────────────
+
 function ContactSupportSection({ supportInquiries = [], setSupportInquiries }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -2641,10 +2835,11 @@ const ADMIN_NAV = [
   { id: 'units',        label: 'Units',              Icon: Home        },
   { id: 'applications', label: 'Applications',       Icon: FileText    },
   { id: 'residents',    label: 'Residents',          Icon: Users       },
-  { id: 'maintenance',  label: 'Maintenance',        Icon: Wrench      },
-  { id: 'addons',       label: 'Add-ons',            Icon: Package     },
-  { id: 'emaillogs',    label: 'Email Logs',         Icon: Mail        },
-  { id: 'support',      label: 'Contact Support',    Icon: Headphones  },
+  { id: 'maintenance',  label: 'Maintenance',        Icon: Wrench        },
+  { id: 'addons',       label: 'Add-ons',            Icon: Package       },
+  { id: 'emaillogs',    label: 'Email Logs',         Icon: Mail          },
+  { id: 'livechat',     label: 'Live Chat',          Icon: MessageSquare },
+  { id: 'support',      label: 'Contact Support',    Icon: Headphones    },
   { id: 'pages',        label: 'Pages & Legal',      Icon: BookOpen    },
   { id: 'settings',     label: 'Site Settings',      Icon: Sliders     },
   { id: 'theme',        label: 'Theme & Colors',     Icon: Palette     },
@@ -2691,6 +2886,7 @@ export default function AdminPanel({
     maintenance:  <AdminMaintenanceSection />,
     addons:       <AddOnsManagementSection />,
     emaillogs:    <EmailLogsSection />,
+    livechat:     <LiveChatSection />,
     support:      <ContactSupportSection supportInquiries={supportInquiries} setSupportInquiries={handleUpdateSupportInquiries} />,
     pages:        <PagesManagementSection legalPages={legalPages} setLegalPages={handleUpdateLegalPages} />,
     settings:     <SiteSettingsSection siteSettings={siteSettings} setSiteSettings={handleUpdateSiteSettings} />,
@@ -2722,6 +2918,21 @@ export default function AdminPanel({
   };
 
 
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+
+  useEffect(() => {
+    setChatUnreadCount(getTotalUnread());
+    const onChatUpdate = () => {
+      setChatUnreadCount(getTotalUnread());
+    };
+    window.addEventListener('chat-sessions-updated', onChatUpdate);
+    const interval = setInterval(onChatUpdate, 2500);
+    return () => {
+      window.removeEventListener('chat-sessions-updated', onChatUpdate);
+      clearInterval(interval);
+    };
+  }, []);
+
   const pendingCount = APPLICATIONS_DATA.filter((a) => a.status === 'pending').length;
   const newSupportCount = supportInquiries.filter((s) => s.status === 'new').length;
 
@@ -2752,6 +2963,7 @@ export default function AdminPanel({
             const active = activeSection === id;
             const isAppBadge = id === 'applications' && pendingCount > 0;
             const isSupportBadge = id === 'support' && newSupportCount > 0;
+            const isChatBadge = id === 'livechat' && chatUnreadCount > 0;
             return (
               <button
                 key={id}
@@ -2799,6 +3011,11 @@ export default function AdminPanel({
                 {isSupportBadge && (
                   <span style={{ backgroundColor: A.accent, color: '#0a0d14', borderRadius: 10, padding: '0.1rem 0.45rem', fontSize: '0.65rem', fontWeight: 800 }}>
                     {newSupportCount}
+                  </span>
+                )}
+                {isChatBadge && (
+                  <span style={{ backgroundColor: '#22c55e', color: '#08090f', borderRadius: 10, padding: '0.1rem 0.45rem', fontSize: '0.65rem', fontWeight: 800 }}>
+                    {chatUnreadCount}
                   </span>
                 )}
               </button>

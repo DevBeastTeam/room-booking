@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MessageSquare,
   Calendar,
@@ -16,22 +16,106 @@ import {
   Users,
   Eye,
   ZoomIn,
-  Contrast
+  Contrast,
+  UserCircle,
+  Edit2,
+  Check
 } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
+import {
+  getOrCreateUserId,
+  getUserInfo,
+  setUserInfo,
+  getSession,
+  ensureSession,
+  sendUserMessage,
+  formatTs,
+} from '../services/chatService';
 
 export default function Widgets({ onOpenScheduleTour }) {
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'chat', 'tour', 'email', 'call', 'accessibility'
 
-  // Chat State
-  const [chatMessages, setChatMessages] = useState([
-    {
-      sender: 'bot',
-      text: "Welcome, I'm Edward! If you have any questions about Monarch Pass or would like to schedule a tour, I'm happy to help. To start may I please have your name?",
-    },
-  ]);
+  // ── Real Chat State (Admin & Customer Live Chat) ──────────────────────────
+  const [chatMessages, setChatMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [chatUser, setChatUser] = useState({ userId: '', displayName: 'Guest', email: '', isLoggedIn: false });
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const messagesEndRef = useRef(null);
+
+  // Sync user info and load conversation
+  const syncChatState = () => {
+    const info = getUserInfo();
+    setChatUser(info);
+    setEditName(info.displayName.startsWith('Guest') ? '' : info.displayName);
+    setEditEmail(info.email || '');
+    ensureSession(info.userId, info.displayName, info.email);
+    const session = getSession(info.userId);
+    if (session && session.messages) {
+      setChatMessages(session.messages);
+    }
+  };
+
+  useEffect(() => {
+    syncChatState();
+  }, []);
+
+  useEffect(() => {
+    if (activeModal === 'chat') {
+      syncChatState();
+    }
+  }, [activeModal]);
+
+  // Real-time listener and polling for admin replies
+  useEffect(() => {
+    if (activeModal !== 'chat' || !chatUser.userId) return;
+    const fetchLatest = () => {
+      const s = getSession(chatUser.userId);
+      if (s && s.messages) {
+        setChatMessages(s.messages);
+      }
+    };
+    const interval = setInterval(fetchLatest, 2000);
+    const onUpdate = () => fetchLatest();
+    window.addEventListener('chat-sessions-updated', onUpdate);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('chat-sessions-updated', onUpdate);
+    };
+  }, [activeModal, chatUser.userId]);
+
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    if (activeModal === 'chat') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages, activeModal]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim()) return;
+    const msg = inputMessage.trim();
+    const info = getUserInfo();
+    const uid = chatUser.userId || info.userId;
+    sendUserMessage(uid, msg, chatUser.displayName || info.displayName, chatUser.email || info.email);
+    setInputMessage('');
+    const s = getSession(uid);
+    if (s && s.messages) setChatMessages(s.messages);
+  };
+
+  const handleSaveCustomerInfo = (e) => {
+    e.preventDefault();
+    if (!editName.trim() && !editEmail.trim()) return;
+    setUserInfo(editName.trim(), editEmail.trim());
+    const updated = getUserInfo();
+    setChatUser(updated);
+    setIsEditingInfo(false);
+    const s = getSession(updated.userId);
+    if (s && s.messages) setChatMessages(s.messages);
+  };
+
 
   // Tour State
   const [tourType, setTourType] = useState('guided'); // 'guided', 'virtual'
@@ -66,23 +150,6 @@ export default function Widgets({ onOpenScheduleTour }) {
     '2:30pm', '3:00pm', '3:30pm', '4:00pm',
   ];
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!inputMessage.trim()) return;
-    const msg = inputMessage.trim();
-    setChatMessages((prev) => [...prev, { sender: 'user', text: msg }]);
-    setInputMessage('');
-
-    setTimeout(() => {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          sender: 'bot',
-          text: `Nice to meet you! Thanks for asking about Monarch Pass. Our 1 to 4 bedroom floor plans in Fort Worth are currently leasing with special move-in incentives. Would you like me to reserve a guided tour slot for you?`,
-        },
-      ]);
-    }, 800);
-  };
 
   const handleTourSubmit = (e) => {
     e.preventDefault();
@@ -436,7 +503,7 @@ export default function Widgets({ onOpenScheduleTour }) {
       )}
 
       {/* ========================================================================= */}
-      {/* 3. CHAT MODAL WINDOW ('Chat with us') */}
+      {/* 3. CHAT MODAL WINDOW (Real-time Live Chat with Admin) */}
       {/* ========================================================================= */}
       {activeModal === 'chat' && (
         <div
@@ -445,8 +512,9 @@ export default function Widgets({ onOpenScheduleTour }) {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            width: '360px',
-            height: '520px',
+            width: '380px',
+            maxWidth: 'calc(100vw - 32px)',
+            height: '540px',
             backgroundColor: 'var(--modal-bg, #0c101c)',
             borderRadius: '16px',
             boxShadow: '0 25px 60px var(--shadow-color, rgba(0,0,0,0.7))',
@@ -457,122 +525,172 @@ export default function Widgets({ onOpenScheduleTour }) {
             flexDirection: 'column',
           }}
         >
-          {/* Luxury Top Header */}
-          <div
-            style={{
-              background: 'var(--card-bg, #0c101c)',
-              padding: '1rem 1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.25))',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285, #c9a96e))',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--btn-gold-text, #08090f)',
-                  fontWeight: 800,
-                  fontSize: '0.85rem',
-                }}
-              >
-                M
-              </div>
-              <div style={{ fontWeight: 600, fontSize: '1.15rem', color: 'var(--text-main, #f8fafc)', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
-                Monarch Pass Concierge
+          {/* Header */}
+          <div style={{ background: 'var(--card-bg, #0c101c)', padding: '0.9rem 1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.25))', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285, #c9a96e))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--btn-gold-text, #08090f)', fontWeight: 800, fontSize: '0.95rem' }}>M</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main, #f8fafc)', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>Monarch Pass Concierge</div>
+                <div style={{ fontSize: '0.68rem', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
+                  Live Chat with Leasing Staff
+                </div>
               </div>
             </div>
-            <button onClick={() => setActiveModal(null)} style={{ color: 'var(--primary-color, #c9a96e)', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <X size={20} />
+            <button onClick={() => setActiveModal(null)} style={{ color: 'var(--primary-color, #c9a96e)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}><X size={20} /></button>
+          </div>
+
+          {/* User Identity Sub-bar */}
+          <div style={{
+            backgroundColor: 'var(--card-inner-bg, rgba(201, 169, 110, 0.08))',
+            borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.15))',
+            padding: '0.45rem 0.9rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.74rem',
+            flexShrink: 0,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main, #f4efe6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <UserCircle size={14} style={{ color: 'var(--primary-color, #c9a96e)', flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {chatUser.email ? (
+                  <span><strong>{chatUser.displayName}</strong> ({chatUser.email})</span>
+                ) : (
+                  <span>Chatting as <strong style={{ color: 'var(--primary-color, #dfc285)' }}>{chatUser.displayName}</strong></span>
+                )}
+              </span>
+            </div>
+            <button
+              onClick={() => setIsEditingInfo(!isEditingInfo)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--primary-color, #c9a96e)',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.2rem',
+                flexShrink: 0,
+                padding: '2px 6px',
+                borderRadius: '4px',
+                backgroundColor: isEditingInfo ? 'rgba(201, 169, 110, 0.15)' : 'transparent',
+              }}
+            >
+              <Edit2 size={11} />
+              {isEditingInfo ? 'Cancel' : (chatUser.email ? 'Edit' : 'Add Info')}
             </button>
           </div>
 
-          {/* Privacy Consent Notice */}
-          <div
-            style={{
-              padding: '0.6rem 1rem',
-              backgroundColor: 'var(--card-inner-bg, rgba(8, 10, 18, 0.85))',
-              borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.15))',
-              fontSize: '0.725rem',
-              color: 'var(--text-muted, #94a3b8)',
-              lineHeight: 1.4,
-            }}
-          >
-            Connected to 24/7 Leasing Concierge. Ask about floor plan pricing, deposit policies, and virtual tour options.
-          </div>
-
-          {/* Messages Area */}
-          <div
-            style={{
-              flex: 1,
-              padding: '1rem',
-              overflowY: 'auto',
+          {/* Collapsible Profile Edit Drawer */}
+          {isEditingInfo && (
+            <form onSubmit={handleSaveCustomerInfo} style={{
+              backgroundColor: 'var(--card-bg, #0f1322)',
+              borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.25))',
+              padding: '0.8rem 1rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.75rem',
-              backgroundColor: 'var(--bg-page, rgba(8, 10, 18, 0.95))',
-            }}
-          >
-            {chatMessages.map((m, idx) => (
-              <div
-                key={idx}
+              gap: '0.5rem',
+              flexShrink: 0,
+            }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)' }}>
+                Set your name and email so our leasing team can follow up with you:
+              </div>
+              <input
+                type="text"
+                placeholder="Your Name (e.g. John Doe)"
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
                 style={{
-                  alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                  background: m.sender === 'user' ? 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285, #c9a96e))' : 'var(--card-bg, rgba(16, 20, 34, 0.95))',
-                  color: m.sender === 'user' ? 'var(--btn-gold-text, #08090f)' : 'var(--text-main, #f4efe6)',
-                  border: m.sender === 'user' ? 'none' : '1px solid var(--card-border, rgba(201, 169, 110, 0.25))',
-                  padding: '0.75rem 1rem',
-                  borderRadius: m.sender === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                  maxWidth: '85%',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.5,
-                  boxShadow: '0 4px 12px var(--shadow-color, rgba(0,0,0,0.3))',
-                  fontWeight: m.sender === 'user' ? 600 : 400,
+                  padding: '0.45rem 0.7rem',
+                  borderRadius: '6px',
+                  border: '1px solid var(--card-border, rgba(201,169,110,0.3))',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255,255,255,0.06))',
+                  color: 'var(--text-main, #f4efe6)',
+                  fontSize: '0.8rem',
+                  outline: 'none',
+                }}
+              />
+              <input
+                type="email"
+                placeholder="Your Email (e.g. john@example.com)"
+                value={editEmail}
+                onChange={e => setEditEmail(e.target.value)}
+                style={{
+                  padding: '0.45rem 0.7rem',
+                  borderRadius: '6px',
+                  border: '1px solid var(--card-border, rgba(201,169,110,0.3))',
+                  backgroundColor: 'var(--card-inner-bg, rgba(255,255,255,0.06))',
+                  color: 'var(--text-main, #f4efe6)',
+                  fontSize: '0.8rem',
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: '0.45rem 0.8rem',
+                  borderRadius: '6px',
+                  background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285, #c9a96e))',
+                  color: 'var(--btn-gold-text, #08090f)',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.3rem',
                 }}
               >
-                {m.text}
+                <Check size={13} /> Save & Update Profile
+              </button>
+            </form>
+          )}
+
+          {/* Message Thread */}
+          <div style={{ flex: 1, padding: '0.85rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.65rem', backgroundColor: 'var(--bg-page, rgba(8, 10, 18, 0.95))' }}>
+            {chatMessages.length === 0 && (
+              <div style={{ textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '0.8rem', marginTop: '2rem' }}>Send a message to start the conversation...</div>
+            )}
+            {chatMessages.map((m, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{
+                  background: m.sender === 'user' ? 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285, #c9a96e))' : 'var(--card-bg, rgba(16,20,34,0.95))',
+                  color: m.sender === 'user' ? 'var(--btn-gold-text, #08090f)' : 'var(--text-main, #f4efe6)',
+                  border: m.sender === 'user' ? 'none' : '1px solid var(--card-border, rgba(201,169,110,0.25))',
+                  padding: '0.65rem 0.9rem',
+                  borderRadius: m.sender === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                  maxWidth: '82%',
+                  fontSize: '0.84rem',
+                  lineHeight: 1.5,
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.25)',
+                  fontWeight: m.sender === 'user' ? 600 : 400,
+                }}>
+                  {m.text}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted, #64748b)', marginTop: '2px', padding: '0 4px' }}>
+                  {m.sender === 'admin' ? '🏢 Leasing Staff · ' : ''}{formatTs(m.ts)}
+                </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Footer */}
-          <form
-            onSubmit={handleSendMessage}
-            style={{
-              backgroundColor: 'var(--card-bg, rgba(12, 16, 28, 0.98))',
-              borderTop: '1px solid var(--border-color, rgba(201, 169, 110, 0.25))',
-              padding: '0.65rem 0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-            }}
-          >
+          {/* Input Form */}
+          <form onSubmit={handleSendMessage} style={{ backgroundColor: 'var(--card-bg, rgba(12,16,28,0.98))', borderTop: '1px solid var(--border-color, rgba(201,169,110,0.25))', padding: '0.6rem 0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
             <input
               type="text"
               value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Inquire about pricing, floor plans..."
-              style={{
-                flex: 1,
-                backgroundColor: 'var(--input-bg, var(--card-inner-bg))',
-                border: '1px solid var(--input-border, var(--border-color))',
-                borderRadius: '8px',
-                padding: '0.5rem 0.75rem',
-                color: 'var(--text-main, #f8fafc)',
-                fontSize: '0.85rem',
-                outline: 'none',
-              }}
+              onChange={e => setInputMessage(e.target.value)}
+              placeholder="Ask about floor plans, pricing, tour..."
+              style={{ flex: 1, backgroundColor: 'var(--card-inner-bg, rgba(255,255,255,0.06))', border: '1px solid var(--card-border, rgba(201,169,110,0.25))', borderRadius: '8px', padding: '0.55rem 0.75rem', color: 'var(--text-main, #f8fafc)', fontSize: '0.84rem', outline: 'none' }}
             />
             <button
               type="submit"
-              className="btn-gold"
+              disabled={!inputMessage.trim()}
               style={{
                 width: '34px',
                 height: '34px',
@@ -581,73 +699,32 @@ export default function Widgets({ onOpenScheduleTour }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: 0,
-                background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
-                color: 'var(--btn-gold-text, #08090f)',
+                background: inputMessage.trim() ? 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))' : 'rgba(201,169,110,0.25)',
+                color: inputMessage.trim() ? 'var(--btn-gold-text, #08090f)' : 'rgba(255,255,255,0.4)',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: inputMessage.trim() ? 'pointer' : 'default',
+                flexShrink: 0,
+                transition: 'all 0.2s',
               }}
             >
               <Send size={15} />
             </button>
           </form>
 
-          {/* Quick Shortcuts Bar */}
-          <div
-            style={{
-              backgroundColor: 'var(--card-bg, rgba(8, 10, 18, 0.95))',
-              padding: '0.55rem 1rem',
-              borderTop: '1px solid var(--border-color, rgba(201, 169, 110, 0.15))',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <button
-              onClick={() => setActiveModal(null)}
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--primary-light, rgba(201, 169, 110, 0.15))',
-                border: '1px solid var(--primary-border, rgba(201, 169, 110, 0.3))',
-                color: 'var(--primary-color, #dfc285)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
-            >
-              <X size={15} />
-            </button>
-
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button
-                onClick={() => setActiveModal('tour')}
-                title="Book a tour"
-                style={{ color: 'var(--primary-color, #dfc285)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
-              >
-                <Calendar size={18} />
-              </button>
-              <button
-                onClick={() => setActiveModal('email')}
-                title="Email an agent"
-                style={{ color: 'var(--primary-color, #dfc285)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
-              >
-                <Mail size={18} />
-              </button>
-              <button
-                onClick={() => setActiveModal('call')}
-                title="Call or text"
-                style={{ color: 'var(--primary-color, #dfc285)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
-              >
-                <Smartphone size={18} />
-              </button>
+          {/* Quick Shortcuts Footer */}
+          <div style={{ backgroundColor: 'var(--card-bg, rgba(8,10,18,0.95))', padding: '0.45rem 1rem', borderTop: '1px solid var(--border-color, rgba(201,169,110,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <span style={{ fontSize: '0.67rem', color: 'var(--text-muted, #64748b)' }}>
+              Replies appear here in real time
+            </span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => setActiveModal('tour')} title="Book a tour" style={{ color: 'var(--primary-color, #dfc285)', background: 'none', border: 'none', cursor: 'pointer', padding: '3px' }}><Calendar size={15} /></button>
+              <button onClick={() => setActiveModal('call')} title="Call us" style={{ color: 'var(--primary-color, #dfc285)', background: 'none', border: 'none', cursor: 'pointer', padding: '3px' }}><Phone size={15} /></button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
+
       {/* 4. SCHEDULE A TOUR MODAL ('Book a tour') */}
       {/* ========================================================================= */}
       {activeModal === 'tour' && (
