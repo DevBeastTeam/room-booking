@@ -20,6 +20,7 @@ export default function ContactUsView({
   const handleSchedule = onOpenScheduleTour || (() => { window.dispatchEvent(new CustomEvent('open-schedule-tour')); });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -35,31 +36,43 @@ export default function ContactUsView({
     e.preventDefault();
     if (!formData.firstName || !formData.email) return;
 
-    try {
-      await fetch('/backend/api/contact.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: formData.email,
-          phone: formData.phone,
-          subject: `Contact Page Inquiry - ${formData.bedrooms} (Move-in: ${formData.moveInDate || 'Flexible'})`,
-          message: formData.message || 'General leasing inquiry submitted via Contact Us page.',
-        }),
-      });
-    } catch (err) {
-      console.log('PHP API fallback', err);
-    }
-
-    saveSupportInquiry({
+    const payload = {
       name: `${formData.firstName} ${formData.lastName}`.trim(),
       email: formData.email,
       phone: formData.phone,
+      preferredBedroom: formData.bedrooms,
+      moveInDate: formData.moveInDate || '',
+      consent: formData.consent,
+      category: 'Contact Page Inquiry',
       subject: `Contact Page Inquiry - ${formData.bedrooms} (Move-in: ${formData.moveInDate || 'Flexible'})`,
       message: formData.message || 'General leasing inquiry submitted via Contact Us page.',
+    };
+
+    try {
+      const res = await fetch('/backend/api/contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || data.success !== true) {
+        throw new Error(data?.error || 'Failed to submit inquiry.');
+      }
+    } catch (err) {
+      setSubmitError(err.message || 'Failed to submit inquiry. Please try again.');
+      return;
+    }
+
+    saveSupportInquiry({
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      subject: payload.subject,
+      message: payload.message,
       category: 'Leasing Inquiry',
     });
 
+    setSubmitError('');
     setFormSubmitted(true);
   };
 
@@ -74,6 +87,7 @@ export default function ContactUsView({
       message: '',
       consent: true,
     });
+    setSubmitError('');
     setFormSubmitted(false);
   };
 
@@ -571,6 +585,12 @@ export default function ContactUsView({
                       I agree to receive calls and text messages from Monarch Pass regarding my inquiry at the contact number provided. Message and data rates may apply.
                     </label>
                   </div>
+
+                  {submitError && (
+                    <div style={{ marginBottom: '1.25rem', padding: '0.75rem 1rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.35)', borderRadius: 6, color: '#fca5a5', fontSize: '0.85rem' }}>
+                      {submitError}
+                    </div>
+                  )}
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <button

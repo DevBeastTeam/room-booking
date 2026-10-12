@@ -184,7 +184,7 @@ function ActionBtn({ icon: Icon, label, onClick, color, disabled, loading }) {
 }
 
 // ── Main DatabaseManager Component ─────────────────────────────────────────────
-export default function DatabaseManager({ onBack }) {
+export default function DatabaseManager({ onBack, embedded = false }) {
   const handleBack = onBack || (() => { window.location.href = '/admin'; });
 
   const [selected, setSelected]     = useState([]);
@@ -345,7 +345,7 @@ export default function DatabaseManager({ onBack }) {
   const noTablesSelected = !selected.length;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: D.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text }}>
+    <div style={embedded ? { fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text } : { minHeight: '100vh', backgroundColor: D.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text }}>
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -354,32 +354,34 @@ export default function DatabaseManager({ onBack }) {
         ::-webkit-scrollbar-thumb { background: ${D.border}; border-radius: 3px; }
       `}</style>
 
-      {/* ── Header ── */}
-      <header style={{
-        background: D.panel, borderBottom: `1px solid ${D.border}`,
-        padding: '1.25rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <div style={{ width: 40, height: 40, borderRadius: 10, background: `${D.accent}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Database size={20} color={D.accent} />
+      {/* ── Header (skip when embedded inside DevPanel) ── */}
+      {!embedded && (
+        <header style={{
+          background: D.panel, borderBottom: `1px solid ${D.border}`,
+          padding: '1.25rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          position: 'sticky', top: 0, zIndex: 100,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: `${D.accent}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Database size={20} color={D.accent} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: D.text }}>Database Manager</div>
+              <div style={{ fontSize: '0.72rem', color: D.muted }}>roombookingdb · {totalRows.toLocaleString()} total rows · {ALL_TABLES.length} tables</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '1.05rem', color: D.text }}>Database Manager</div>
-            <div style={{ fontSize: '0.72rem', color: D.muted }}>roombookingdb · {totalRows.toLocaleString()} total rows · {ALL_TABLES.length} tables</div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button onClick={fetchStats} style={{ background: D.card2, border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer', borderRadius: 8, padding: '0.5rem 0.9rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <RefreshCw size={13} /> Refresh
+            </button>
+            <button onClick={handleBack} style={{ background: D.card2, border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer', borderRadius: 8, padding: '0.5rem 0.9rem', fontSize: '0.8rem' }}>
+              ← Back to Dev Panel
+            </button>
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button onClick={fetchStats} style={{ background: D.card2, border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer', borderRadius: 8, padding: '0.5rem 0.9rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <RefreshCw size={13} /> Refresh
-          </button>
-          <button onClick={handleBack} style={{ background: D.card2, border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer', borderRadius: 8, padding: '0.5rem 0.9rem', fontSize: '0.8rem' }}>
-            ← Back to Admin
-          </button>
-        </div>
-      </header>
+        </header>
+      )}
 
-      <div style={{ maxWidth: 1300, margin: '0 auto', padding: '2rem' }}>
+      <div style={{ maxWidth: 1300, margin: '0 auto', padding: embedded ? '0' : '2rem' }}>
 
         {/* ── Action Bar ── */}
         <div style={{
@@ -401,7 +403,12 @@ export default function DatabaseManager({ onBack }) {
           </div>
 
           {/* Action buttons */}
-          <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            {embedded && (
+              <button onClick={fetchStats} style={{ background: D.card2, border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer', borderRadius: 8, padding: '0.55rem 0.9rem', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <RefreshCw size={13} /> Refresh
+              </button>
+            )}
             <ActionBtn icon={Zap}      label="Seed Data"     onClick={handleSeed}               color={D.green}  disabled={noTablesSelected} loading={loading === 'seed'}   />
             <ActionBtn icon={Trash2}   label="Clear Tables"  onClick={handleClear}              color={D.red}    disabled={noTablesSelected} loading={loading === 'clear'}  />
             <ActionBtn icon={Download} label="Export JSON"   onClick={handleExport}             color={D.blue}   disabled={noTablesSelected} loading={loading === 'export'} />

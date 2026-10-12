@@ -16,6 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
+
+// Settings tab sirf un admins ko jinka 'settings' permission on ho
+auth_require_permission('settings');
 
 $storageDir = dirname(__DIR__) . '/data';
 if (!is_dir($storageDir)) {

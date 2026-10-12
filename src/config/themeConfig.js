@@ -153,11 +153,25 @@ export function savePalettes(palettes) {
     localStorage.setItem(THEME_PALETTES_KEY, JSON.stringify(merged));
     applyThemeToDOM(merged, getThemeMode());
     window.dispatchEvent(new CustomEvent('theme-updated', { detail: merged }));
+    syncPalettesToBackend(merged);
     return true;
   } catch (err) {
     console.error('Failed to save theme palettes:', err);
     return false;
   }
+}
+
+// Palettes MySQL (theme_config table) par bhi save karo — best effort.
+// Logged-out visitors par theme.php 401 deta hai; localStorage source of truth rehta hai.
+function syncPalettesToBackend(merged) {
+  try {
+    fetch('/backend/api/theme.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(merged),
+    }).catch(() => {});
+  } catch { /* fetch unavailable */ }
 }
 
 /**
@@ -170,6 +184,7 @@ export function resetPalettes() {
     const defaults = { dark: { ...DEFAULT_DARK_PALETTE }, light: { ...DEFAULT_LIGHT_PALETTE } };
     applyThemeToDOM(defaults, getThemeMode());
     window.dispatchEvent(new CustomEvent('theme-updated', { detail: defaults }));
+    syncPalettesToBackend(defaults);
     return defaults;
   } catch {
     return { dark: DEFAULT_DARK_PALETTE, light: DEFAULT_LIGHT_PALETTE };

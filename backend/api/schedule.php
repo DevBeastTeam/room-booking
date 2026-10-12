@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
 
 $storageDir = dirname(__DIR__) . '/data';
 if (!is_dir($storageDir)) {
@@ -23,8 +24,9 @@ if (!is_dir($storageDir)) {
 }
 $dataFile = $storageDir . '/tours.json';
 
-// GET: Return all scheduled tours
+// GET: Return all scheduled tours (prospect PII — sirf admin/support permission wale)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    auth_require_permission('support');
     $pdo = getDatabaseConnection();
     if ($pdo) {
         try {
@@ -111,12 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'name' => $fullName,
         'email' => $email,
         'phone' => $phone,
-        'date' => $formattedDate,
-        'time' => $time,
-        'tourType' => $tourTypeRaw,
-        'bedroom' => $bedroom,
-        'unit' => $unit,
-        'notes' => $notes,
+        'preferred_bedroom' => $bedroom,
+        'preferred_unit' => $unit,
+        'tour_date' => $formattedDate,
+        'tour_time' => $time,
+        'tour_type' => $mappedTourType,
+        'comments' => $notes,
         'created_at' => $createdAt,
         'status' => 'scheduled'
     ];

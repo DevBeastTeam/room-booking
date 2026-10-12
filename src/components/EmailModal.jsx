@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, Mail, FileText, Check } from 'lucide-react';
+import { addSupportInquiry } from '../services/siteDataService';
 
 export default function EmailModal({
   isOpen,
@@ -36,7 +37,21 @@ export default function EmailModal({
     }
 
     setErrors({});
-    setIsSubmitted(true);
+
+    const created = addSupportInquiry({
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: email.trim(),
+      phone: phone.trim(),
+      category: 'Email Cost Breakdown Request',
+      subject: 'Email Cost Breakdown Request',
+      message: `Requested itemized cost breakdown PDF for Unit #${unitNumber} (${floorPlan.name}, ${floorPlan.beds} Bed / ${floorPlan.baths} Bath). Total monthly estimate: $${totalMonthlyPrice.toFixed(2)} · Base rent: $${baseRent.toFixed(2)} · Lease term: ${leaseTerm} months. SMS opt-in: ${smsOptIn ? 'Yes' : 'No'}.`,
+    });
+
+    if (created) {
+      setIsSubmitted(true);
+    } else {
+      setErrors({ submit: 'Unable to send your breakdown at this moment. Please try again.' });
+    }
   };
 
   const handleReset = () => {
@@ -92,7 +107,7 @@ export default function EmailModal({
             Email Cost Breakdown
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleReset}
             aria-label="Close dialog"
             style={{
               color: '#c9a96e',
@@ -356,6 +371,10 @@ export default function EmailModal({
                     </div>
                   )}
                 </div>
+
+                {errors.submit && (
+                  <span style={{ fontSize: '0.75rem', color: '#fca5a5', display: 'block', marginBottom: '0.75rem' }}>{errors.submit}</span>
+                )}
 
                 {/* Submit Button */}
                 <button

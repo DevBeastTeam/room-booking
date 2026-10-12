@@ -202,6 +202,14 @@ const baseApartmentSchema = {
     {schemaData && (
       <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
     )}
+
+    <!-- Analytics: pageview tracking (public pages only — admin/dev/database skip server-side) -->
+    <script>
+      import { trackPageView } from '../services/analytics.js';
+      if (!/^\/?(admin|dev|database)(\/|$)/.test(window.location.pathname)) {
+        trackPageView();
+      }
+    </script>
   </head>
   <body style="min-height: 100vh; display: flex; flex-direction: column; background-color: var(--bg-page, #08090f); color: var(--text-main, #f0ebe0); transition: background-color 0.25s ease, color 0.25s ease;">
     {!hideHeaderFooter && <Header client:load currentView={currentView} />}

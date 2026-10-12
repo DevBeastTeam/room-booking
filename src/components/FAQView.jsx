@@ -45,7 +45,7 @@ const FAQ_DATA = [
       },
       {
         q: 'What are the current maximum income limits?',
-        a: 'Income limits are based on household occupancy. For instance, a 1-person household qualifies up to $43,740 at the 60% AMI tier, while a 4-person household limit extends up to $62,460. Visit our Income Guidelines page for full qualification tables.',
+        a: 'Income limits are based on household occupancy. For instance, a 1-person household qualifies up to $43,722 at the 60% AMI tier, while a 4-person household limit extends up to $62,460. Visit our Income Guidelines page for full qualification tables.',
       },
       {
         q: 'What documentation is needed during the application?',
@@ -124,7 +124,7 @@ export default function FAQView({
       return item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q);
     });
     return { ...cat, items: matchingItems };
-  }).filter(Boolean);
+  }).filter((cat) => cat && cat.items && cat.items.length > 0);
 
   return (
     <div style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)', minHeight: '100vh', transition: 'background-color 0.25s ease, color 0.25s ease' }}>

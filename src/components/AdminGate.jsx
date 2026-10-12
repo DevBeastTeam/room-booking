@@ -1,73 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import { Shield, Lock, User, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react';
 import AdminPanel from './AdminPanel.jsx';
-import { Shield, Lock, User, Eye, EyeOff, AlertCircle, Database, LogIn, Key } from 'lucide-react';
 
-// ── Hardcoded Credentials ──────────────────────────────────────────────────────
-// Admin credentials (fixed)
-const ADMIN_USERS = [
-  { username: 'admin', email: 'admin@monarchpass.com', password: 'admin@2026', role: 'Admin', name: 'Property Admin' },
-  { username: 'manager', email: 'manager@monarchpass.com', password: 'manager123', role: 'Manager', name: 'Property Manager' },
-];
-
-// Dev user: password = current day of month (e.g., if day is 21 → password "21")
-// Changes automatically every midnight
-function getDevPassword() {
-  return String(new Date().getDate()); // e.g., "21"
-}
-
-function isDevLogin(username, password) {
-  const isDevUser = (
-    username.toLowerCase() === 'dev' ||
-    username.toLowerCase() === 'dev@gmail.com'
-  );
-  const isValidPassword = password === getDevPassword();
-  return isDevUser && isValidPassword;
-}
-
-function isAdminLogin(username, password) {
-  return ADMIN_USERS.find(
-    u => (u.username === username || u.email === username) && u.password === password
-  );
-}
-
-// ── Session Helpers ────────────────────────────────────────────────────────────
+// ── Auth API (server-side PHP session) ─────────────────────────────────────────
+const API = '/backend/api/auth.php';
 const SESSION_KEY = 'monarch_admin_session';
 
-function getSession() {
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw);
-    // Expire session after 8 hours
-    if (Date.now() - session.loginTime > 8 * 60 * 60 * 1000) {
-      sessionStorage.removeItem(SESSION_KEY);
-      return null;
-    }
-    // Dev password changes every day — validate still on same day
-    if (session.role === 'Developer') {
-      const sessionDay = new Date(session.loginTime).getDate();
-      const today = new Date().getDate();
-      if (sessionDay !== today) {
-        sessionStorage.removeItem(SESSION_KEY);
-        return null;
-      }
-    }
-    return session;
-  } catch {
-    return null;
-  }
+async function apiPost(body) {
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(body),
+  });
+  const json = await res.json().catch(() => ({}));
+  return { ok: res.ok, data: json };
 }
 
-function saveSession(user) {
-  const session = { ...user, loginTime: Date.now() };
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+async function apiGet(action) {
+  const res = await fetch(`${API}?action=${action}`, { credentials: 'same-origin' });
+  const json = await res.json().catch(() => ({}));
+  return { ok: res.ok, data: json };
+}
+
+function persistSession(user) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...user, loginTime: Date.now() }));
+  } catch { /* ignore */ }
 }
 
 function clearSession() {
-  sessionStorage.removeItem(SESSION_KEY);
+  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
 }
 
-// ── Design Tokens ──────────────────────────────────────────────────────────────
+// ── Design Tokens ─────────────────────────────────────────────────────────────
 const S = {
   bg: '#08090f',
   card: '#0d1117',
@@ -122,29 +88,13 @@ function InputField({ label, type, value, onChange, placeholder, icon: Icon, err
   );
 }
 
-// ── Hint Card (dev password hint) ─────────────────────────────────────────────
-function DevHintCard() {
-  const today = new Date();
-  const day = today.getDate();
-  return (
-    <div style={{
-      background: `${S.purple}15`, border: `1px solid ${S.purple}40`,
-      borderRadius: 10, padding: '0.85rem 1rem', marginBottom: '1.25rem',
-    }}>
-
-    </div>
-  );
-}
-
-// ── Login Form ─────────────────────────────────────────────────────────────────
+// ── Login Form (server-side auth) ──────────────────────────────────────────────
 function AdminLoginForm({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showDevHint, setShowDevHint] = useState(false);
-  const [attempts, setAttempts] = useState(0);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -156,36 +106,14 @@ function AdminLoginForm({ onLoginSuccess }) {
     setLoading(true);
     setError('');
 
-    // Simulate brief network delay for UX
-    await new Promise(r => setTimeout(r, 600));
+    const { ok, data } = await apiPost({ action: 'login', username: username.trim(), password });
 
-    // Check dev login
-    if (isDevLogin(username.trim(), password.trim())) {
-      const devUser = { username: 'dev', name: 'Developer', role: 'Developer', email: 'dev@gmail.com' };
-      saveSession(devUser);
-      onLoginSuccess(devUser);
-      setLoading(false);
-      return;
+    if (ok && data.success && data.user) {
+      persistSession(data.user);
+      onLoginSuccess(data.user);
+    } else {
+      setError(data.error || 'Login failed. Dubara try karein.');
     }
-
-    // Check admin users
-    const adminUser = isAdminLogin(username.trim(), password.trim());
-    if (adminUser) {
-      saveSession(adminUser);
-      onLoginSuccess(adminUser);
-      setLoading(false);
-      return;
-    }
-
-    // Failed
-    const newAttempts = attempts + 1;
-    setAttempts(newAttempts);
-    setError(
-      newAttempts >= 3
-        ? `❌ ${newAttempts} attempts fail hue. Developer login ke liye hint dekhen ↓`
-        : '❌ Galat username ya password. Dobara try karein.'
-    );
-    if (newAttempts >= 3) setShowDevHint(true);
     setLoading(false);
   };
 
@@ -253,15 +181,13 @@ function AdminLoginForm({ onLoginSuccess }) {
           borderRadius: 20, padding: '2rem',
           boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
         }}>
-          {showDevHint && <DevHintCard />}
-
           <form onSubmit={handleLogin}>
             <InputField
               label="Username / Email"
               type="text"
               value={username}
               onChange={e => { setUsername(e.target.value); setError(''); }}
-              placeholder="admin  ya  dev@gmail.com"
+              placeholder="admin  ya  admin@monarchpass.com"
               icon={User}
               error={error && !password.trim() ? error : ''}
             />
@@ -310,28 +236,9 @@ function AdminLoginForm({ onLoginSuccess }) {
             </button>
           </form>
 
-          {/* Toggle hint button */}
-          <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
-            <button
-              onClick={() => setShowDevHint(v => !v)}
-              style={{ background: 'none', border: 'none', color: S.muted, cursor: 'pointer', fontSize: '0.78rem', textDecoration: 'underline' }}
-            >
-              {showDevHint ? 'Hint chhupayein' : '🔑 Developer login hint dekhein'}
-            </button>
-          </div>
-        </div>
-
-        {/* Credentials reference (collapsed) */}
-        <div style={{ marginTop: '1.25rem', background: `${S.amber}10`, border: `1px solid ${S.amber}30`, borderRadius: 12, padding: '0.9rem 1.1rem' }}>
-          <div style={{ color: S.amber, fontSize: '0.73rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Database size={13} /> Credential Quick Reference
-          </div>
-          <div style={{ color: S.muted, fontSize: '0.75rem', lineHeight: 1.8, fontFamily: 'monospace' }}>
-            <span style={{ color: S.text }}>admin</span> / <span style={{ color: S.accent }}>admin@2026</span>
-            <br />
-            <span style={{ color: S.text }}>manager</span> / <span style={{ color: S.accent }}>manager123</span>
-
-          </div>
+          <p style={{ color: S.muted, fontSize: '0.72rem', textAlign: 'center', marginTop: '1.25rem', lineHeight: 1.6 }}>
+            Credentials super admin (/dev) manage karta hai. Password bhool gaye? Super admin se contact karein.
+          </p>
         </div>
       </div>
     </div>
@@ -341,12 +248,13 @@ function AdminLoginForm({ onLoginSuccess }) {
 // ── Session Info Bar (shown inside admin panel) ────────────────────────────────
 function SessionBar({ user, onLogout }) {
   const roleColors = {
+    super_admin: S.purple,
     Developer: S.purple,
+    admin: S.accent,
     Admin: S.accent,
     Manager: S.amber,
   };
   const color = roleColors[user.role] || S.accent;
-  const today = new Date().getDate();
 
   return (
     <div style={{
@@ -360,13 +268,8 @@ function SessionBar({ user, onLogout }) {
       <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
       <span style={{ color: S.text, fontWeight: 600 }}>{user.name || user.username}</span>
       <span style={{ background: `${color}22`, color, padding: '1px 8px', borderRadius: 10, fontWeight: 700, fontSize: '0.7rem' }}>
-        {user.role}
+        {user.role_label || user.role}
       </span>
-      {user.role === 'Developer' && (
-        <span style={{ color: S.muted, fontSize: '0.68rem' }}>
-          pwd expires midnight (day={today})
-        </span>
-      )}
       <button
         onClick={onLogout}
         style={{
@@ -381,22 +284,39 @@ function SessionBar({ user, onLogout }) {
 }
 
 // ── Main Gated Export ──────────────────────────────────────────────────────────
-export default function AdminGate() {
+export default function AdminGate({ onSession }) {
   const [session, setSession] = useState(null);
   const [ready, setReady] = useState(false);
 
+  const applySession = (user) => {
+    setSession(user);
+    if (onSession) onSession(user);
+  };
+
   useEffect(() => {
-    // Check existing session on mount (client-only)
-    const existing = getSession();
-    if (existing) setSession(existing);
-    setReady(true);
+    // Verify with server session (source of truth)
+    let cancelled = false;
+    (async () => {
+      const { ok, data } = await apiGet('session');
+      if (cancelled) return;
+      if (ok && data.authenticated && data.user) {
+        persistSession(data.user);
+        applySession(data.user);
+      } else {
+        clearSession();
+        setSession(null);
+      }
+      setReady(true);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLogin = (user) => setSession(user);
-
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await apiPost({ action: 'logout' });
     clearSession();
     setSession(null);
+    if (onSession) onSession(null);
   };
 
   if (!ready) {
@@ -410,13 +330,13 @@ export default function AdminGate() {
   }
 
   if (!session) {
-    return <AdminLoginForm onLoginSuccess={handleLogin} />;
+    return <AdminLoginForm onLoginSuccess={applySession} />;
   }
 
   return (
     <>
       <SessionBar user={session} onLogout={handleLogout} />
-      <AdminPanel />
+      <AdminPanel user={session} />
     </>
   );
 }

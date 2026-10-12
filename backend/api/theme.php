@@ -16,6 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
+
+// Theme & Colors tab permission
+auth_require_permission('theme');
 
 $pdo = getDatabaseConnection();
 

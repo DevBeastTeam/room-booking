@@ -23,9 +23,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
+
+// Database Manager sirf super admin (dev panel) ke liye hai — client admins ko
+// yeh tab bilkul nahi dikhta aur API se bhi access nahi milta.
+$authUser = auth_require_permission();
+if ($authUser['role'] !== 'super_admin') {
+    auth_json_out(false, ['error' => 'Database Manager sirf super admin ke liye hai.'], 403);
+}
 
 $pdo = getDatabaseConnection();
 if (!$pdo) {
+    http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => 'Database connection unavailable',
@@ -33,6 +42,15 @@ if (!$pdo) {
     ]);
     exit;
 }
+
+// Sirf yeh 15 schema tables (backend/migrations/001_initial_schema.sql) clear,
+// export ya import ki ja sakti hain. Koi doosri table name reject hoti hai.
+const DATA_MANAGER_ALLOWED_TABLES = [
+    'floor_plans', 'units', 'applications', 'residents',
+    'maintenance_tickets', 'addons', 'email_logs', 'inquiries',
+    'tours', 'site_settings', 'theme_config', 'legal_pages',
+    'documents', 'notifications', 'transactions'
+];
 
 // Ensure all tables exist
 function ensureTablesExist($pdo) {
@@ -48,16 +66,35 @@ function ensureTablesExist($pdo) {
 }
 ensureTablesExist($pdo);
 
+/** Valid table names (strict allowlist) ya 400 error ke saath band */
+function data_manager_require_allowed_tables($tables) {
+    foreach ($tables as $t) {
+        if (!in_array($t, DATA_MANAGER_ALLOWED_TABLES, true)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => "Invalid table name: '{$t}'. Sirf schema tables allowed hain."
+            ]);
+            exit;
+        }
+    }
+}
+
+/** Actual columns of a whitelisted table (import column validation ke liye) */
+function data_manager_table_columns($pdo, $table) {
+    $stmt = $pdo->query("SHOW COLUMNS FROM `{$table}`");
+    $cols = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $c) {
+        $cols[] = $c['Field'];
+    }
+    return $cols;
+}
+
 $action = $_GET['action'] ?? 'stats';
 
 // ── 1. STATS: Live Row Counts ─────────────────────────────────────────────────
 if ($action === 'stats') {
-    $tableList = [
-        'floor_plans', 'units', 'applications', 'residents',
-        'maintenance_tickets', 'addons', 'email_logs', 'inquiries',
-        'tours', 'site_settings', 'theme_config', 'legal_pages',
-        'documents', 'notifications', 'transactions'
-    ];
+    $tableList = DATA_MANAGER_ALLOWED_TABLES;
     $counts = [];
     foreach ($tableList as $t) {
         try {
@@ -268,7 +305,7 @@ function seedModule($pdo, $table) {
                 ],
                 'mapsUrl' => 'https://maps.app.goo.gl/E71XfBiE8dE9bAjV6',
             ];
-            $stmt = $pdo->prepare("INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES ('general', ?)");
+            $stmt = $pdo->prepare("INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES ('site_config', ?)");
             $stmt->execute([json_encode($defaultSettings)]);
             return 1;
 
@@ -354,9 +391,11 @@ function seedModule($pdo, $table) {
 // ── 2. SEED: Populate selected tables with rich dummy data ─────────────────────
 if ($action === 'seed') {
     if (empty($requestedTables)) {
+        http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'No tables specified for seeding']);
         exit;
     }
+    data_manager_require_allowed_tables($requestedTables);
 
     $seededSummary = [];
     $pdo->beginTransaction();
@@ -373,6 +412,7 @@ if ($action === 'seed') {
         ]);
     } catch (Exception $e) {
         $pdo->rollBack();
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -381,18 +421,18 @@ if ($action === 'seed') {
 // ── 3. CLEAR / FORMAT: Wipe selected tables ───────────────────────────────────
 if ($action === 'clear') {
     if (empty($requestedTables)) {
+        http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'No tables specified for clearing']);
         exit;
     }
+    data_manager_require_allowed_tables($requestedTables);
 
     $cleared = [];
     try {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
         foreach ($requestedTables as $table) {
-            // Clean table name for safety
-            $cleanTable = preg_replace('/[^a-zA-Z0-9_]/', '', $table);
-            $pdo->exec("TRUNCATE TABLE `{$cleanTable}`");
-            $cleared[] = $cleanTable;
+            $pdo->exec("TRUNCATE TABLE `{$table}`");
+            $cleared[] = $table;
         }
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
 
@@ -403,6 +443,7 @@ if ($action === 'clear') {
         ]);
     } catch (Exception $e) {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -411,9 +452,11 @@ if ($action === 'clear') {
 // ── 4. EXPORT: Dump selected tables to structured JSON ────────────────────────
 if ($action === 'export') {
     if (empty($requestedTables)) {
+        http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'No tables specified for export']);
         exit;
     }
+    data_manager_require_allowed_tables($requestedTables);
 
     $exportData = [
         'app' => 'Monarch Pass Apartments',
@@ -424,9 +467,8 @@ if ($action === 'export') {
 
     try {
         foreach ($requestedTables as $table) {
-            $cleanTable = preg_replace('/[^a-zA-Z0-9_]/', '', $table);
-            $stmt = $pdo->query("SELECT * FROM `{$cleanTable}`");
-            $exportData['tables'][$cleanTable] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt = $pdo->query("SELECT * FROM `{$table}`");
+            $exportData['tables'][$table] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         echo json_encode([
@@ -434,6 +476,7 @@ if ($action === 'export') {
             'data' => $exportData
         ], JSON_PRETTY_PRINT);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -442,9 +485,50 @@ if ($action === 'export') {
 // ── 5. IMPORT: Restore database from JSON payload ─────────────────────────────
 if ($action === 'import') {
     $tablesPayload = $input['data']['tables'] ?? $input['tables'] ?? [];
-    if (empty($tablesPayload)) {
+    if (empty($tablesPayload) || !is_array($tablesPayload)) {
+        http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'No valid table data found in import payload']);
         exit;
+    }
+
+    // Pehle saari tables aur unke columns validate karo — DB ko haath lagane se pehle
+    foreach ($tablesPayload as $table => $rows) {
+        if (!in_array($table, DATA_MANAGER_ALLOWED_TABLES, true)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => "Invalid table name in import payload: '{$table}'"]);
+            exit;
+        }
+        if (!empty($rows) && is_array($rows)) {
+            $firstRow = reset($rows);
+            if (!is_array($firstRow)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => "Invalid row data for table '{$table}'"]);
+                exit;
+            }
+            try {
+                $validColumns = data_manager_table_columns($pdo, $table);
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => "Could not read columns of table '{$table}': " . $e->getMessage()]);
+                exit;
+            }
+            $expectedColumns = array_keys($firstRow);
+            foreach ($expectedColumns as $column) {
+                if (!in_array($column, $validColumns, true)) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => "Unknown column '{$column}' for table '{$table}'"]);
+                    exit;
+                }
+            }
+            // Har row ke columns same hone chahiye warna prepared statement match nahi karti
+            foreach ($rows as $row) {
+                if (!is_array($row) || array_keys($row) !== $expectedColumns) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => "All rows of table '{$table}' must have the same columns"]);
+                    exit;
+                }
+            }
+        }
     }
 
     $imported = [];
@@ -452,21 +536,20 @@ if ($action === 'import') {
     try {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
         foreach ($tablesPayload as $table => $rows) {
-            $cleanTable = preg_replace('/[^a-zA-Z0-9_]/', '', $table);
             // Clear existing rows for this imported table
-            $pdo->exec("DELETE FROM `{$cleanTable}`");
+            $pdo->exec("DELETE FROM `{$table}`");
 
             if (!empty($rows)) {
-                $columns = array_keys($rows[0]);
+                $columns = array_keys(reset($rows));
                 $colNames = implode('`, `', $columns);
                 $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-                $stmt = $pdo->prepare("INSERT INTO `{$cleanTable}` (`{$colNames}`) VALUES ({$placeholders})");
+                $stmt = $pdo->prepare("INSERT INTO `{$table}` (`{$colNames}`) VALUES ({$placeholders})");
 
                 foreach ($rows as $row) {
                     $stmt->execute(array_values($row));
                 }
             }
-            $imported[$cleanTable] = count($rows);
+            $imported[$table] = count($rows);
         }
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
         $pdo->commit();
@@ -479,10 +562,12 @@ if ($action === 'import') {
     } catch (Exception $e) {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
         $pdo->rollBack();
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
 }
 
 // Fallback unknown action
+http_response_code(400);
 echo json_encode(['success' => false, 'error' => 'Invalid action: ' . htmlspecialchars($action)]);

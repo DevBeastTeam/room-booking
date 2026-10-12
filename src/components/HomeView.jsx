@@ -100,6 +100,13 @@ export default function HomeView({
     else window.location.href = '/floor-plans';
   };
 
+  const handleSearchFloorPlans = () => {
+    if (typeof quickDate === 'string' && quickDate !== '') {
+      sessionStorage.setItem('mb_move_in_date', quickDate);
+    }
+    handleFloorPlans();
+  };
+
   const handleSchedule = (bed = '', unit = '') => {
     if (onOpenScheduleTour) onOpenScheduleTour(bed, unit);
     else window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } }));
@@ -107,7 +114,7 @@ export default function HomeView({
 
   const handleDepositCheckout = (planName) => {
     window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
-      detail: { item: `deposit_${planName.toLowerCase().replace(/\s+/g, '_')}`, amount: 250.00 }
+      detail: { item: 'holding_deposit', plan: planName, amount: 250.00 }
     }));
   };
 
@@ -526,7 +533,7 @@ export default function HomeView({
             {/* Search Action */}
             <div style={{ display: 'flex', alignItems: 'flex-end', paddingTop: '1.2rem' }}>
               <button
-                onClick={handleFloorPlans}
+                onClick={handleSearchFloorPlans}
                 style={{
                   width: '100%',
                   padding: '0.75rem 1.5rem',

@@ -4,6 +4,7 @@ import {
   Building, User, Mail, Phone, ArrowRight, RefreshCw, Sparkles, Check
 } from 'lucide-react';
 import { createPaddleTransaction, verifyPaddleTransaction, fetchPaddleConfig } from '../services/siteDataService';
+import { trackEvent } from '../services/analytics.js';
 
 const PAYMENT_OPTIONS = [
   {
@@ -52,19 +53,24 @@ export default function PaddleCheckoutModal({
   const [paddleConfig, setPaddleConfig] = useState(null);
   const [activeTransaction, setActiveTransaction] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [verificationResult, setVerificationResult] = useState(null);
 
   // Sync props when modal opens
   useEffect(() => {
     if (isOpen) {
       if (initialItem) setSelectedItem(initialItem);
-      if (initialUnit) setUnitNumber(initialUnit);
-      if (initialAmount) setCustomAmount(String(initialAmount));
+      setUnitNumber(initialUnit || '');
+      setCustomAmount(initialAmount ? String(initialAmount) : '');
       if (customerPreset?.name) setName(customerPreset.name);
+      else setName('');
       if (customerPreset?.email) setEmail(customerPreset.email);
+      else setEmail('');
       if (customerPreset?.phone) setPhone(customerPreset.phone);
+      else setPhone('');
       setIsSuccess(false);
       setActiveTransaction(null);
       setErrorMessage('');
+      setVerificationResult(null);
 
       fetchPaddleConfig().then(cfg => {
         if (cfg) setPaddleConfig(cfg);
@@ -106,8 +112,20 @@ export default function PaddleCheckoutModal({
         throw new Error(res?.error || 'Failed to initialize Paddle payment transaction.');
       }
 
+      if (!res.checkout_url && !res.demo_mode) {
+        throw new Error('Unable to start the secure checkout session. Please try again later.');
+      }
+
       setActiveTransaction(res);
       setIsLoading(false);
+
+      // Analytics: actual payment started
+      trackEvent('paddle_started', {
+        item: selectedItem,
+        unit: unitNumber || 'general',
+        amount: String(finalAmount),
+        txn: res.txn_id || '',
+      });
 
       // If Paddle checkout URL is present, open checkout in a popup window or redirect
       if (res.checkout_url) {
@@ -125,12 +143,17 @@ export default function PaddleCheckoutModal({
     setIsLoading(true);
 
     try {
-      await verifyPaddleTransaction(activeTransaction.txn_id || activeTransaction.paddle_txn_id);
+      const result = await verifyPaddleTransaction(activeTransaction.txn_id || activeTransaction.paddle_txn_id);
       setIsLoading(false);
-      setIsSuccess(true);
-    } catch {
+      if (result && result.verified === true) {
+        setVerificationResult(result);
+        setIsSuccess(true);
+      } else {
+        setErrorMessage(result?.message || 'Payment could not be verified yet. Please complete the Paddle checkout first.');
+      }
+    } catch (err) {
       setIsLoading(false);
-      setIsSuccess(true);
+      setErrorMessage(err?.message || 'Payment could not be verified yet. Please complete the Paddle checkout first.');
     }
   };
 
@@ -250,10 +273,12 @@ export default function PaddleCheckoutModal({
               </div>
 
               <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.4rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
-                Payment Confirmed & Verified
+                {verificationResult?.simulated ? 'Test Payment Recorded (Simulated)' : 'Payment Confirmed & Verified'}
               </h3>
               <p style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-                Thank you! Your transaction has been recorded securely and your reservation details are confirmed.
+                {verificationResult?.simulated
+                  ? 'This was a simulated test payment in demo mode — no funds were charged. The transaction has been recorded for sandbox testing purposes.'
+                  : 'Thank you! Your transaction has been recorded securely and your reservation details are confirmed.'}
               </p>
 
               {/* Receipt Summary Card */}
@@ -333,6 +358,13 @@ export default function PaddleCheckoutModal({
                 A secure Paddle checkout window has opened. If your browser blocked the popup, click the button below.
               </p>
 
+              {errorMessage && (
+                <div style={{ padding: '0.85rem', backgroundColor: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#fca5a5', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <AlertCircle size={16} />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
               {activeTransaction.checkout_url && (
                 <a
                   href={activeTransaction.checkout_url}
@@ -360,6 +392,11 @@ export default function PaddleCheckoutModal({
                 <div style={{ fontSize: '0.82rem', color: '#dfc285', fontWeight: 700, marginBottom: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Sandbox Quick Test Action
                 </div>
+                {activeTransaction.demo_mode && (
+                  <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '0.6rem', lineHeight: 1.4 }}>
+                    Demo mode: Paddle API keys are not configured, so this will record a simulated payment.
+                  </div>
+                )}
                 <button
                   onClick={handleSimulateOrVerifySuccess}
                   disabled={isLoading}

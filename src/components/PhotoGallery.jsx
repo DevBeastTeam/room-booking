@@ -242,6 +242,8 @@ export default function PhotoGallery({ onOpenTourModal }) {
     setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
   };
 
+  const closeLightbox = () => setLightboxIndex(null);
+
   // Keyboard navigation for lightbox
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -619,7 +621,10 @@ export default function PhotoGallery({ onOpenTourModal }) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button
-                onClick={handleTourModal}
+                onClick={() => {
+                  setLightboxIndex(null);
+                  handleTourModal();
+                }}
                 style={{
                   padding: '0.45rem 1rem',
                   backgroundColor: '#0f766e',

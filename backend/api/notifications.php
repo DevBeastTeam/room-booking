@@ -12,17 +12,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 require_once dirname(__DIR__) . '/config/database.php';
 $pdo = getDatabaseConnection();
-if (!$pdo) { echo json_encode(['success' => false, 'error' => 'Database connection failed']); exit; }
+if (!$pdo) { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Database connection failed']); exit; }
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    // Public resident dashboard demo default unit ke saath chalti hai
     $unit = $_GET['unit'] ?? '2104';
     try {
         $stmt = $pdo->prepare("SELECT * FROM `notifications` WHERE `user_unit` = ? ORDER BY `id` DESC");
         $stmt->execute([$unit]);
         echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -44,6 +46,7 @@ if ($method === 'POST') {
         ]);
         echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -56,6 +59,11 @@ if ($method === 'PUT') {
         if ($id) {
             $stmt = $pdo->prepare("UPDATE `notifications` SET `is_read` = 1 WHERE `id` = ?");
             $stmt->execute([$id]);
+            if ($stmt->rowCount() === 0) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Notification not found.']);
+                exit;
+            }
         } else {
             // Mark all as read for unit
             $unit = $input['user_unit'] ?? '2104';
@@ -64,6 +72,7 @@ if ($method === 'PUT') {
         }
         echo json_encode(['success' => true, 'message' => 'Notification(s) marked as read']);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -82,7 +91,11 @@ if ($method === 'DELETE') {
         }
         echo json_encode(['success' => true, 'message' => 'Notification(s) deleted']);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
 }
+
+http_response_code(405);
+echo json_encode(['success' => false, 'error' => 'Method Not Allowed']);

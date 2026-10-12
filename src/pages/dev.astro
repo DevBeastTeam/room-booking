@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DevGate from '../components/DevGate.jsx';
+---
+
+<Layout
+  title="Super Admin / Developer | Monarch Pass Apartments"
+  description="Secure developer access for Monarch Pass Apartments — manage admins, credentials, permissions and monitor all activity."
+  currentView="dev"
+  hideHeaderFooter={true}
+>
+  <DevGate client:only="react" />
+</Layout>

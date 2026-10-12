@@ -7,12 +7,31 @@
  * Or via web: http://localhost/backend/migrations/migrate.php (with setup key)
  */
 
+require_once dirname(__DIR__) . '/config/database.php';
+
 if (php_sapi_name() !== 'cli') {
     header('Content-Type: application/json; charset=UTF-8');
-    // Allow query parameter or default dev access
+    // Web access sirf valid SETUP_KEY ke saath (CLI usage bina key chalti hai)
+    $envVars = loadEnvFile(dirname(__DIR__) . '/config/.env');
+    $setupKey = $envVars['SETUP_KEY'] ?? '';
+    if ($setupKey === '') {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'error' => 'SETUP_KEY is not configured in backend/config/.env — web migration disabled. Run from CLI: php backend/migrations/migrate.php'
+        ]);
+        exit;
+    }
+    $providedKey = $_GET['key'] ?? '';
+    if (!is_string($providedKey) || !hash_equals($setupKey, $providedKey)) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Invalid or missing setup key.'
+        ]);
+        exit;
+    }
 }
-
-require_once dirname(__DIR__) . '/config/database.php';
 
 $results = [
     'timestamp' => date('Y-m-d H:i:s'),
@@ -76,8 +95,8 @@ try {
                 ':name' => $inq['name'] ?? 'Guest Prospect',
                 ':email' => $inq['email'] ?? 'unknown@example.com',
                 ':phone' => $inq['phone'] ?? null,
-                ':preferred_bedroom' => $inq['preferredBedroom'] ?? $inq['bedrooms'] ?? 'Any',
-                ':move_in_date' => $inq['moveInDate'] ?? null,
+                ':preferred_bedroom' => $inq['preferred_bedroom'] ?? $inq['preferredBedroom'] ?? $inq['bedrooms'] ?? 'Any',
+                ':move_in_date' => $inq['move_in_date'] ?? $inq['moveInDate'] ?? null,
                 ':category' => $inq['category'] ?? $inq['subject'] ?? 'General Inquiry',
                 ':message' => $inq['message'] ?? null,
                 ':status' => $inq['status'] ?? 'new',
@@ -111,11 +130,13 @@ try {
         ");
         foreach ($tours as $t) {
             $tid = $t['tracking_id'] ?? $t['id'] ?? ('TOUR-' . strtoupper(substr(uniqid(), -6)));
-            $date = $t['date'] ?? date('Y-m-d');
+            // schedule.php ab snake_case columns likhta hai, camelCase fallback rehta hai
+            $date = $t['tour_date'] ?? $t['date'] ?? date('Y-m-d');
+            $tourTypeRaw = $t['tour_type'] ?? $t['tourType'] ?? 'in-person';
             $tType = 'in-person';
-            if (isset($t['tourType']) && stripos($t['tourType'], 'virtual') !== false) {
+            if (stripos($tourTypeRaw, 'virtual') !== false) {
                 $tType = 'virtual-video';
-            } elseif (isset($t['tourType']) && stripos($t['tourType'], 'self') !== false) {
+            } elseif (stripos($tourTypeRaw, 'self') !== false) {
                 $tType = 'self-guided';
             }
             $stmtTour->execute([
@@ -123,12 +144,12 @@ try {
                 ':name' => $t['name'] ?? 'Prospect',
                 ':email' => $t['email'] ?? 'unknown@example.com',
                 ':phone' => $t['phone'] ?? '',
-                ':preferred_bedroom' => $t['bedroom'] ?? 'Any',
-                ':preferred_unit' => $t['unit'] ?? null,
+                ':preferred_bedroom' => $t['preferred_bedroom'] ?? $t['bedroom'] ?? 'Any',
+                ':preferred_unit' => $t['preferred_unit'] ?? $t['unit'] ?? null,
                 ':tour_date' => $date,
-                ':tour_time' => $t['time'] ?? '10:00 AM',
+                ':tour_time' => $t['tour_time'] ?? $t['time'] ?? '10:00 AM',
                 ':tour_type' => $tType,
-                ':comments' => $t['notes'] ?? null,
+                ':comments' => $t['comments'] ?? $t['notes'] ?? null,
                 ':status' => $t['status'] ?? 'scheduled',
                 ':created_at' => $t['created_at'] ?? date('Y-m-d H:i:s')
             ]);

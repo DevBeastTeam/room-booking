@@ -42,7 +42,6 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
           padding: '0.65rem 1rem',
           zIndex: 990,
           boxShadow: '0 -8px 25px rgba(0,0,0,0.3)',
-          display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           backdropFilter: 'blur(12px)',

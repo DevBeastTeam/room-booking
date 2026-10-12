@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import UserDashboard from '../components/UserDashboard.jsx';
+import SiteModals from '../components/SiteModals.jsx';
 ---
 
 <Layout
@@ -10,4 +11,5 @@ import UserDashboard from '../components/UserDashboard.jsx';
   hideHeaderFooter={true}
 >
   <UserDashboard client:only="react" />
+  <SiteModals client:load minimal />
 </Layout>

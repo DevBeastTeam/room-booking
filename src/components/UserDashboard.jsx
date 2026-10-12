@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { submitMaintenanceTicketDB } from '../services/siteDataService';
 import {
   Home, CreditCard, FileText, Wrench, Bell, LogOut, ChevronRight,
   CheckCircle, Clock, AlertCircle, Download, Plus, X, Star,
@@ -33,8 +34,8 @@ const RESIDENT = {
   floorPlan: 'Two Bedroom',
   beds: 2, baths: 1, sqft: 769,
   rent: 967, // 909 + fees
-  leaseStart: '2025-02-01',
-  leaseEnd: '2026-02-01',
+  leaseStart: '2026-02-01',
+  leaseEnd: '2027-01-31',
   leaseTerm: 12,
   moveInDate: '2025-02-01',
   status: 'Good Standing',
@@ -173,6 +174,7 @@ function OverviewSection() {
 
 // ── Section: My Lease ──────────────────────────────────────────────────────────
 function LeaseSection() {
+  const [renewalRequested, setRenewalRequested] = useState(false);
   const rows = [
     ['Floor Plan',    RESIDENT.floorPlan],
     ['Unit Number',   `#${RESIDENT.unit}`],
@@ -187,6 +189,32 @@ function LeaseSection() {
     ['Lease End',     RESIDENT.leaseEnd],
     ['Security Deposit', `$${RESIDENT.deposit}.00`],
   ];
+
+  const handleDownloadLease = () => {
+    const summary = [
+      'Monarch Pass Apartments - Lease Summary',
+      '========================================',
+      `Resident: ${RESIDENT.name}`,
+      `Unit: #${RESIDENT.unit} (${RESIDENT.floorPlan})`,
+      `Lease Term: ${RESIDENT.leaseTerm} months`,
+      `Lease Start: ${RESIDENT.leaseStart}`,
+      `Lease End: ${RESIDENT.leaseEnd}`,
+      `Base Rent: $909.00 / month`,
+      'Mandatory Fees: $58.00 / month',
+      `Total Monthly: $${RESIDENT.rent}.00 / month`,
+      `Security Deposit: $${RESIDENT.deposit}.00`,
+      '',
+      'This text summary was generated from the resident portal.',
+    ].join('\n');
+    const blob = new Blob([summary], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Lease-Agreement-Unit-${RESIDENT.unit}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <SectionTitle>My Lease</SectionTitle>
@@ -199,15 +227,20 @@ function LeaseSection() {
         ))}
       </div>
       <div style={{ marginTop: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <button style={{ padding: '0.65rem 1.4rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
+        <button onClick={() => setRenewalRequested(true)} style={{ padding: '0.65rem 1.4rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: 'none', transition: 'background 0.2s' }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = C.accentDark}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = C.accent}>
           Request Renewal
         </button>
-        <button style={{ padding: '0.65rem 1.4rem', backgroundColor: 'transparent', color: C.accent, borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: `1.5px solid ${C.accent}` }}>
+        <button onClick={handleDownloadLease} style={{ padding: '0.65rem 1.4rem', backgroundColor: 'transparent', color: C.accent, borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: `1.5px solid ${C.accent}` }}>
           Download Lease PDF
         </button>
       </div>
+      {renewalRequested && (
+        <div style={{ marginTop: '0.75rem', color: C.success, fontSize: '0.82rem', fontWeight: 600 }}>
+          Renewal request submitted. The leasing office will contact you.
+        </div>
+      )}
     </div>
   );
 }
@@ -256,8 +289,35 @@ function PaymentsSection() {
 function MaintenanceSection() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', category: 'Plumbing', priority: 'Medium', desc: '' });
+  const [submitMsg, setSubmitMsg] = useState(null);
 
   const priorityColor = { High: C.danger, Medium: C.warning, Low: C.success };
+
+  const handleSubmitRequest = async () => {
+    if (!form.title.trim() || !form.desc.trim()) {
+      setSubmitMsg({ type: 'error', text: 'Please fill in both the title and description.' });
+      return;
+    }
+    setSubmitMsg(null);
+    try {
+      const res = await submitMaintenanceTicketDB({
+        title: form.title,
+        category: form.category,
+        priority: form.priority,
+        unit: RESIDENT.unit,
+        tenant: RESIDENT.name,
+        notes: form.desc,
+      });
+      if (res && res.success) {
+        setSubmitMsg({ type: 'success', text: 'Request submitted successfully.' });
+        setForm({ title: '', category: 'Plumbing', priority: 'Medium', desc: '' });
+      } else {
+        setSubmitMsg({ type: 'error', text: 'Failed to submit request. Please try again.' });
+      }
+    } catch {
+      setSubmitMsg({ type: 'error', text: 'Failed to submit request. Please try again.' });
+    }
+  };
 
   return (
     <div>
@@ -282,7 +342,7 @@ function MaintenanceSection() {
                   <select value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
                     style={{ padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem' }}>
                     {key === 'category'
-                      ? ['Plumbing', 'Electrical', 'HVAC', 'Appliance', 'Other'].map(o => <option key={o}>{o}</option>)
+                      ? ['Plumbing', 'Electrical', 'HVAC', 'Appliance', 'General'].map(o => <option key={o}>{o}</option>)
                       : ['Low', 'Medium', 'High'].map(o => <option key={o}>{o}</option>)}
                   </select>
                 ) : (
@@ -298,9 +358,15 @@ function MaintenanceSection() {
               style={{ width: '100%', padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem', resize: 'vertical', boxSizing: 'border-box' }} />
           </div>
           <div style={{ display: 'flex', gap: '0.6rem' }}>
-            <button style={{ padding: '0.6rem 1.2rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer', border: 'none' }}>Submit Request</button>
+            <button onClick={handleSubmitRequest} style={{ padding: '0.6rem 1.2rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer', border: 'none' }}>Submit Request</button>
             <button onClick={() => setShowForm(false)} style={{ padding: '0.6rem 1rem', backgroundColor: 'transparent', color: C.muted, borderRadius: 8, fontWeight: 600, fontSize: '0.83rem', cursor: 'pointer', border: `1px solid ${C.border}` }}>Cancel</button>
           </div>
+        </div>
+      )}
+
+      {submitMsg && (
+        <div style={{ marginBottom: '1.25rem', padding: '0.75rem 1.1rem', background: C.card, border: `1px solid ${submitMsg.type === 'error' ? C.danger : C.success}66`, borderRadius: 12, color: submitMsg.type === 'error' ? C.danger : C.success, fontSize: '0.85rem', fontWeight: 600 }}>
+          {submitMsg.text}
         </div>
       )}
 
@@ -361,6 +427,23 @@ function AddOnsSection() {
 
 // ── Section: Documents ─────────────────────────────────────────────────────────
 function DocumentsSection() {
+  const handleDownload = (doc) => {
+    const content = [
+      'Monarch Pass Apartments - Resident Portal',
+      `Document: ${doc.name}`,
+      `Unit: #${RESIDENT.unit}  Resident: ${RESIDENT.name}`,
+      `Size: ${doc.size}  Date: ${doc.date}`,
+      '',
+      'This file was generated from the resident portal.',
+    ].join('\n');
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <div>
       <SectionTitle>My Documents</SectionTitle>
@@ -376,7 +459,7 @@ function DocumentsSection() {
                 <div style={{ color: C.muted, fontSize: '0.75rem' }}>{doc.size} · {doc.date}</div>
               </div>
             </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.45rem 0.85rem', backgroundColor: `${C.info}22`, color: C.info, borderRadius: 7, fontWeight: 700, fontSize: '0.77rem', cursor: 'pointer', border: `1px solid ${C.info}44` }}>
+            <button onClick={() => handleDownload(doc)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.45rem 0.85rem', backgroundColor: `${C.info}22`, color: C.info, borderRadius: 7, fontWeight: 700, fontSize: '0.77rem', cursor: 'pointer', border: `1px solid ${C.info}44` }}>
               <Download size={13} /> Download
             </button>
           </div>
@@ -402,7 +485,16 @@ function NotificationsSection() {
               <div style={{ flex: 1, color: C.text, fontSize: '0.87rem' }}>{n.msg}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ color: C.muted, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{n.time}</span>
-                <button onClick={() => setNotes(prev => prev.filter(x => x.id !== n.id))} style={{ color: C.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '2px' }}>
+                <button onClick={() => {
+                  if (typeof fetch !== 'undefined') {
+                    fetch('/backend/api/notifications.php', {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: n.id }),
+                    }).catch(err => console.debug('Notification dismiss sync note:', err));
+                  }
+                  setNotes(prev => prev.filter(x => x.id !== n.id));
+                }} style={{ color: C.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '2px' }}>
                   <X size={14} />
                 </button>
               </div>

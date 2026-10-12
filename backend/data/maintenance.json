@@ -1,0 +1,14 @@
+[
+    {
+        "id": "MR-482",
+        "ticket_id": "MR-482",
+        "unit_number": "9999",
+        "tenant_name": "Test",
+        "title": "AC noisy",
+        "category": "HVAC",
+        "priority": "Low",
+        "status": "pending",
+        "date_submitted": "Oct 11, 2026",
+        "created_at": "2026-10-11 19:24:36"
+    }
+]

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Calendar,
   Search,
@@ -122,6 +122,15 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
   const [activeLayoutModal, setActiveLayoutModal] = useState(null); // floorPlan object for zoom
   const [expandedAvailability, setExpandedAvailability] = useState(null); // floorPlan ID
 
+  // Initialize move-in filter from a homepage quick-search (mb_move_in_date)
+  useEffect(() => {
+    const stored = sessionStorage.getItem('mb_move_in_date');
+    sessionStorage.removeItem('mb_move_in_date');
+    if (stored && !isNaN(Date.parse(stored))) {
+      setMoveInFilterDate(stored);
+    }
+  }, []);
+
   const handleClearFilters = () => {
     setSelectedBedrooms('all');
     setSelectedBathrooms('all');
@@ -165,9 +174,17 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
         const matchesUnit = plan.availableUnits.some((u) => u.unit.toLowerCase().includes(query));
         if (!matchesUnit) return false;
       }
+      if (moveInFilterDate) {
+        const hasUnitAvailableByDate = plan.availableUnits.some((u) => {
+          const availableDate = typeof u.availableDate === 'string' ? u.availableDate.trim() : '';
+          if (!availableDate || /now|immediate/i.test(availableDate)) return true;
+          return availableDate <= moveInFilterDate;
+        });
+        if (!hasUnitAvailableByDate) return false;
+      }
       return true;
     });
-  }, [selectedBedrooms, selectedBathrooms, selectedUnitSize, selectedPriceRange, apartmentNumberQuery]);
+  }, [selectedBedrooms, selectedBathrooms, selectedUnitSize, selectedPriceRange, apartmentNumberQuery, moveInFilterDate]);
 
   return (
     <div style={{ paddingBottom: '3.5rem' }}>

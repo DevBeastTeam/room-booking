@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, ChevronDown, CheckCircle2, Calendar, Clock, Sparkles } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
+import { trackEvent } from '../services/analytics.js';
 
 const TIME_SLOTS = [
   '9:00 am',
@@ -77,25 +78,24 @@ export default function ScheduleTourModal({
 
     try {
       // Send to MySQL backend API
-      try {
-        await fetch('/backend/api/tour.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            first_name: firstName,
-            last_name: lastName,
-            email,
-            phone,
-            tour_date: tourDate,
-            tour_time: tourTime,
-            move_date: moveDate,
-            bedrooms,
-            unit_number: selectedUnit,
-            notes: message,
-          }),
-        });
-      } catch (err) {
-        console.warn('Backend tour API offline or unreachable, proceeding with local fallback', err);
+      const res = await fetch('/backend/api/schedule.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          tourDate,
+          tourTime,
+          bedrooms,
+          unit: selectedUnit,
+          notes: message,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data || data.success === false) {
+        throw new Error(data?.error || 'Failed to schedule tour. Please try again.');
       }
 
       // Persist in local storage via siteDataService
@@ -105,10 +105,11 @@ export default function ScheduleTourModal({
         phone,
         topic: 'Tour Scheduling',
         message: `Guided Tour on ${tourDate} at ${tourTime}. Unit/Floorplan: ${bedrooms || 'Any'} ${selectedUnit ? `(Unit #${selectedUnit})` : ''}. Move-in: ${moveDate || 'N/A'}. Message: ${message}`,
-        status: 'Unread',
+        status: 'new',
       });
 
       setIsSubmitted(true);
+      trackEvent('tour_scheduled', { unit: selectedUnit || 'general', bedrooms: bedrooms || 'any' });
       if (onTourScheduled) {
         onTourScheduled({
           name: `${firstName} ${lastName}`,
@@ -121,7 +122,7 @@ export default function ScheduleTourModal({
         });
       }
     } catch (err) {
-      setErrorMessage('Unable to process your reservation at this moment. Please try again.');
+      setErrorMessage(err.message || 'Unable to process your reservation at this moment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -130,6 +131,16 @@ export default function ScheduleTourModal({
   const handleResetAndClose = () => {
     setIsSubmitted(false);
     setErrorMessage('');
+    setFirstName('');
+    setLastName('');
+    setEmail('');
+    setPhone('');
+    setMoveDate('');
+    setMessage('');
+    setTourDate(todayFormatted);
+    setTourTime('1:30 pm');
+    setBedrooms(initialBedrooms || '');
+    setSelectedUnit(initialUnit || '');
     onClose();
   };
 

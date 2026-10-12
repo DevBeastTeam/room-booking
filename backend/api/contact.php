@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
 
 $storageDir = dirname(__DIR__) . '/data';
 if (!is_dir($storageDir)) {
@@ -23,8 +24,9 @@ if (!is_dir($storageDir)) {
 }
 $dataFile = $storageDir . '/inquiries.json';
 
-// GET: Return all inquiries
+// GET: Return all inquiries (prospect PII — sirf admin/support permission wale)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    auth_require_permission('support');
     $pdo = getDatabaseConnection();
     if ($pdo) {
         try {

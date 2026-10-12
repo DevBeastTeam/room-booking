@@ -14,9 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
+
+// Email Logs tab permission
+auth_require_permission('emaillogs');
 $pdo = getDatabaseConnection();
 
 if (!$pdo) {
+    http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Database connection failed']);
     exit;
 }
@@ -29,6 +34,7 @@ if ($method === 'GET') {
         $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode(['success' => true, 'data' => $logs]);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -52,6 +58,7 @@ if ($method === 'POST') {
         ]);
         echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -62,7 +69,11 @@ if ($method === 'DELETE') {
         $pdo->exec("TRUNCATE TABLE `email_logs`");
         echo json_encode(['success' => true, 'message' => 'Email logs cleared']);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
 }
+
+http_response_code(405);
+echo json_encode(['success' => false, 'error' => 'Method Not Allowed']);

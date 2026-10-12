@@ -115,15 +115,29 @@ cd ..
    ```text
    https://yourdomain.com/admin
    ```
-   - **Username:** `dev` ya `dev@gmail.com`
-   - **Password:** Aaj ki date ka number (e.g. aaj 21 tareekh hai to password: `21`).
-   - Theme & Colors tab se colors manage karke Save karein.
+   - **Username:** `admin` (ya `manager`)
+   - **Password:** default `admin@2026` / `manager123` — super admin (`/dev`) se reset/change kar sakte hain
+   - Super admin har admin ke liye decide karta hai ke usay kaun kaun si **sidebar tabs** dikhein (Floor Plans, Units, Applications, etc.)
+
+3. **Super Admin / Developer Panel:**
+   ```text
+   https://yourdomain.com/dev
+   ```
+   - **Username:** `dev`
+   - **Password:** aaj ki tareekh (day of month) — e.g. aaj 12 tareekh hai to `12`, kal `13`. Roz badalta hai.
+   - Super admin dekh sakta hai: saare admin accounts, unke credentials, tab permissions, activity logs, **Database Manager** (seed/clear/export/import)
+   - Super admin kar sakta hai: naya admin banana, enable/disable karna, password reset, tab permissions on/off
+
+> **⚠️ Production Security:** Deploy se pehle `backend/config/.env` mein `ADMIN_CRED_KEY` ko lambi random string se change karein (isi key se admin passwords encrypt hoti hain). Dev panel ka password date-based hai — ise kahin publicly display na karein.
 
 3. **Database Check:**
    ```text
    https://yourdomain.com/database
    ```
    *(Yeh page MySQL live connection status confirm kar dega).*
+
+4. **Database Manager Access:** `/database` page sirf un logins ko dikhega jinke paas
+   dev super admin se "Database Manager" tab permission on hai (server-side bhi enforce hota hai).
 
 ---
 

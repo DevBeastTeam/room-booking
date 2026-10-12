@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, Mail, Phone, User, MessageSquare, CheckCircle, Clock, MapPin, Sparkles } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
+import { trackEvent } from '../services/analytics.js';
 
 export default function ContactSupportModal({ isOpen, onClose, siteSettings, onInquirySubmitted }) {
   const [formData, setFormData] = useState({
@@ -45,12 +46,16 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
         message: formData.message.trim(),
       });
 
+      setIsSubmitting(false);
+
       if (created) {
         setSubmittedId(created.id);
+        trackEvent('inquiry', { category: formData.category });
+        setIsSubmitted(true);
+        if (onInquirySubmitted) onInquirySubmitted();
+      } else {
+        alert('Unable to log your inquiry at this moment. Please try again.');
       }
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      if (onInquirySubmitted) onInquirySubmitted();
     }, 400);
   };
 
@@ -81,7 +86,10 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
         padding: '1rem',
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) {
+          handleReset();
+          onClose();
+        }
       }}
     >
       <div
@@ -140,7 +148,10 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
           </div>
 
           <button
-            onClick={onClose}
+            onClick={() => {
+              handleReset();
+              onClose();
+            }}
             aria-label="Close modal"
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
@@ -426,7 +437,10 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.85rem', marginTop: '0.5rem' }}>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    handleReset();
+                    onClose();
+                  }}
                   className="btn-outline-gold"
                   style={{
                     padding: '0.65rem 1.25rem',

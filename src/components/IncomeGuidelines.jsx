@@ -18,16 +18,16 @@ import {
 } from 'lucide-react';
 
 export const INCOME_LIMITS = [
-  { size: 1, ami80: 59760, ami140: 104580 },
-  { size: 2, ami80: 68320, ami140: 119560 },
-  { size: 3, ami80: 76800, ami140: 134400 },
-  { size: 4, ami80: 85360, ami140: 149380 },
-  { size: 5, ami80: 92160, ami140: 161280 },
-  { size: 6, ami80: 99040, ami140: 173320 },
-  { size: 7, ami80: 105840, ami140: 185220 },
-  { size: 8, ami80: 112640, ami140: 197120 },
-  { size: 9, ami80: 119520, ami140: 209160 },
-  { size: 10, ami80: 133200, ami140: 233100 },
+  { size: 1, ami30: 21861, ami50: 36435, ami60: 43722 },
+  { size: 2, ami30: 24984, ami50: 41640, ami60: 49968 },
+  { size: 3, ami30: 28107, ami50: 46845, ami60: 56214 },
+  { size: 4, ami30: 31230, ami50: 52050, ami60: 62460 },
+  { size: 5, ami30: 33728, ami50: 56214, ami60: 67457 },
+  { size: 6, ami30: 36227, ami50: 60378, ami60: 72454 },
+  { size: 7, ami30: 38725, ami50: 64542, ami60: 77450 },
+  { size: 8, ami30: 41224, ami50: 68706, ami60: 82447 },
+  { size: 9, ami30: 43722, ami50: 72870, ami60: 87444 },
+  { size: 10, ami30: 46221, ami50: 77034, ami60: 92441 },
 ];
 
 export default function IncomeGuidelines({
@@ -54,26 +54,21 @@ export default function IncomeGuidelines({
 
   let qualificationStatus = null;
   if (parsedIncome > 0) {
-    if (parsedIncome <= selectedTier.ami80) {
+    if (parsedIncome <= selectedTier.ami60) {
+      const tier = parsedIncome <= selectedTier.ami30 ? '30% AMI' : parsedIncome <= selectedTier.ami50 ? '50% AMI' : '60% AMI';
+      const tierLimit = parsedIncome <= selectedTier.ami30 ? selectedTier.ami30 : parsedIncome <= selectedTier.ami50 ? selectedTier.ami50 : selectedTier.ami60;
       qualificationStatus = {
-        level: '80% AMI',
+        level: tier,
         type: 'success',
-        title: 'You likely qualify for 80% AMI reduced-rate housing!',
-        desc: `Your entered gross annual income ($${parsedIncome.toLocaleString()}) is at or below the $${selectedTier.ami80.toLocaleString()} limit for a household size of ${calcSize}.`,
-      };
-    } else if (parsedIncome <= selectedTier.ami140) {
-      qualificationStatus = {
-        level: '140% AMI',
-        type: 'info',
-        title: 'You likely qualify for 140% AMI housing!',
-        desc: `Your entered gross annual income ($${parsedIncome.toLocaleString()}) is within the 140% AMI bracket (up to $${selectedTier.ami140.toLocaleString()}) for a household size of ${calcSize}.`,
+        title: `You likely qualify for ${tier} reduced-rate housing!`,
+        desc: `Your entered gross annual income ($${parsedIncome.toLocaleString()}) is at or below the ${tier} limit of $${tierLimit.toLocaleString()} for a household size of ${calcSize}.`,
       };
     } else {
       qualificationStatus = {
         level: 'Over Limit',
         type: 'warning',
         title: 'Income exceeds program limits',
-        desc: `Your entered income ($${parsedIncome.toLocaleString()}) exceeds the maximum 140% AMI threshold ($${selectedTier.ami140.toLocaleString()}) for ${calcSize} occupant(s). Contact our leasing concierge for alternative options.`,
+        desc: `Your entered income ($${parsedIncome.toLocaleString()}) exceeds the maximum 60% AMI threshold ($${selectedTier.ami60.toLocaleString()}) for ${calcSize} occupant(s). Contact our leasing concierge for alternative options.`,
       };
     }
   }
@@ -249,7 +244,7 @@ export default function IncomeGuidelines({
               </tr>
             </thead>
             <tbody>
-              {/* 80% AMI Row */}
+              {/* 30% AMI Row */}
               <tr style={{ borderBottom: '1px solid rgba(201, 169, 110, 0.15)' }}>
                 <td
                   style={{
@@ -262,7 +257,7 @@ export default function IncomeGuidelines({
                     borderRight: '1px solid rgba(201, 169, 110, 0.18)',
                   }}
                 >
-                  80% AMI Limit
+                  30% AMI Limit
                 </td>
                 {INCOME_LIMITS.map((item) => (
                   <td
@@ -276,13 +271,13 @@ export default function IncomeGuidelines({
                       borderRight: '1px solid rgba(255, 255, 255, 0.05)',
                     }}
                   >
-                    ${item.ami80.toLocaleString()}
+                    ${item.ami30.toLocaleString()}
                   </td>
                 ))}
               </tr>
 
-              {/* 140% AMI Row */}
-              <tr>
+              {/* 50% AMI Row */}
+              <tr style={{ borderBottom: '1px solid rgba(201, 169, 110, 0.15)' }}>
                 <td
                   style={{
                     padding: '1rem 1.25rem',
@@ -294,7 +289,7 @@ export default function IncomeGuidelines({
                     borderRight: '1px solid rgba(201, 169, 110, 0.18)',
                   }}
                 >
-                  140% AMI Limit
+                  50% AMI Limit
                 </td>
                 {INCOME_LIMITS.map((item) => (
                   <td
@@ -308,7 +303,39 @@ export default function IncomeGuidelines({
                       borderRight: '1px solid rgba(255, 255, 255, 0.05)',
                     }}
                   >
-                    ${item.ami140.toLocaleString()}
+                    ${item.ami50.toLocaleString()}
+                  </td>
+                ))}
+              </tr>
+
+              {/* 60% AMI Row */}
+              <tr>
+                <td
+                  style={{
+                    padding: '1rem 1.25rem',
+                    fontWeight: 700,
+                    fontSize: '0.95rem',
+                    color: '#6ee7b7',
+                    textAlign: 'left',
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    borderRight: '1px solid rgba(201, 169, 110, 0.18)',
+                  }}
+                >
+                  60% AMI Limit
+                </td>
+                {INCOME_LIMITS.map((item) => (
+                  <td
+                    key={item.size}
+                    style={{
+                      padding: '1rem 0.6rem',
+                      fontSize: '0.92rem',
+                      fontWeight: 600,
+                      color: '#f4efe6',
+                      backgroundColor: item.size % 2 === 0 ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.15)',
+                      borderRight: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    ${item.ami60.toLocaleString()}
                   </td>
                 ))}
               </tr>
@@ -430,7 +457,7 @@ export default function IncomeGuidelines({
               </span>
               <input
                 type="number"
-                placeholder={`e.g. ${selectedTier.ami80}`}
+                placeholder={`e.g. ${selectedTier.ami60}`}
                 value={calcIncome}
                 onChange={(e) => setCalcIncome(e.target.value)}
                 style={{
@@ -447,7 +474,7 @@ export default function IncomeGuidelines({
               />
             </div>
             <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem' }}>
-              80% AMI Max: <strong style={{ color: '#dfc285' }}>${selectedTier.ami80.toLocaleString()}</strong> · 140% AMI Max: <strong style={{ color: '#93c5fd' }}>${selectedTier.ami140.toLocaleString()}</strong>
+              60% AMI Max: <strong style={{ color: '#6ee7b7' }}>${selectedTier.ami60.toLocaleString()}</strong> · 30% AMI Max: <strong style={{ color: '#dfc285' }}>${selectedTier.ami30.toLocaleString()}</strong>
             </div>
           </div>
         </div>

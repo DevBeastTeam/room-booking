@@ -6,8 +6,9 @@ import SummerSavingsModal from './SummerSavingsModal';
 import Widgets from './Widgets';
 import PaddleCheckoutModal from './PaddleCheckoutModal';
 import { getSiteSettings, getLegalPages, getSupportInquiries } from '../services/siteDataService';
+import { trackEvent } from '../services/analytics.js';
 
-export default function SiteModals() {
+export default function SiteModals({ minimal = false }) {
   const [siteSettings, setSiteSettings] = useState(() => getSiteSettings());
   const [legalPages, setLegalPages] = useState(() => getLegalPages());
   const [supportInquiries, setSupportInquiries] = useState(() => getSupportInquiries());
@@ -41,6 +42,13 @@ export default function SiteModals() {
       const { item = 'holding_deposit', unit = '', amount = null, customer = null } = e.detail || {};
       setPaddlePreset({ item, unit, amount, customer });
       setIsPaddleOpen(true);
+      // Analytics: buy/checkout intent (saare "Reserve" / "Buy" buttons yahin se guzarte hain)
+      trackEvent('buy_click', {
+        item,
+        unit: unit || 'general',
+        amount: amount != null ? String(amount) : 'default',
+        path: window.location.pathname,
+      });
     };
 
     const onSettingsUpdate = (e) => setSiteSettings(e.detail);
@@ -113,9 +121,9 @@ export default function SiteModals() {
         customerPreset={paddlePreset.customer}
       />
 
-      <SummerSavingsModal onNavigateFloorPlans={handleNavigateFloorPlans} />
+      {!minimal && <SummerSavingsModal onNavigateFloorPlans={handleNavigateFloorPlans} />}
 
-      <Widgets onOpenScheduleTour={handleOpenScheduleTour} />
+      {!minimal && <Widgets onOpenScheduleTour={handleOpenScheduleTour} />}
     </>
   );
 }

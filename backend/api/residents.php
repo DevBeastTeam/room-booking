@@ -14,9 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
+
+// Residents tab permission
+auth_require_permission('residents');
 $pdo = getDatabaseConnection();
 
 if (!$pdo) {
+    http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Database connection failed']);
     exit;
 }
@@ -30,6 +35,7 @@ if ($method === 'GET') {
         $residents = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode(['success' => true, 'data' => $residents]);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -59,6 +65,7 @@ if ($method === 'POST') {
         ]);
         echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -69,9 +76,19 @@ if ($method === 'PUT') {
     try {
         $id = (int)($input['id'] ?? $_GET['id'] ?? 0);
         if (!$id) {
+            http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Resident ID required']);
             exit;
         }
+        $checkStmt = $pdo->prepare("SELECT `id` FROM `residents` WHERE `id` = ?");
+        $checkStmt->execute([$id]);
+        if (!$checkStmt->fetch()) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Resident not found.']);
+            exit;
+        }
+        // Rent sirf tab update ho jab input mein valid number ho — warna stored rent overwrite ho jati hai
+        $rent = isset($input['rent']) && is_numeric($input['rent']) ? (int)$input['rent'] : null;
         $stmt = $pdo->prepare("
             UPDATE `residents` SET
                 `name` = COALESCE(?, `name`),
@@ -91,12 +108,13 @@ if ($method === 'PUT') {
             $input['unit_number'] ?? null,
             $input['floor_plan_name'] ?? null,
             $input['lease_end_date'] ?? null,
-            isset($input['rent']) ? (int)$input['rent'] : null,
+            $rent,
             $input['status'] ?? null,
             $id
         ]);
         echo json_encode(['success' => true, 'message' => 'Resident updated']);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
@@ -107,14 +125,24 @@ if ($method === 'DELETE') {
     try {
         $id = (int)($input['id'] ?? $_GET['id'] ?? 0);
         if (!$id) {
+            http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Resident ID required']);
             exit;
         }
         $stmt = $pdo->prepare("DELETE FROM `residents` WHERE `id` = ?");
         $stmt->execute([$id]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Resident not found.']);
+            exit;
+        }
         echo json_encode(['success' => true, 'message' => 'Resident deleted']);
     } catch (Exception $e) {
+        http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
 }
+
+http_response_code(405);
+echo json_encode(['success' => false, 'error' => 'Method Not Allowed']);

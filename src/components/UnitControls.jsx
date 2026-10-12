@@ -136,11 +136,14 @@ export default function UnitControls({
             outline: 'none',
           }}
         >
-          {selectedFloorPlan.availableUnits.map((u) => (
-            <option key={u} value={u} style={{ backgroundColor: '#0c101c' }}>
-              Unit #{u} · Available Immediately
-            </option>
-          ))}
+          {selectedFloorPlan.availableUnits.map((u) => {
+            const unitId = typeof u === 'string' ? u : u.unit;
+            return (
+              <option key={unitId} value={unitId} style={{ backgroundColor: '#0c101c' }}>
+                Unit #{unitId} · Available Immediately
+              </option>
+            );
+          })}
         </select>
       </div>
 

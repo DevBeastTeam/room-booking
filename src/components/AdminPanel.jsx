@@ -7,7 +7,7 @@ import {
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
   Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw, Wand2,
-  Database, Sun, Moon, Inbox, MessageSquare, UserCircle
+  Sun, Moon, Inbox, MessageSquare, UserCircle, ShieldCheck, KeyRound, Activity as ActivityIcon
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -59,7 +59,50 @@ const A = {
   teal:     '#5ec4b6',
 };
 
+// Valid CSS colour: #rgb / #rrggbb / #rrggbbaa / rgb() / rgba()
+function isValidColorValue(value) {
+  if (typeof value !== 'string') return false;
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)) return true;
+  return /^rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+(?:\s*,\s*[\d.]+)?\s*\)$/.test(value);
+}
+
+// Clipboard API na ho (non-HTTPS) to purana textarea trick
+function fallbackCopy(text) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch { /* clipboard unavailable */ }
+}
+
 // ── Mock data ──────────────────────────────────────────────────────────────────
+
+// Admin sections ki edits MySQL backend par sync karta hai (best-effort).
+// Session cookie same-origin fetch ke sath automatically jati hai.
+async function syncToBackend(url, method, body) {
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || data.success !== true) {
+      console.debug('Admin backend sync note:', url, res.status, data);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.debug('Admin backend sync failed:', url, err);
+    return false;
+  }
+}
 const FLOOR_PLANS_DATA = [
   { id: 'one-bedroom',   name: 'One Bedroom',   beds: 1, baths: 1, sqft: 614,  total: 40, occupied: 27, price12: 898,  price10: 950,  price6: 1020, deposit: 250 },
   { id: 'two-bedroom',   name: 'Two Bedroom',   beds: 2, baths: 1, sqft: 769,  total: 55, occupied: 35, price12: 909,  price10: 960,  price6: 1050, deposit: 250 },
@@ -246,7 +289,21 @@ function FloorPlansSection() {
   const [editVals, setEditVals] = useState({});
 
   const startEdit = (fp) => { setEditingId(fp.id); setEditVals({ price12: fp.price12, price10: fp.price10, price6: fp.price6, deposit: fp.deposit }); };
-  const saveEdit = (id) => { setPlans(prev => prev.map(p => p.id === id ? { ...p, ...editVals } : p)); setEditingId(null); };
+  const saveEdit = (id) => {
+    const plan = plans.find(p => p.id === id);
+    setPlans(prev => prev.map(p => p.id === id ? { ...p, ...editVals } : p));
+    setEditingId(null);
+    if (plan) {
+      syncToBackend('/backend/api/floor-plans.php', 'POST', {
+        action: 'update_plan',
+        slug: plan.id,
+        price_12m: Number(editVals.price12),
+        price_10m: Number(editVals.price10),
+        price_6m: Number(editVals.price6),
+        deposit: Number(editVals.deposit),
+      });
+    }
+  };
 
   return (
     <div>
@@ -304,7 +361,15 @@ function UnitsSection() {
     return true;
   });
 
-  const changeStatus = (unit, newStatus) => setUnits(prev => prev.map(u => u.unit === unit ? { ...u, status: newStatus } : u));
+  const changeStatus = (unit, newStatus) => {
+    setUnits(prev => prev.map(u => u.unit === unit ? { ...u, status: newStatus } : u));
+    syncToBackend('/backend/api/floor-plans.php', 'POST', {
+      action: 'update_unit',
+      unit_number: unit,
+      status: newStatus,
+      tenant_name: units.find(u => u.unit === unit)?.tenant || null,
+    });
+  };
 
   return (
     <div>
@@ -359,7 +424,10 @@ function UnitsSection() {
 // ── Applications Section ───────────────────────────────────────────────────────
 function ApplicationsSection() {
   const [apps, setApps] = useState(APPLICATIONS_DATA);
-  const updateStatus = (id, status) => setApps(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+  const updateStatus = (id, status) => {
+    setApps(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    syncToBackend('/backend/api/applications.php', 'PUT', { app_id: id, status });
+  };
   const pending = apps.filter(a => a.status === 'pending');
   const reviewed = apps.filter(a => a.status !== 'pending');
 
@@ -466,7 +534,10 @@ function ResidentsSection() {
 // ── Maintenance Section ────────────────────────────────────────────────────────
 function AdminMaintenanceSection() {
   const [tickets, setTickets] = useState(MAINTENANCE_DATA);
-  const updateStatus = (id, status) => setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+  const updateStatus = (id, status) => {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+    syncToBackend('/backend/api/maintenance.php', 'POST', { action: 'update_status', ticket_id: id, status });
+  };
   const priorityColor = { High: A.danger, Medium: A.warning, Low: A.success };
 
   return (
@@ -533,7 +604,14 @@ function AddOnsManagementSection() {
                     <input type="number" defaultValue={a.price} id={`price-${a.id}`}
                       style={{ width: 70, padding: '0.4rem 0.5rem', backgroundColor: A.bg, border: `1px solid ${A.accent}`, borderRadius: 7, color: A.text, fontSize: '0.87rem' }} />
                     <span style={{ color: A.muted, fontSize: '0.78rem' }}>/mo</span>
-                    <button onClick={() => { const v = Number(document.getElementById(`price-${a.id}`).value); setAddons(prev => prev.map(x => x.id === a.id ? { ...x, price: v } : x)); setEditing(null); }}
+                    <button onClick={() => {
+                      const el = document.getElementById(`price-${a.id}`);
+                      const v = el ? Number(el.value) : a.price;
+                      const finalPrice = Number.isFinite(v) && v > 0 ? v : a.price;
+                      setAddons(prev => prev.map(x => x.id === a.id ? { ...x, price: finalPrice } : x));
+                      setEditing(null);
+                      syncToBackend('/backend/api/addons.php', 'PUT', { addon_key: a.id, price: finalPrice });
+                    }}
                       style={{ padding: '0.35rem 0.7rem', backgroundColor: A.success, color: '#fff', borderRadius: 7, fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', border: 'none' }}>Save</button>
                   </div>
                 : <div style={{ fontSize: '1.3rem', fontWeight: 800, color: A.accent }}>${a.price}<span style={{ fontSize: '0.78rem', fontWeight: 400, color: A.muted }}>/mo</span></div>
@@ -581,6 +659,153 @@ function EmailLogsSection() {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+
+// ── Admin Activity Section (team logins + activity log) ───────────────────────
+function AdminActivitySection() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/backend/api/auth.php?action=activity', { credentials: 'same-origin' });
+      const json = await res.json();
+      if (json.success) setData(json);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <SectionTitle>Admin Activity — Team Logins & Activity Log</SectionTitle>
+        <div style={{ padding: '3rem', textAlign: 'center', color: A.muted }}>Loading…</div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div>
+        <SectionTitle>Admin Activity — Team Logins & Activity Log</SectionTitle>
+        <div style={{ padding: '3rem', textAlign: 'center', color: A.muted }}>
+          Activity log load nahi ho rahi. Super admin se permission check karein.
+        </div>
+      </div>
+    );
+  }
+
+  const s = data.summary || {};
+  const admins = data.admins || [];
+  const logs = data.logs || [];
+
+  const stats = [
+    ['Total Accounts', s.total ?? 0, A.info, Users],
+    ['Super Admins', s.super_admins ?? 0, A.purple, ShieldCheck],
+    ['Active Admins', s.active ?? 0, A.success, UserCheck],
+    ['Disabled', s.disabled ?? 0, A.danger, XCircle],
+  ];
+
+  return (
+    <div>
+      <SectionTitle>Admin Activity — Team Logins &amp; Activity Log</SectionTitle>
+
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+        {stats.map(([label, value, color, Icon]) => (
+          <div key={label} style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: '1.1rem 1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ color: A.muted, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+              <span style={{ width: 30, height: 30, borderRadius: 8, background: `${color}22`, color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={15} />
+              </span>
+            </div>
+            <div style={{ color, fontSize: '1.6rem', fontWeight: 800 }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Admin accounts table */}
+      <h3 style={{ color: A.text, fontSize: '0.95rem', fontWeight: 800, margin: '0 0 0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <KeyRound size={15} color={A.accent} /> Admin Accounts &amp; Login Times
+      </h3>
+      <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, overflow: 'auto', marginBottom: '2rem' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
+          <THead cols={['Admin', 'Role', 'Status', 'Last Login', 'Account Created']} />
+          <tbody>
+            {admins.map(a => (
+              <tr key={a.id} style={{ borderBottom: `1px solid ${A.border}` }}>
+                <td style={{ padding: '0.8rem 1rem' }}>
+                  <div style={{ color: A.text, fontWeight: 700, fontSize: '0.85rem' }}>{a.name}</div>
+                  <div style={{ color: A.muted, fontSize: '0.73rem' }}>{a.username} · {a.email}</div>
+                </td>
+                <td style={{ padding: '0.8rem 1rem' }}>
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 700, padding: '2px 9px', borderRadius: 10,
+                    color: a.role === 'super_admin' ? A.purple : A.accent,
+                    background: a.role === 'super_admin' ? `${A.purple}22` : `${A.accent}22`,
+                  }}>
+                    {a.role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                  </span>
+                </td>
+                <td style={{ padding: '0.8rem 1rem' }}>
+                  <span style={{
+                    fontSize: '0.68rem', fontWeight: 700, padding: '2px 9px', borderRadius: 10,
+                    color: a.active ? A.success : A.danger,
+                    background: a.active ? `${A.success}22` : `${A.danger}22`,
+                  }}>
+                    {a.active ? 'Active' : 'Disabled'}
+                  </span>
+                </td>
+                <td style={{ padding: '0.8rem 1rem', color: A.text, fontSize: '0.82rem', fontWeight: 600 }}>{a.last_login || 'Never'}</td>
+                <td style={{ padding: '0.8rem 1rem', color: A.muted, fontSize: '0.78rem' }}>{a.created_at || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Activity log */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+        <h3 style={{ color: A.text, fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <ActivityIcon size={15} color={A.accent} /> Recent Activity
+        </h3>
+        <button
+          onClick={load}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            background: A.card2, border: `1px solid ${A.border}`, color: A.muted,
+            cursor: 'pointer', borderRadius: 8, padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 700,
+          }}
+        >
+          <RefreshCw size={12} /> Refresh
+        </button>
+      </div>
+      <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: '0.5rem 1.1rem 0.75rem' }}>
+        {logs.map(l => (
+          <div key={l.id} style={{
+            display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'baseline',
+            padding: '0.55rem 0', fontSize: '0.8rem', borderBottom: `1px solid ${A.border}`,
+          }}>
+            <span style={{ color: A.muted, fontFamily: 'monospace', fontSize: '0.72rem', whiteSpace: 'nowrap' }}>{l.timestamp}</span>
+            <span style={{ color: A.accent, fontWeight: 700, minWidth: 60 }}>{l.actor}</span>
+            <span style={{
+              fontWeight: 600,
+              color: /failed|blocked/.test(l.action) ? A.danger
+                : /reset|credentials|created|toggled/.test(l.action) ? A.warning
+                : A.text,
+            }}>{l.action}</span>
+            {l.detail && <span style={{ color: A.muted }}>({l.detail})</span>}
+          </div>
+        ))}
+        {logs.length === 0 && <div style={{ padding: '1.5rem', textAlign: 'center', color: A.muted }}>No activity recorded yet.</div>}
       </div>
     </div>
   );
@@ -684,7 +909,7 @@ function LiveChatSection() {
               </div>
             ) : sessionList.map(s => (
               <button key={s.userId} onClick={() => handleSelectSession(s.userId)}
-                style={{ width: '100%', padding: '0.85rem 0.9rem', borderBottom: `1px solid ${A.border}`, backgroundColor: selectedUserId === s.userId ? `${A.accent}18` : 'transparent', border: 'none', borderBottom: `1px solid ${A.border}`, cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.65rem' }}
+                style={{ width: '100%', padding: '0.85rem 0.9rem', borderBottom: `1px solid ${A.border}`, backgroundColor: selectedUserId === s.userId ? `${A.accent}18` : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.65rem' }}
               >
                 <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${A.accent}88, ${A.teal}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.82rem', fontWeight: 800, color: A.bg }}>
                   {(s.displayName || 'G')[0].toUpperCase()}
@@ -1403,6 +1628,24 @@ function PagesManagementSection({ legalPages, setLegalPages }) {
         >
           <BookOpen size={16} /> Privacy Policy
         </button>
+        <button
+          onClick={() => setActiveTab('accessibility')}
+          style={{
+            padding: '0.6rem 1.25rem',
+            borderRadius: 8,
+            border: 'none',
+            backgroundColor: activeTab === 'accessibility' ? `${A.accent}22` : 'transparent',
+            color: activeTab === 'accessibility' ? A.accent : A.muted,
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <ShieldCheck size={16} /> Accessibility
+        </button>
       </div>
 
       {/* Editor & Preview Grid */}
@@ -2028,6 +2271,8 @@ function ThemeConfigSection() {
   const [customPrimary, setCustomPrimary] = useState(() => activePalette.primary || (activeEditMode === 'light' ? '#a47c2a' : '#c9a96e'));
   const [customSecondary, setCustomSecondary] = useState(() => activePalette.secondary || (activeEditMode === 'light' ? '#b8860b' : '#dfc285'));
   const [copied, setCopied] = useState(false);
+  // Fine-tuner partial hex typing ke liye local drafts (invalid values apply nahi hoti)
+  const [tokenDrafts, setTokenDrafts] = useState({});
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
 
   const DARK_PRESETS = [
@@ -2253,9 +2498,20 @@ export const DEFAULT_LIGHT_PALETTE = ${JSON.stringify(palettes.light, null, 2)};
   };
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(generateConfigFileCode());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    const code = generateConfigFileCode();
+    const done = () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(code).then(done).catch(() => {
+        fallbackCopy(code);
+        done();
+      });
+    } else {
+      fallbackCopy(code);
+      done();
+    }
   };
 
   const colorFields = [
@@ -2717,8 +2973,24 @@ export const DEFAULT_LIGHT_PALETTE = ${JSON.stringify(palettes.light, null, 2)};
                 />
                 <input
                   type="text"
-                  value={activePalette[field.key] || ''}
-                  onChange={(e) => handleColorChange(field.key, e.target.value)}
+                  value={tokenDrafts[field.key] ?? (activePalette[field.key] || '')}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setTokenDrafts(prev => ({ ...prev, [field.key]: raw }));
+                    if (isValidColorValue(raw)) {
+                      handleColorChange(field.key, raw);
+                      setTokenDrafts(prev => {
+                        const next = { ...prev };
+                        delete next[field.key];
+                        return next;
+                      });
+                    }
+                  }}
+                  onBlur={() => setTokenDrafts(prev => {
+                    const next = { ...prev };
+                    delete next[field.key];
+                    return next;
+                  })}
                   style={{
                     flex: 1,
                     backgroundColor: A.bg,
@@ -2843,11 +3115,12 @@ const ADMIN_NAV = [
   { id: 'pages',        label: 'Pages & Legal',      Icon: BookOpen    },
   { id: 'settings',     label: 'Site Settings',      Icon: Sliders     },
   { id: 'theme',        label: 'Theme & Colors',     Icon: Palette     },
-  { id: 'database',     label: 'Database Manager',   Icon: Database    },
+  { id: 'adminactivity', label: 'Admin Activity',    Icon: ShieldCheck  },
 ];
 
 // ── Main Export ────────────────────────────────────────────────────────────────
 export default function AdminPanel({
+  user,
   onBack,
   siteSettings: propSiteSettings,
   onUpdateSiteSettings,
@@ -2858,6 +3131,24 @@ export default function AdminPanel({
 }) {
   const handleBack = onBack || (() => { window.location.href = '/'; });
   const [activeSection, setActiveSection] = useState('overview');
+
+  // Tab permission check — super admin sab kuch dekh sakta hai
+  const canAccessTab = (tabId) => {
+    if (tabId === 'overview') return true;
+    if (!user) return true; // backward compatibility (no session prop passed)
+    if (user.role === 'super_admin') return true;
+    return Boolean(user.permissions?.[tabId]);
+  };
+
+  // Sidebar sirf allowed tabs dikhaye
+  const visibleNav = ADMIN_NAV.filter((item) => canAccessTab(item.id));
+
+  // Agar current active tab ki permission nahi → overview pe fall back
+  useEffect(() => {
+    if (!canAccessTab(activeSection)) {
+      setActiveSection('overview');
+    }
+  }, [activeSection]);
   const [supportInquiries, setSupportInquiries] = useState(() => propSupportInquiries || getSupportInquiries());
   const [siteSettings, setSiteSettings] = useState(() => propSiteSettings || getSiteSettings());
   const [legalPages, setLegalPages] = useState(() => propLegalPages || getLegalPages());
@@ -2891,30 +3182,7 @@ export default function AdminPanel({
     pages:        <PagesManagementSection legalPages={legalPages} setLegalPages={handleUpdateLegalPages} />,
     settings:     <SiteSettingsSection siteSettings={siteSettings} setSiteSettings={handleUpdateSiteSettings} />,
     theme:        <ThemeConfigSection />,
-    database:     (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400, gap: '1.25rem' }}>
-        <div style={{ width: 72, height: 72, borderRadius: 20, background: '#5ec4b622', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Database size={34} color="#5ec4b6" />
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ color: A.text, fontWeight: 800, fontSize: '1.2rem', marginBottom: '0.4rem' }}>Database Manager</div>
-          <div style={{ color: A.muted, fontSize: '0.87rem', maxWidth: 380, lineHeight: 1.6, marginBottom: '1.5rem' }}>
-            MySQL tables ko seed, format, export ya import karein — dedicated Database Manager page par.
-          </div>
-          <button
-            onClick={() => { window.location.href = '/database'; }}
-            style={{
-              background: 'linear-gradient(135deg, #5ec4b6, #3da89a)',
-              border: 'none', color: '#0f1117', fontWeight: 800, fontSize: '0.95rem',
-              padding: '0.85rem 2rem', borderRadius: 12, cursor: 'pointer',
-              boxShadow: '0 6px 20px rgba(94,196,182,0.35)',
-            }}
-          >
-            🗄️ Open Database Manager
-          </button>
-        </div>
-      </div>
-    ),
+    adminactivity: <AdminActivitySection />,
   };
 
 
@@ -2959,7 +3227,7 @@ export default function AdminPanel({
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: '0.85rem 0.65rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-          {ADMIN_NAV.map(({ id, label, Icon }) => {
+          {visibleNav.map(({ id, label, Icon }) => {
             const active = activeSection === id;
             const isAppBadge = id === 'applications' && pendingCount > 0;
             const isSupportBadge = id === 'support' && newSupportCount > 0;
@@ -3065,7 +3333,7 @@ export default function AdminPanel({
               <div style={{ color: A.text, fontSize: '0.82rem', fontWeight: 600 }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
               </div>
-              <div style={{ color: A.accent, fontSize: '0.72rem', fontWeight: 700 }}>Admin: Property Manager</div>
+              <div style={{ color: A.accent, fontSize: '0.72rem', fontWeight: 700 }}>Admin: {user?.name || user?.username || 'Property Manager'}</div>
             </div>
             <div
               style={{
@@ -3081,7 +3349,12 @@ export default function AdminPanel({
                 fontSize: '0.85rem',
               }}
             >
-              PM
+              {(user?.name || user?.username || 'PM')
+                .split(' ')
+                .map((part) => part[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase()}
             </div>
           </div>
         </div>

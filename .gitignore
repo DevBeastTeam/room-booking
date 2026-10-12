@@ -27,3 +27,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Admin auth store (contains password hashes + encrypted passwords)
+backend/data/admins.json
+backend/data/admin_logs.json

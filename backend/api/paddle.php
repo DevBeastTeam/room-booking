@@ -17,6 +17,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
 
 $envVars = loadEnvFile(dirname(__DIR__) . '/config/.env');
 
@@ -38,6 +39,11 @@ $currency = strtoupper($envVars['PADDLE_CURRENCY'] ?? 'USD');
 $vendorId = $envVars['PADDLE_VENDOR_ID'] ?? '333354';
 
 $action = $_GET['action'] ?? ($_POST['action'] ?? 'config');
+
+// Payment history sirf logged-in admins ko (config/create/verify public rehte hain)
+if ($action === 'history') {
+    auth_require_permission();
+}
 
 // ── 1. Return Public Client Configuration ────────────────────────────────────
 if ($action === 'config') {
@@ -82,66 +88,106 @@ if ($action === 'create_transaction') {
         exit();
     }
 
+    // item_type must match transactions.item_type ENUM, warna INSERT strict mode mein fail hota hai
+    if (!in_array($itemType, ['application_fee', 'holding_deposit', 'rent_payment'], true)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Invalid item_type. Allowed values: application_fee, holding_deposit, rent_payment.'
+        ]);
+        exit();
+    }
+
     $amountInCents = (int) round($amount * 100);
     $localTxnId = 'TXN-' . strtoupper(substr(uniqid(), -8));
 
-    // Call Paddle Billing v2 API
-    $paddlePayload = [
-        'items' => [
-            [
-                'quantity' => 1,
-                'price' => [
-                    'description' => "Monarch Pass - {$itemName} (Unit: " . ($unitNumber ?: 'General') . ")",
-                    'unit_price' => [
-                        'amount' => (string) $amountInCents,
-                        'currency_code' => $currency,
-                    ],
-                    'billing_cycle' => null, // Explicitly one-time payment (Non-recurring)
-                    'product' => [
-                        'name' => "Monarch Pass - {$itemName}",
-                        'tax_category' => 'standard',
+    $paddleTxnId = null;
+    $paddleCheckoutUrl = null;
+    $demoMode = empty($paddleApiKey);
+
+    if ($demoMode) {
+        // No Paddle API key configured → demo/sandbox testing. Koi Paddle call nahi,
+        // local row 'pending' rehti hai (simulated payment).
+    } else {
+        // Call Paddle Billing v2 API
+        $paddlePayload = [
+            'items' => [
+                [
+                    'quantity' => 1,
+                    'price' => [
+                        'description' => "Monarch Pass - {$itemName} (Unit: " . ($unitNumber ?: 'General') . ")",
+                        'unit_price' => [
+                            'amount' => (string) $amountInCents,
+                            'currency_code' => $currency,
+                        ],
+                        'billing_cycle' => null, // Explicitly one-time payment (Non-recurring)
+                        'product' => [
+                            'name' => "Monarch Pass - {$itemName}",
+                            'tax_category' => 'standard',
+                        ]
                     ]
                 ]
+            ],
+            'customer' => [
+                'email' => $customerEmail,
+                'name' => $customerName
+            ],
+            'custom_data' => [
+                'local_txn_id' => $localTxnId,
+                'unit_number' => $unitNumber,
+                'item_type' => $itemType,
+                'community' => 'Monarch Pass Apartments'
             ]
-        ],
-        'customer' => [
-            'email' => $customerEmail,
-            'name' => $customerName
-        ],
-        'custom_data' => [
-            'local_txn_id' => $localTxnId,
-            'unit_number' => $unitNumber,
-            'item_type' => $itemType,
-            'community' => 'Monarch Pass Apartments'
-        ]
-    ];
+        ];
 
-    $ch = curl_init($baseApiUrl . 'transactions');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($paddlePayload));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $paddleApiKey
-    ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        $ch = curl_init($baseApiUrl . 'transactions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($paddlePayload));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $paddleApiKey
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
 
-    $paddleData = json_decode($response, true);
-    $paddleTxnId = $paddleData['data']['id'] ?? null;
-    $paddleCheckoutUrl = $paddleData['data']['checkout']['url'] ?? null;
+        // Key configured hai lekin Paddle request fail hui → payment confirmed NAHI hui
+        if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+            http_response_code(502);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Paddle API request failed. Please try again.',
+                'details' => $curlError !== '' ? $curlError : ('HTTP ' . $httpCode)
+            ]);
+            exit();
+        }
 
-    if (empty($paddleCheckoutUrl) && !empty($paddleTxnId)) {
-        $checkoutHost = $isSandbox ? 'https://sandbox-buy.paddle.com' : 'https://buy.paddle.com';
-        $paddleCheckoutUrl = $checkoutHost . '/checkout?_ptxn=' . $paddleTxnId;
+        $paddleData = json_decode($response, true);
+        $paddleTxnId = $paddleData['data']['id'] ?? null;
+        $paddleCheckoutUrl = $paddleData['data']['checkout']['url'] ?? null;
+
+        if (empty($paddleTxnId)) {
+            http_response_code(502);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Paddle API did not return a transaction id. Please try again.'
+            ]);
+            exit();
+        }
+
+        if (empty($paddleCheckoutUrl)) {
+            $checkoutHost = $isSandbox ? 'https://sandbox-buy.paddle.com' : 'https://buy.paddle.com';
+            $paddleCheckoutUrl = $checkoutHost . '/checkout?_ptxn=' . $paddleTxnId;
+        }
     }
 
     $finalTxnId = $paddleTxnId ?: $localTxnId;
 
-    // Save transaction to MySQL
+    // Save transaction to MySQL (always 'pending' — payment abhi confirm nahi hui)
     $storedInDb = false;
     $pdo = getDatabaseConnection();
     if ($pdo) {
@@ -176,13 +222,15 @@ if ($action === 'create_transaction') {
         }
     }
 
-    echo json_encode([
+    $responsePayload = [
         'success' => true,
+        'demo_mode' => $demoMode,
         'txn_id' => $finalTxnId,
         'paddle_txn_id' => $paddleTxnId,
         'checkout_url' => $paddleCheckoutUrl,
         'amount' => $amount,
         'currency' => $currency,
+        'item_type' => $itemType,
         'item_name' => $itemName,
         'unit_number' => $unitNumber,
         'customer' => [
@@ -192,24 +240,80 @@ if ($action === 'create_transaction') {
         'environment' => $paddleEnv,
         'client_side_token' => $paddleClientToken,
         'database_recorded' => $storedInDb
-    ]);
+    ];
+
+    if ($demoMode) {
+        $responsePayload['message'] = 'No Paddle API key configured — demo mode. Payment simulated locally, transaction is still pending.';
+    }
+
+    echo json_encode($responsePayload);
     exit();
 }
 
 // ── 3. Verify Transaction Status ─────────────────────────────────────────────
 if ($action === 'verify_transaction') {
-    $txnId = $_GET['txn_id'] ?? ($_POST['txn_id'] ?? '');
+    $txnId = trim($_GET['txn_id'] ?? ($_POST['txn_id'] ?? ''));
     if (empty($txnId)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Transaction ID is required']);
         exit();
     }
 
-    $isCompleted = false;
-    $paddleStatus = null;
+    $pdo = getDatabaseConnection();
 
+    // Local transaction row (amount/messages ke liye)
+    $localRow = null;
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM `transactions` WHERE `txn_id` = :id OR `paddle_order_id` = :id2 LIMIT 1");
+            $stmt->execute([':id' => $txnId, ':id2' => $txnId]);
+            $localRow = $stmt->fetch();
+        } catch (Exception $e) {
+            error_log("Failed to read txn in DB: " . $e->getMessage());
+        }
+    }
+
+    $rowAmount = $localRow ? (float)$localRow['amount'] : null;
+
+    // ── (b) Demo mode (no API key): locally generated 'TXN-...' id confirm karo ──
+    if (empty($paddleApiKey)) {
+        if ($localRow && strpos($txnId, 'TXN-') === 0) {
+            if ($localRow['status'] === 'pending') {
+                try {
+                    $stmt = $pdo->prepare("UPDATE `transactions` SET `status` = 'completed' WHERE `txn_id` = :id");
+                    $stmt->execute([':id' => $txnId]);
+                } catch (Exception $e) {
+                    error_log("Failed to update txn in DB: " . $e->getMessage());
+                }
+            }
+            echo json_encode([
+                'success' => true,
+                'verified' => true,
+                'status' => 'completed',
+                'simulated' => true,
+                'txn_id' => $txnId,
+                'amount' => $rowAmount,
+                'message' => 'Demo mode: local transaction simulated as completed (no Paddle API key configured).'
+            ]);
+            exit();
+        }
+
+        http_response_code(404);
+        echo json_encode([
+            'success' => false,
+            'verified' => false,
+            'status' => 'not_found',
+            'simulated' => true,
+            'txn_id' => $txnId,
+            'amount' => $rowAmount,
+            'message' => 'Transaction not found.'
+        ]);
+        exit();
+    }
+
+    // ── (a) Paddle id: API se confirm karo ──
     if (strpos($txnId, 'txn_') === 0) {
-        $ch = curl_init($baseApiUrl . 'transactions/' . $txnId);
+        $ch = curl_init($baseApiUrl . 'transactions/' . rawurlencode($txnId));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
@@ -217,33 +321,74 @@ if ($action === 'verify_transaction') {
         ]);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $resp = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         $parsed = json_decode($resp, true);
         $paddleStatus = $parsed['data']['status'] ?? null;
+        $paddleTotal = $parsed['data']['details']['totals']['total'] ?? null;
+        if ($rowAmount === null && is_numeric($paddleTotal)) {
+            $rowAmount = round(((float)$paddleTotal) / 100, 2);
+        }
+
         if (in_array($paddleStatus, ['completed', 'paid', 'billed'])) {
-            $isCompleted = true;
+            if ($pdo) {
+                try {
+                    $stmt = $pdo->prepare("UPDATE `transactions` SET `status` = 'completed' WHERE `txn_id` = :id OR `paddle_order_id` = :id2");
+                    $stmt->execute([':id' => $txnId, ':id2' => $txnId]);
+                } catch (Exception $e) {
+                    error_log("Failed to update txn in DB: " . $e->getMessage());
+                }
+            }
+            echo json_encode([
+                'success' => true,
+                'verified' => true,
+                'status' => 'completed',
+                'simulated' => false,
+                'txn_id' => $txnId,
+                'amount' => $rowAmount,
+                'message' => 'Payment verified via Paddle.'
+            ]);
+            exit();
         }
-    } else {
-        $isCompleted = true;
-        $paddleStatus = 'completed';
+
+        // Paddle ne explicitly 404 diya → transaction exist hi nahi karti
+        if ($httpCode === 404) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'verified' => false,
+                'status' => 'not_found',
+                'simulated' => false,
+                'txn_id' => $txnId,
+                'amount' => $rowAmount,
+                'message' => 'Transaction not found on Paddle.'
+            ]);
+            exit();
+        }
+
+        echo json_encode([
+            'success' => true,
+            'verified' => false,
+            'status' => 'pending',
+            'simulated' => false,
+            'txn_id' => $txnId,
+            'amount' => $rowAmount,
+            'message' => 'Payment is still pending on Paddle (status: ' . ($paddleStatus ?: 'unknown') . ').'
+        ]);
+        exit();
     }
 
-    $pdo = getDatabaseConnection();
-    if ($pdo && $isCompleted) {
-        try {
-            $stmt = $pdo->prepare("UPDATE `transactions` SET `status` = 'completed' WHERE `txn_id` = :id OR `paddle_order_id` = :id2");
-            $stmt->execute([':id' => $txnId, ':id2' => $txnId]);
-        } catch (Exception $e) {
-            error_log("Failed to update txn in DB: " . $e->getMessage());
-        }
-    }
-
+    // Koi bhi unknown id format → not_found
+    http_response_code(404);
     echo json_encode([
-        'success' => true,
-        'verified' => $isCompleted,
-        'status' => $paddleStatus ?: ($isCompleted ? 'completed' : 'pending'),
-        'txn_id' => $txnId
+        'success' => false,
+        'verified' => false,
+        'status' => 'not_found',
+        'simulated' => false,
+        'txn_id' => $txnId,
+        'amount' => $rowAmount,
+        'message' => 'Unknown transaction id. Expected a Paddle (txn_...) or local (TXN-...) id.'
     ]);
     exit();
 }

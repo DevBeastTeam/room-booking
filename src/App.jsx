@@ -363,7 +363,7 @@ export default function App() {
                 <div className="container">
                   <IncomeGuidelines
                     onNavigateFloorPlans={handleNavigateFloorPlans}
-                    onOpenContactSupport={() => handleOpenScheduleTour()}
+                    onOpenContactSupport={() => setIsContactModalOpen(true)}
                     siteSettings={siteSettings}
                   />
                 </div>
