@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, MapPin, Mail, Clock, Shield, Award } from 'lucide-react';
+import { Phone, MapPin, Clock } from 'lucide-react';
 
 const FacebookIcon = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -26,7 +26,7 @@ export default function Footer({
   onNavigateMap,
   onNavigateFAQ,
   onNavigateContact,
-  onNavigateDashboard,
+  _onNavigateDashboard,
 }) {
   const currentYear = new Date().getFullYear();
 
@@ -332,7 +332,11 @@ export default function Footer({
           </a>
           <a
             href="#accessibility"
-            onClick={(e) => { e.preventDefault(); if (onOpenLegal) onOpenLegal('accessibility'); }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (onOpenLegal) onOpenLegal('accessibility');
+              else window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { pageType: 'accessibility' } }));
+            }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#c9a96e')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#8c8273')}
@@ -372,7 +376,7 @@ export default function Footer({
           </div>
 
           <div>
-            {siteSettings?.copyrightText || '© 2026 Monarch Pass Apartments · Cushman & Wakefield. All Rights Reserved.'}
+            {siteSettings?.copyrightText || `© ${currentYear} Monarch Pass Apartments · Cushman & Wakefield. All Rights Reserved.`}
           </div>
         </div>
       </div>

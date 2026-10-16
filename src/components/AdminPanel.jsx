@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Home, Users, FileText, Wrench, DollarSign, BarChart2, Settings,
   LogOut, CheckCircle, XCircle, Clock,
@@ -7,7 +7,8 @@ import {
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
   Phone, Send, TrendingUp, Palette, Copy, Sparkles, RefreshCw, Wand2,
-  Sun, Moon, Inbox, MessageSquare, UserCircle, ShieldCheck, KeyRound, Activity as ActivityIcon
+  Sun, Moon, Inbox, MessageSquare, ShieldCheck, KeyRound, Activity as ActivityIcon,
+  CreditCard, Repeat
 } from 'lucide-react';
 import {
   getSiteSettings,
@@ -17,7 +18,9 @@ import {
   saveLegalPages,
   getSupportInquiries,
   saveSupportInquiries,
-  addSupportInquiry
+  addSupportInquiry,
+  fetchWorldFirstTransactions,
+  cancelWorldFirstSubscription
 } from '../services/siteDataService';
 import {
   getAllSessions,
@@ -28,7 +31,6 @@ import {
   formatTs,
 } from '../services/chatService';
 import {
-  THEME_CONFIG,
   DEFAULT_DARK_PALETTE,
   DEFAULT_LIGHT_PALETTE,
   applyThemeToDOM,
@@ -485,7 +487,7 @@ function ApplicationsSection() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <THead cols={['ID', 'Applicant', 'Plan', 'Unit', 'Date', 'Income', 'Credit', 'Status']} />
           <tbody>
-            {reviewed.map((app, i) => (
+            {reviewed.map((app) => (
               <tr key={app.id} style={{ borderBottom: `1px solid ${A.border}` }}>
                 <td style={{ padding: '0.8rem 1rem', color: A.muted, fontSize: '0.75rem' }}>{app.id}</td>
                 <td style={{ padding: '0.8rem 1rem', color: A.text, fontWeight: 600, fontSize: '0.85rem' }}>{app.name}</td>
@@ -632,29 +634,548 @@ function AddOnsManagementSection() {
   );
 }
 
-// ── Email Logs Section ─────────────────────────────────────────────────────────
-function EmailLogsSection() {
-  const logs = [
-    { to: 'sarah.johnson@email.com', plan: 'Two Bedroom', unit: '#2104', total: '$967/mo', date: 'Sep 18, 2026 2:34 PM'  },
-    { to: 'david.m@gmail.com',       plan: 'Two Bedroom', unit: 'TBD',   total: '$983/mo', date: 'Sep 17, 2026 5:12 PM'  },
-    { to: 'emily.chen@yahoo.com',    plan: 'One Bedroom', unit: '#3505', total: '$956/mo', date: 'Sep 16, 2026 10:08 AM' },
-    { to: 'k.nguyen@email.com',      plan: 'Four Bedroom', unit: 'TBD',  total: '$1,267/mo', date: 'Sep 16, 2026 1:44 PM' },
-    { to: 'r.thompson@gmail.com',    plan: 'Three Bedroom', unit: '#1002', total: '$1,081/mo', date: 'Sep 15, 2026 9:21 AM' },
-  ];
+// ── WorldFirst Payments & Billing Management Section ─────────────────────────────
+function PaymentsManagementSection() {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [selectedTxn, setSelectedTxn] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [notice, setNotice] = useState(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const res = await fetchWorldFirstTransactions();
+    if (res && res.success && Array.isArray(res.transactions)) {
+      setTransactions(res.transactions);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleCancelSubscription = async (txnId) => {
+    if (!window.confirm(`Are you sure you want to cancel recurring auto-pay for transaction ${txnId}? The tenant will no longer be charged automatically.`)) {
+      return;
+    }
+    setCancellingId(txnId);
+    const res = await cancelWorldFirstSubscription(txnId);
+    setCancellingId(null);
+    if (res && res.success) {
+      setNotice({ type: 'success', text: `Auto-subscription ${txnId} successfully cancelled.` });
+      loadData();
+    } else {
+      setNotice({ type: 'error', text: res?.error || 'Failed to cancel subscription.' });
+    }
+  };
+
+  const filtered = transactions.filter((t) => {
+    if (filter === 'subscription' && t.payment_mode !== 'subscription') return false;
+    if (filter === 'one_time' && t.payment_mode !== 'one_time') return false;
+    if (filter === 'active' && (t.payment_mode !== 'subscription' || t.subscription_status !== 'active')) return false;
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      const matchName = (t.user_name || '').toLowerCase().includes(q);
+      const matchEmail = (t.user_email || '').toLowerCase().includes(q);
+      const matchUnit = (t.unit_number || '').toLowerCase().includes(q);
+      const matchTxn = (t.txn_id || '').toLowerCase().includes(q);
+      const matchItem = (t.item_name || '').toLowerCase().includes(q);
+      if (!matchName && !matchEmail && !matchUnit && !matchTxn && !matchItem) return false;
+    }
+    return true;
+  });
+
+  const totalRevenue = transactions
+    .filter((t) => t.status === 'completed')
+    .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+
+  const activeSubs = transactions.filter(
+    (t) => t.payment_mode === 'subscription' && t.subscription_status === 'active'
+  ).length;
+
+  const completedCount = transactions.filter((t) => t.status === 'completed').length;
+
   return (
     <div>
-      <SectionTitle>Email Logs — Cost Estimate Emails</SectionTitle>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <SectionTitle>WorldFirst Payments & Billing</SectionTitle>
+          <p style={{ color: A.muted, fontSize: '0.82rem', margin: '-0.75rem 0 0' }}>
+            Real-time transaction history, recurring subscriptions, and payment audits via WorldFirst Pay Solution.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.72rem', padding: '0.3rem 0.65rem', borderRadius: 6, backgroundColor: `${A.accent}20`, color: A.accent, border: `1px solid ${A.accent}40`, fontWeight: 700 }}>
+            Sandbox Testing Active
+          </span>
+          <button
+            onClick={loadData}
+            disabled={loading}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              backgroundColor: A.card2,
+              border: `1px solid ${A.border}`,
+              color: A.text,
+              borderRadius: 8,
+              padding: '0.45rem 0.85rem',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {notice && (
+        <div style={{
+          padding: '0.75rem 1rem',
+          borderRadius: 8,
+          marginBottom: '1.25rem',
+          fontSize: '0.82rem',
+          backgroundColor: notice.type === 'success' ? '#22c55e18' : '#ef444418',
+          border: `1px solid ${notice.type === 'success' ? '#22c55e44' : '#ef444444'}`,
+          color: notice.type === 'success' ? A.success : A.danger,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span>{notice.text}</span>
+          <button onClick={() => setNotice(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>×</button>
+        </div>
+      )}
+
+      {/* Metric Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.2rem' }}>
+          <div style={{ color: A.muted, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Revenue</div>
+          <div style={{ color: A.accent, fontSize: '1.75rem', fontWeight: 800, margin: '0.35rem 0 0.15rem' }}>${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div style={{ color: A.muted, fontSize: '0.72rem' }}>Completed charges</div>
+        </div>
+
+        <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.2rem' }}>
+          <div style={{ color: A.muted, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active Auto-Subscriptions</div>
+          <div style={{ color: '#38bdf8', fontSize: '1.75rem', fontWeight: 800, margin: '0.35rem 0 0.15rem' }}>{activeSubs}</div>
+          <div style={{ color: A.muted, fontSize: '0.72rem' }}>3-Day & Monthly recurring cycles</div>
+        </div>
+
+        <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.2rem' }}>
+          <div style={{ color: A.muted, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Completed Payments</div>
+          <div style={{ color: A.success, fontSize: '1.75rem', fontWeight: 800, margin: '0.35rem 0 0.15rem' }}>{completedCount}</div>
+          <div style={{ color: A.muted, fontSize: '0.72rem' }}>Out of {transactions.length} total logs</div>
+        </div>
+
+        <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.2rem' }}>
+          <div style={{ color: A.muted, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Payment Gateway</div>
+          <div style={{ color: A.text, fontSize: '1.1rem', fontWeight: 800, margin: '0.55rem 0 0.15rem' }}>WorldFirst Pay</div>
+          <div style={{ color: A.muted, fontSize: '0.72rem' }}>Ant International · Sandbox</div>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', backgroundColor: A.card, padding: '0.25rem', borderRadius: 9, border: `1px solid ${A.border}` }}>
+          {[
+            { id: 'all', label: `All (${transactions.length})` },
+            { id: 'subscription', label: 'Subscriptions' },
+            { id: 'active', label: `Active Auto-Pay (${activeSubs})` },
+            { id: 'one_time', label: 'One-Time' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id)}
+              style={{
+                border: 'none',
+                borderRadius: 7,
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                backgroundColor: filter === tab.id ? A.accent : 'transparent',
+                color: filter === tab.id ? '#0a0d14' : A.muted,
+                transition: 'all 0.15s'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ position: 'relative', minWidth: 260 }}>
+          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: A.muted }} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tenant, email, unit, txn id…"
+            style={{
+              width: '100%',
+              backgroundColor: A.card,
+              border: `1px solid ${A.border}`,
+              borderRadius: 8,
+              padding: '0.45rem 0.8rem 0.45rem 2rem',
+              color: A.text,
+              fontSize: '0.78rem',
+              outline: 'none'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Transactions Table */}
+      <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem' }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${A.border}`, backgroundColor: 'rgba(255,255,255,0.02)', color: A.muted, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <th style={{ padding: '0.85rem 1rem' }}>Transaction</th>
+                <th style={{ padding: '0.85rem 1rem' }}>Tenant</th>
+                <th style={{ padding: '0.85rem 1rem' }}>Unit / Purpose</th>
+                <th style={{ padding: '0.85rem 1rem' }}>Billing Plan / Cycle</th>
+                <th style={{ padding: '0.85rem 1rem' }}>Amount</th>
+                <th style={{ padding: '0.85rem 1rem' }}>Status</th>
+                <th style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ padding: '2.5rem 1rem', textAlign: 'center', color: A.muted }}>
+                    {loading ? 'WorldFirst ٹرانزیکشنز لوڈ ہو رہی ہیں…' : 'کوئی ٹرانزیکشن نہیں ملی۔'}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((t) => {
+                  const isSub = t.payment_mode === 'subscription';
+                  const isSubActive = isSub && t.subscription_status === 'active';
+                  return (
+                    <tr key={t.txn_id || t.id} style={{ borderBottom: `1px solid ${A.border}`, transition: 'background .15s' }}>
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ color: A.text, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.82rem' }}>
+                          {t.txn_id}
+                        </div>
+                        <div style={{ color: A.muted, fontSize: '0.7rem' }}>
+                          {t.created_at || 'Recently'}
+                        </div>
+                      </td>
+
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ color: A.text, fontWeight: 600 }}>{t.user_name || 'Prospect'}</div>
+                        <div style={{ color: A.muted, fontSize: '0.72rem' }}>{t.user_email}</div>
+                      </td>
+
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ color: A.accent, fontWeight: 700, fontSize: '0.8rem' }}>
+                          {t.unit_number ? `Unit #${t.unit_number}` : 'General Booking'}
+                        </div>
+                        <div style={{ color: A.muted, fontSize: '0.72rem' }}>
+                          {t.item_name || t.item_type}
+                        </div>
+                      </td>
+
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        {isSub ? (
+                          <div>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                              padding: '0.2rem 0.5rem',
+                              borderRadius: 5,
+                              backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                              color: '#38bdf8',
+                              fontSize: '0.7rem',
+                              fontWeight: 700
+                            }}>
+                              <Repeat size={11} /> Auto-Pay ({t.subscription_interval === '3_days' ? 'Every 3 Days' : 'Monthly 30 Days'})
+                            </span>
+                            {t.next_billing_date && (
+                              <div style={{ color: A.muted, fontSize: '0.68rem', marginTop: '0.2rem' }}>
+                                Next: {t.next_billing_date}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '0.2rem 0.5rem',
+                            borderRadius: 5,
+                            backgroundColor: 'rgba(255,255,255,0.06)',
+                            color: A.muted,
+                            fontSize: '0.7rem',
+                            fontWeight: 600
+                          }}>
+                            One-Time Payment
+                          </span>
+                        )}
+                      </td>
+
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        <div style={{ color: A.text, fontWeight: 800, fontSize: '0.9rem' }}>
+                          ${(parseFloat(t.amount) || 0).toFixed(2)}
+                        </div>
+                        <div style={{ color: A.muted, fontSize: '0.68rem' }}>{t.currency || 'USD'}</div>
+                      </td>
+
+                      <td style={{ padding: '0.85rem 1rem' }}>
+                        {t.status === 'completed' ? (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.2rem 0.55rem',
+                            borderRadius: 6,
+                            backgroundColor: '#22c55e18',
+                            color: A.success,
+                            fontSize: '0.72rem',
+                            fontWeight: 700
+                          }}>
+                            <CheckCircle size={11} /> Completed
+                          </span>
+                        ) : (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            padding: '0.2rem 0.55rem',
+                            borderRadius: 6,
+                            backgroundColor: '#f59e0b18',
+                            color: '#f59e0b',
+                            fontSize: '0.72rem',
+                            fontWeight: 700
+                          }}>
+                            <Clock size={11} /> Pending
+                          </span>
+                        )}
+
+                        {isSub && (
+                          <div style={{ marginTop: '0.25rem' }}>
+                            <span style={{
+                              fontSize: '0.66rem',
+                              fontWeight: 700,
+                              color: isSubActive ? '#38bdf8' : A.danger
+                            }}>
+                              • {t.subscription_status?.toUpperCase() || 'NONE'}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
+                      <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                          <button
+                            onClick={() => setSelectedTxn(t)}
+                            style={{
+                              padding: '0.35rem 0.65rem',
+                              backgroundColor: A.card2,
+                              border: `1px solid ${A.border}`,
+                              color: A.text,
+                              borderRadius: 6,
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Details
+                          </button>
+                          {isSubActive && (
+                            <button
+                              onClick={() => handleCancelSubscription(t.txn_id)}
+                              disabled={cancellingId === t.txn_id}
+                              style={{
+                                padding: '0.35rem 0.65rem',
+                                backgroundColor: '#ef444418',
+                                border: '1px solid #ef444444',
+                                color: A.danger,
+                                borderRadius: 6,
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {cancellingId === t.txn_id ? 'Cancelling…' : 'Cancel Auto-Pay'}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Details Modal */}
+      {selectedTxn && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1rem'
+        }}>
+          <div style={{
+            background: A.card,
+            border: `1px solid ${A.border}`,
+            borderRadius: 14,
+            padding: '1.5rem',
+            maxWidth: 520,
+            width: '100%',
+            color: A.text
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: `1px solid ${A.border}`, paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <CreditCard size={18} color={A.accent} />
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>WorldFirst Receipt Details</h3>
+              </div>
+              <button onClick={() => setSelectedTxn(null)} style={{ background: 'none', border: 'none', color: A.muted, cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', fontSize: '0.8rem', marginBottom: '1.25rem' }}>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Transaction ID</div>
+                <div style={{ fontWeight: 700, fontFamily: 'monospace', color: A.accent }}>{selectedTxn.txn_id}</div>
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Order ID</div>
+                <div style={{ fontWeight: 700, fontFamily: 'monospace' }}>{selectedTxn.paddle_order_id || 'N/A'}</div>
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Tenant / Payer</div>
+                <div style={{ fontWeight: 600 }}>{selectedTxn.user_name}</div>
+                <div style={{ color: A.muted, fontSize: '0.72rem' }}>{selectedTxn.user_email}</div>
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Phone</div>
+                <div>{selectedTxn.user_phone || 'None provided'}</div>
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Payment Purpose</div>
+                <div style={{ fontWeight: 600 }}>{selectedTxn.item_name}</div>
+                {selectedTxn.unit_number && <div style={{ color: A.accent, fontSize: '0.72rem' }}>Unit #{selectedTxn.unit_number}</div>}
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Total Amount Paid</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: A.success }}>${(parseFloat(selectedTxn.amount) || 0).toFixed(2)} {selectedTxn.currency || 'USD'}</div>
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Billing Plan</div>
+                <div style={{ fontWeight: 600 }}>
+                  {selectedTxn.payment_mode === 'subscription' ? `Auto-Subscription (${selectedTxn.subscription_interval === '3_days' ? '3 Days Test' : 'Monthly'})` : 'One-Time Payment'}
+                </div>
+              </div>
+              <div>
+                <div style={{ color: A.muted, fontSize: '0.7rem' }}>Subscription Status</div>
+                <div style={{ fontWeight: 700, color: selectedTxn.subscription_status === 'active' ? '#38bdf8' : A.muted }}>
+                  {selectedTxn.subscription_status || 'none'}
+                </div>
+              </div>
+              {selectedTxn.next_billing_date && (
+                <div style={{ gridColumn: 'span 2' }}>
+                  <div style={{ color: A.muted, fontSize: '0.7rem' }}>Next Scheduled Renewal Date</div>
+                  <div style={{ fontWeight: 700, color: '#38bdf8' }}>{selectedTxn.next_billing_date}</div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '0.75rem', borderTop: `1px solid ${A.border}` }}>
+              <button
+                onClick={() => setSelectedTxn(null)}
+                style={{
+                  padding: '0.45rem 1rem',
+                  backgroundColor: A.card2,
+                  border: `1px solid ${A.border}`,
+                  color: A.text,
+                  borderRadius: 7,
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Email Logs Section ─────────────────────────────────────────────────────────
+const DEFAULT_EMAIL_LOGS = [
+  { recipient: 'sarah.johnson@email.com', subject: 'Cost Estimate Breakdown', template: 'estimate', status: 'sent', content_summary: 'Two Bedroom · Unit #2104 · $967/mo', sent_at: 'Sep 18, 2026 2:34 PM' },
+  { recipient: 'david.m@gmail.com',       subject: 'Cost Estimate Breakdown', template: 'estimate', status: 'sent', content_summary: 'Two Bedroom · Unit TBD · $983/mo', sent_at: 'Sep 17, 2026 5:12 PM' },
+  { recipient: 'emily.chen@yahoo.com',    subject: 'Cost Estimate Breakdown', template: 'estimate', status: 'sent', content_summary: 'One Bedroom · Unit #3505 · $956/mo', sent_at: 'Sep 16, 2026 10:08 AM' },
+  { recipient: 'k.nguyen@email.com',      subject: 'Cost Estimate Breakdown', template: 'estimate', status: 'sent', content_summary: 'Four Bedroom · Unit TBD · $1,267/mo', sent_at: 'Sep 16, 2026 1:44 PM' },
+  { recipient: 'r.thompson@gmail.com',    subject: 'Cost Estimate Breakdown', template: 'estimate', status: 'sent', content_summary: 'Three Bedroom · Unit #1002 · $1,081/mo', sent_at: 'Sep 15, 2026 9:21 AM' },
+];
+
+function EmailLogsSection() {
+  const [logs, setLogs] = useState(DEFAULT_EMAIL_LOGS);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/backend/api/email-logs.php', { credentials: 'same-origin' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && data?.success && Array.isArray(data.data) && data.data.length > 0) {
+          setLogs(data.data);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div>
+      <SectionTitle>Email Logs — Automated & Prospect Communications</SectionTitle>
       <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <THead cols={['Recipient', 'Floor Plan', 'Unit', 'Total Estimate', 'Sent At']} />
+          <THead cols={['Recipient', 'Subject / Type', 'Summary / Details', 'Status', 'Sent At']} />
           <tbody>
             {logs.map((l, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${A.border}` }}>
-                <td style={{ padding: '0.85rem 1rem', color: A.info, fontSize: '0.83rem', fontWeight: 500 }}>{l.to}</td>
-                <td style={{ padding: '0.85rem 1rem', color: A.text, fontSize: '0.83rem' }}>{l.plan}</td>
-                <td style={{ padding: '0.85rem 1rem', color: A.muted, fontSize: '0.83rem' }}>{l.unit}</td>
-                <td style={{ padding: '0.85rem 1rem', color: A.accent, fontWeight: 700, fontSize: '0.85rem' }}>{l.total}</td>
-                <td style={{ padding: '0.85rem 1rem', color: A.muted, fontSize: '0.78rem' }}>{l.date}</td>
+              <tr key={l.id || i} style={{ borderBottom: `1px solid ${A.border}` }}>
+                <td style={{ padding: '0.85rem 1rem', color: A.info, fontSize: '0.83rem', fontWeight: 500 }}>
+                  {l.recipient || l.to}
+                </td>
+                <td style={{ padding: '0.85rem 1rem', color: A.text, fontSize: '0.83rem' }}>
+                  {l.subject || l.plan}
+                </td>
+                <td style={{ padding: '0.85rem 1rem', color: A.muted, fontSize: '0.83rem' }}>
+                  {l.content_summary || (l.unit ? `${l.unit} · ${l.total || ''}` : '—')}
+                </td>
+                <td style={{ padding: '0.85rem 1rem' }}>
+                  <span style={{
+                    backgroundColor: `${A.accent}22`,
+                    color: A.accent,
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: 6,
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase'
+                  }}>
+                    {l.status || 'sent'}
+                  </span>
+                </td>
+                <td style={{ padding: '0.85rem 1rem', color: A.muted, fontSize: '0.78rem' }}>
+                  {l.sent_at || l.date}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -680,7 +1201,22 @@ function AdminActivitySection() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/backend/api/auth.php?action=activity', { credentials: 'same-origin' });
+        const json = await res.json();
+        if (!cancelled) {
+          if (json.success) setData(json);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   if (loading) {
     return (
@@ -814,7 +1350,7 @@ function AdminActivitySection() {
 
 // ── Live Chat Section ──────────────────────────────────────────────────────────
 function LiveChatSection() {
-  const [sessions, setSessions] = useState({});
+  const [sessions, setSessions] = useState(() => getAllSessions());
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [search, setSearch] = useState('');
@@ -825,7 +1361,6 @@ function LiveChatSection() {
   };
 
   useEffect(() => {
-    loadSessions();
     const interval = setInterval(loadSessions, 3000);
     const onUpdate = () => loadSessions();
     window.addEventListener('chat-sessions-updated', onUpdate);
@@ -3107,6 +3642,7 @@ const ADMIN_NAV = [
   { id: 'units',        label: 'Units',              Icon: Home        },
   { id: 'applications', label: 'Applications',       Icon: FileText    },
   { id: 'residents',    label: 'Residents',          Icon: Users       },
+  { id: 'payments',     label: 'Payments & Billing', Icon: CreditCard  },
   { id: 'maintenance',  label: 'Maintenance',        Icon: Wrench        },
   { id: 'addons',       label: 'Add-ons',            Icon: Package       },
   { id: 'emaillogs',    label: 'Email Logs',         Icon: Mail          },
@@ -3133,22 +3669,18 @@ export default function AdminPanel({
   const [activeSection, setActiveSection] = useState('overview');
 
   // Tab permission check — super admin sab kuch dekh sakta hai
-  const canAccessTab = (tabId) => {
+  const canAccessTab = useCallback((tabId) => {
     if (tabId === 'overview') return true;
     if (!user) return true; // backward compatibility (no session prop passed)
     if (user.role === 'super_admin') return true;
     return Boolean(user.permissions?.[tabId]);
-  };
+  }, [user]);
+
+  // Agar current active tab ki permission nahi → overview pe fall back (derived during render)
+  const currentSection = canAccessTab(activeSection) ? activeSection : 'overview';
 
   // Sidebar sirf allowed tabs dikhaye
   const visibleNav = ADMIN_NAV.filter((item) => canAccessTab(item.id));
-
-  // Agar current active tab ki permission nahi → overview pe fall back
-  useEffect(() => {
-    if (!canAccessTab(activeSection)) {
-      setActiveSection('overview');
-    }
-  }, [activeSection]);
   const [supportInquiries, setSupportInquiries] = useState(() => propSupportInquiries || getSupportInquiries());
   const [siteSettings, setSiteSettings] = useState(() => propSiteSettings || getSiteSettings());
   const [legalPages, setLegalPages] = useState(() => propLegalPages || getLegalPages());
@@ -3174,6 +3706,7 @@ export default function AdminPanel({
     units:        <UnitsSection />,
     applications: <ApplicationsSection />,
     residents:    <ResidentsSection />,
+    payments:     <PaymentsManagementSection />,
     maintenance:  <AdminMaintenanceSection />,
     addons:       <AddOnsManagementSection />,
     emaillogs:    <EmailLogsSection />,
@@ -3186,10 +3719,9 @@ export default function AdminPanel({
   };
 
 
-  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(() => getTotalUnread());
 
   useEffect(() => {
-    setChatUnreadCount(getTotalUnread());
     const onChatUpdate = () => {
       setChatUnreadCount(getTotalUnread());
     };
@@ -3228,7 +3760,7 @@ export default function AdminPanel({
         {/* Nav */}
         <nav style={{ flex: 1, padding: '0.85rem 0.65rem', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
           {visibleNav.map(({ id, label, Icon }) => {
-            const active = activeSection === id;
+            const active = currentSection === id;
             const isAppBadge = id === 'applications' && pendingCount > 0;
             const isSupportBadge = id === 'support' && newSupportCount > 0;
             const isChatBadge = id === 'livechat' && chatUnreadCount > 0;
@@ -3322,7 +3854,7 @@ export default function AdminPanel({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: `1px solid ${A.border}` }}>
           <div>
             <h1 style={{ color: A.text, fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-              {ADMIN_NAV.find((n) => n.id === activeSection)?.label}
+              {ADMIN_NAV.find((n) => n.id === currentSection)?.label}
             </h1>
             <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0.25rem 0 0' }}>
               {siteSettings?.siteName || 'Monarch Pass Apartments'} · Admin Dashboard
@@ -3360,8 +3892,8 @@ export default function AdminPanel({
         </div>
 
         {/* Section */}
-        <div className="animate-fade-in" key={activeSection}>
-          {sectionMap[activeSection]}
+        <div className="animate-fade-in" key={currentSection}>
+          {sectionMap[currentSection]}
         </div>
       </main>
     </div>

@@ -24,7 +24,7 @@ require_once __DIR__ . '/_auth.php';
 $__raw = file_get_contents('php://input');
 $__parsed = json_decode($__raw, true) ?: [];
 $__action = $__parsed['action'] ?? ($_POST['action'] ?? ($_GET['action'] ?? ''));
-$__isAdminAction = ($_SERVER['REQUEST_METHOD'] === 'GET')
+$__isAdminAction = ($_SERVER['REQUEST_METHOD'] === 'GET' && empty($_GET['unit']))
     || ($__action === 'update_status');
 if ($__isAdminAction) {
     auth_require_permission('maintenance');

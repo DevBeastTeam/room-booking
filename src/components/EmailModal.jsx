@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, Mail, FileText, Check } from 'lucide-react';
+import { X, FileText, Check } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
 
 export default function EmailModal({

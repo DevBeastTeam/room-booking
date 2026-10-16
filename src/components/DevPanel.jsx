@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ShieldCheck, Users, UserCog, KeyRound, Eye, EyeOff, Power, PowerOff,
   LogOut, UserPlus, Activity, Check, X, AlertCircle, ExternalLink, Database,
   Search, RefreshCw, Copy, BarChart3, MousePointerClick, TrendingUp,
-  Eye as EyeIcon, Smartphone, Monitor, Tablet, Download, Sliders, Save,
+  Eye as EyeIcon, Smartphone, Monitor, Tablet, Download, Sliders, Save, Trash2,
+  CreditCard, Repeat
 } from 'lucide-react';
 import DatabaseManager from './DatabaseManager.jsx';
 import '../devpanel.css';
@@ -16,6 +17,7 @@ const TABS = [
   ['units',        'Units'],
   ['applications', 'Applications'],
   ['residents',    'Residents'],
+  ['payments',     'Payments & Billing'],
   ['maintenance',  'Maintenance'],
   ['addons',       'Add-ons'],
   ['emaillogs',    'Email Logs'],
@@ -28,12 +30,13 @@ const TABS = [
 ];
 
 const NAV = [
-  { id: 'overview', label: 'Overview',        Icon: Users },
-  { id: 'analytics', label: 'Analytics',      Icon: BarChart3 },
-  { id: 'menu',      label: 'Admin Menu',     Icon: Sliders },
-  { id: 'admins',   label: 'Admin Accounts',  Icon: UserCog },
-  { id: 'database', label: 'Database Manager', Icon: Database },
-  { id: 'logs',     label: 'Activity Logs',   Icon: Activity },
+  { id: 'overview',     label: 'Overview',               Icon: Users },
+  { id: 'transactions', label: 'WorldFirst Transactions', Icon: CreditCard },
+  { id: 'analytics',    label: 'Analytics',             Icon: BarChart3 },
+  { id: 'menu',         label: 'Admin Menu',            Icon: Sliders },
+  { id: 'admins',       label: 'Admin Accounts',         Icon: UserCog },
+  { id: 'database',     label: 'Database Manager',        Icon: Database },
+  { id: 'logs',         label: 'Activity Logs',          Icon: Activity },
 ];
 
 const S = {
@@ -175,17 +178,18 @@ export default function DevPanel({ user, onLogout }) {
   const [menuEmail, setMenuEmail] = useState('');
   const [menuSaving, setMenuSaving] = useState(false);
 
-  const showNotice = (type, text) => {
+  const noticeTimerRef = useRef(null);
+  const showNotice = useCallback((type, text) => {
     setNotice({ type, text });
-    window.clearTimeout(showNotice._t);
-    showNotice._t = window.setTimeout(() => setNotice(null), 4500);
-  };
+    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current);
+    noticeTimerRef.current = window.setTimeout(() => setNotice(null), 4500);
+  }, []);
 
   const loadAdmins = useCallback(async () => {
     const { ok, data } = await api('admins');
     if (ok) setAdmins(data.admins || []);
     else showNotice('error', data.error || 'Failed to load admins');
-  }, []);
+  }, [showNotice]);
 
   const loadLogs = useCallback(async () => {
     const { ok, data } = await api('logs');
@@ -359,6 +363,11 @@ export default function DevPanel({ user, onLogout }) {
           </div>
         )}
 
+        {/* ═══ WORLDFIRST TRANSACTIONS & SUBSCRIPTIONS ═══ */}
+        {section === 'transactions' && (
+          <DevTransactionsSection />
+        )}
+
         {/* ═══ ANALYTICS ═══ */}
         {section === 'analytics' && (
           <AnalyticsSection />
@@ -442,6 +451,15 @@ export default function DevPanel({ user, onLogout }) {
                                 else showNotice('error', data.error || 'Failed');
                               }} color={a.active ? S.danger : S.success}>
                                 {a.active ? <><PowerOff size={12} /> Disable</> : <><Power size={12} /> Enable</>}
+                              </Btn>
+                              <Btn small onClick={async () => {
+                                if (window.confirm(`Are you sure you want to permanently delete admin "${a.username}" (${a.name})?`)) {
+                                  const { ok, data } = await api('admins_delete', { id: a.id });
+                                  if (ok) { showNotice('success', data.message); loadAdmins(); }
+                                  else showNotice('error', data.error || 'Failed');
+                                }
+                              }} color={S.danger}>
+                                <Trash2 size={12} /> Delete
                               </Btn>
                             </div>
                           </td>
@@ -554,6 +572,309 @@ export default function DevPanel({ user, onLogout }) {
   );
 }
 
+// ── WorldFirst Transactions & Auto-Subscriptions Audit (Developer Control) ─────
+function DevTransactionsSection() {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [selectedTxn, setSelectedTxn] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [actionNotice, setActionNotice] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/backend/api/worldfirst.php?action=history');
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.transactions)) {
+        setTransactions(data.transactions);
+      }
+    } catch (e) {
+      console.error('Failed to load WorldFirst transactions:', e);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const cancelSub = async (txnId) => {
+    if (!window.confirm(`Auto-subscription ${txnId} cancel karein? Recurring debit stop ho jayegi.`)) return;
+    setCancellingId(txnId);
+    try {
+      const res = await fetch('/backend/api/worldfirst.php?action=cancel_subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ txn_id: txnId })
+      });
+      const data = await res.json();
+      if (data && data.success) {
+        setActionNotice({ type: 'success', text: `Subscription ${txnId} successfully cancelled.` });
+        load();
+      } else {
+        setActionNotice({ type: 'danger', text: data.error || 'Cancel failed.' });
+      }
+    } catch {
+      setActionNotice({ type: 'danger', text: 'Network error while cancelling.' });
+    }
+    setCancellingId(null);
+  };
+
+  const filtered = transactions.filter((t) => {
+    if (filter === 'subscription' && t.payment_mode !== 'subscription') return false;
+    if (filter === 'one_time' && t.payment_mode !== 'one_time') return false;
+    if (filter === 'active' && (t.payment_mode !== 'subscription' || t.subscription_status !== 'active')) return false;
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      const matchName = (t.user_name || '').toLowerCase().includes(q);
+      const matchEmail = (t.user_email || '').toLowerCase().includes(q);
+      const matchUnit = (t.unit_number || '').toLowerCase().includes(q);
+      const matchTxn = (t.txn_id || '').toLowerCase().includes(q);
+      const matchItem = (t.item_name || '').toLowerCase().includes(q);
+      if (!matchName && !matchEmail && !matchUnit && !matchTxn && !matchItem) return false;
+    }
+    return true;
+  });
+
+  const totalRev = transactions
+    .filter(t => t.status === 'completed')
+    .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+
+  const activeSubs = transactions.filter(
+    t => t.payment_mode === 'subscription' && t.subscription_status === 'active'
+  ).length;
+
+  return (
+    <div style={{ animation: 'devFadeIn .25s ease' }}>
+      {/* Top Banner with Quick Actions & Test Cards */}
+      <div className="dev-panel" style={{ marginBottom: '1.25rem', borderColor: `${S.accent}44` }}>
+        <div className="dev-panel-head">
+          <div>
+            <h3><CreditCard size={16} color={S.accent} /> WorldFirst Pay Solution (Sandbox Gateway)</h3>
+            <p style={{ margin: '0.2rem 0 0', color: S.muted, fontSize: '0.74rem' }}>
+              Real-time audit of all one-time payments and recurring auto-pay subscriptions.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Btn
+              small
+              onClick={() => window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', { detail: { item: 'holding_deposit', unit: '204', amount: 250 } }))}
+              color={S.accent}
+            >
+              <CreditCard size={13} /> Test Checkout Modal
+            </Btn>
+            <Btn small onClick={load} color={S.info}>
+              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Refresh
+            </Btn>
+          </div>
+        </div>
+
+        <div className="dev-panel-body" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', background: 'rgba(245,158,11,0.04)', borderRadius: 8, padding: '0.85rem 1rem', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '0.75rem' }}>
+            <span style={{ color: S.muted }}>Mode: </span>
+            <span style={{ color: S.accent, fontWeight: 700 }}>Sandbox (Mock simulation active)</span>
+          </div>
+          <div style={{ fontSize: '0.75rem' }}>
+            <span style={{ color: S.muted }}>Test Visa: </span>
+            <span style={{ color: S.text, fontFamily: 'monospace', fontWeight: 600 }}>4000 0012 3456 0001 (any future MM/YY, CVC: 123)</span>
+          </div>
+          <div style={{ fontSize: '0.75rem' }}>
+            <span style={{ color: S.muted }}>Client ID: </span>
+            <span style={{ color: S.text, fontFamily: 'monospace' }}>wf_client_sandbox_monarch2026</span>
+          </div>
+        </div>
+      </div>
+
+      {actionNotice && (
+        <div className="dev-notice" style={{
+          color: actionNotice.type === 'success' ? S.success : S.danger,
+          borderColor: actionNotice.type === 'success' ? `${S.success}44` : `${S.danger}44`,
+          background: actionNotice.type === 'success' ? `${S.success}12` : `${S.danger}12`,
+          marginBottom: '1rem'
+        }}>
+          {actionNotice.text}
+          <button onClick={() => setActionNotice(null)} style={{ background: 'none', border: 'none', color: 'inherit', marginLeft: 'auto', cursor: 'pointer' }}>×</button>
+        </div>
+      )}
+
+      {/* Stats Cards */}
+      <div className="dev-stats" style={{ marginBottom: '1.25rem' }}>
+        <StatCard label="Total Collected" value={`$${totalRev.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} color={S.accent} Icon={CreditCard} />
+        <StatCard label="Active Subscriptions" value={activeSubs} color={S.teal} Icon={Repeat} />
+        <StatCard label="Total Transactions" value={transactions.length} color={S.info} Icon={BarChart3} />
+        <StatCard label="One-Time Payments" value={transactions.filter(t => t.payment_mode === 'one_time').length} color={S.success} Icon={Check} />
+      </div>
+
+      {/* Toolbar */}
+      <div className="dev-toolbar" style={{ margin: '0 0 1rem', padding: 0 }}>
+        <div className="dev-search">
+          <Search size={15} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tenant name, email, unit, txn id…"
+          />
+        </div>
+        <select value={filter} onChange={(e) => setFilter(e.target.value)} className="dev-select">
+          <option value="all">All Transactions ({transactions.length})</option>
+          <option value="subscription">Subscriptions Only</option>
+          <option value="active">Active Auto-Pay ({activeSubs})</option>
+          <option value="one_time">One-Time Only</option>
+        </select>
+      </div>
+
+      {/* Transactions Table */}
+      <div className="dev-table-wrap">
+        <table className="dev-table">
+          <thead>
+            <tr>
+              <th>Txn ID / Time</th>
+              <th>Tenant / Email</th>
+              <th>Unit / Item</th>
+              <th>Billing Mode / Plan</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th style={{ textAlign: 'right' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: S.muted }}>
+                  {loading ? 'WorldFirst records load ho rahe hain…' : 'Koi transaction record nahi mila.'}
+                </td>
+              </tr>
+            ) : (
+              filtered.map((t) => {
+                const isSub = t.payment_mode === 'subscription';
+                const isSubActive = isSub && t.subscription_status === 'active';
+                return (
+                  <tr key={t.txn_id || t.id} className="dev-table-row">
+                    <td>
+                      <div style={{ color: S.accent, fontWeight: 700, fontFamily: 'monospace' }}>{t.txn_id}</div>
+                      <div className="dev-cell-sub">{t.created_at || 'Recently'}</div>
+                    </td>
+                    <td>
+                      <div style={{ color: S.text, fontWeight: 600 }}>{t.user_name || 'Prospect'}</div>
+                      <div className="dev-cell-sub">{t.user_email}</div>
+                    </td>
+                    <td>
+                      <div style={{ color: S.text, fontWeight: 600 }}>{t.unit_number ? `Unit #${t.unit_number}` : 'Deposit'}</div>
+                      <div className="dev-cell-sub">{t.item_name || t.item_type}</div>
+                    </td>
+                    <td>
+                      {isSub ? (
+                        <div>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: 4,
+                            backgroundColor: 'rgba(94, 196, 182, 0.15)',
+                            color: S.teal,
+                            fontSize: '0.72rem',
+                            fontWeight: 700
+                          }}>
+                            <Repeat size={11} /> Auto-Pay ({t.subscription_interval === '3_days' ? '3-Day Test' : 'Monthly'})
+                          </span>
+                          {t.next_billing_date && (
+                            <div className="dev-cell-sub" style={{ marginTop: '0.2rem' }}>
+                              Next: {t.next_billing_date}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: 4,
+                          backgroundColor: 'rgba(255,255,255,0.06)',
+                          color: S.muted,
+                          fontSize: '0.72rem',
+                          fontWeight: 600
+                        }}>
+                          One-Time
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ color: S.text, fontWeight: 700 }}>${(parseFloat(t.amount) || 0).toFixed(2)}</div>
+                      <div className="dev-cell-sub">{t.currency || 'USD'}</div>
+                    </td>
+                    <td>
+                      {t.status === 'completed' ? (
+                        <span className="dev-badge dev-badge-active">Completed</span>
+                      ) : (
+                        <span className="dev-badge dev-badge-pending">Pending</span>
+                      )}
+                      {isSub && (
+                        <div style={{ marginTop: '0.2rem' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, color: isSubActive ? S.teal : S.danger }}>
+                            • {t.subscription_status?.toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
+                        <Btn small onClick={() => setSelectedTxn(t)} color={S.info}>JSON</Btn>
+                        {isSubActive && (
+                          <Btn
+                            small
+                            onClick={() => cancelSub(t.txn_id)}
+                            disabled={cancellingId === t.txn_id}
+                            color={S.danger}
+                          >
+                            {cancellingId === t.txn_id ? 'Cancelling…' : 'Cancel Auto-Pay'}
+                          </Btn>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* JSON Payload Inspector Modal */}
+      {selectedTxn && (
+        <Modal title="WorldFirst Transaction Payload" subtitle={`Transaction: ${selectedTxn.txn_id}`} onClose={() => setSelectedTxn(null)} width={640}>
+          <div style={{ marginBottom: '1rem' }}>
+            <pre style={{
+              background: '#070a10',
+              padding: '1rem',
+              borderRadius: 8,
+              border: `1px solid ${S.border}`,
+              color: '#38bdf8',
+              fontFamily: 'monospace',
+              fontSize: '0.75rem',
+              maxHeight: 360,
+              overflowY: 'auto'
+            }}>
+              {JSON.stringify(selectedTxn, null, 2)}
+            </pre>
+          </div>
+          <div className="dev-modal-foot">
+            <Btn onClick={() => {
+              navigator.clipboard?.writeText(JSON.stringify(selectedTxn, null, 2));
+              setActionNotice({ type: 'success', text: 'Transaction JSON copied to clipboard.' });
+            }} color={S.accent}>
+              <Copy size={13} /> Copy JSON
+            </Btn>
+            <Btn onClick={() => setSelectedTxn(null)} color={S.muted}>Close</Btn>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
 // ── Analytics Section (visitors, buy clicks, charts, A-Z log) ──────────────────
 function AnalyticsSection() {
   const [range, setRange] = useState('30'); // 7 | 30 | 90 | 365 | all
@@ -565,17 +886,12 @@ function AnalyticsSection() {
   const [logType, setLogType] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const dateRange = () => {
-    if (range === 'all') return { from: '2020-01-01', to: new Date().toISOString().slice(0, 10) };
-    return {
-      from: new Date(Date.now() - Number(range) * 86400000).toISOString().slice(0, 10),
-      to: new Date().toISOString().slice(0, 10),
-    };
-  };
-
   const load = useCallback(async () => {
     setLoading(true);
-    const { from, to } = dateRange();
+    const to = new Date().toISOString().slice(0, 10);
+    const from = range === 'all'
+      ? '2020-01-01'
+      : new Date(Date.now() - Number(range) * 86400000).toISOString().slice(0, 10);
     try {
       const [statsRes, eventsRes] = await Promise.all([
         fetch(`/backend/api/analytics.php?action=stats&from=${from}&to=${to}&type=${typeFilter}`, { credentials: 'same-origin' }),
@@ -620,7 +936,8 @@ function AnalyticsSection() {
               <option value="">All Events</option>
               <option value="pageview">Page Views</option>
               <option value="buy_click">Buy Button Clicks</option>
-              <option value="paddle_started">Payments Started</option>
+              <option value="worldfirst_payment_started">WorldFirst Payments Started</option>
+              <option value="paddle_started">Legacy Payments Started</option>
               <option value="tour_scheduled">Tours Scheduled</option>
               <option value="inquiry">Inquiries</option>
             </select>
@@ -721,7 +1038,8 @@ function AnalyticsSection() {
             <option value="">All Types</option>
             <option value="pageview">Page Views</option>
             <option value="buy_click">Buy Clicks</option>
-            <option value="paddle_started">Payments</option>
+            <option value="worldfirst_payment_started">WorldFirst Payments</option>
+            <option value="paddle_started">Legacy Payments</option>
             <option value="tour_scheduled">Tours</option>
             <option value="inquiry">Inquiries</option>
           </select>

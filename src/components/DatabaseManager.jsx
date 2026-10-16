@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Database, Trash2, Download, Upload, RefreshCw, CheckSquare,
   Square, Zap, AlertTriangle, CheckCircle, XCircle, BarChart2,
@@ -204,17 +204,29 @@ export default function DatabaseManager({ onBack, embedded = false }) {
   };
 
   // Fetch live row counts from DB
-  const fetchStats = useCallback(async () => {
+  const fetchStats = async () => {
     try {
-      const res = await fetch(`${API}?action=stats`);
+      const res = await fetch(`${API}?action=stats`, { credentials: 'same-origin' });
       const json = await res.json();
       if (json.success) setCounts(json.counts);
     } catch {
       // MySQL not running – ignore
     }
-  }, []);
+  };
 
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API}?action=stats`, { credentials: 'same-origin' });
+        const json = await res.json();
+        if (!cancelled && json.success) setCounts(json.counts);
+      } catch {
+        // MySQL not running – ignore
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const toggleTable = (key) => {
     setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -236,6 +248,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
           const res = await fetch(`${API}?action=seed`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
             body: JSON.stringify({ tables: selected }),
           });
           const json = await res.json();
@@ -264,6 +277,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
           const res = await fetch(`${API}?action=clear`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
             body: JSON.stringify({ tables: selected }),
           });
           const json = await res.json();
@@ -287,6 +301,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
       const res = await fetch(`${API}?action=export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ tables: selected }),
       });
       const json = await res.json();
@@ -317,6 +332,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
       const res = await fetch(`${API}?action=import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ data: parsed }),
       });
       const json = await res.json();

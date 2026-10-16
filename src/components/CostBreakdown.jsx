@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Info, HelpCircle, DollarSign, ShieldCheck, Home } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import FloorPlanViewer from './FloorPlanViewer';
 
 export default function CostBreakdown({
@@ -378,7 +378,7 @@ export default function CostBreakdown({
         </button>
         <button
           onClick={() => {
-            window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+            window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
               detail: {
                 item: 'holding_deposit',
                 amount: 250.00,

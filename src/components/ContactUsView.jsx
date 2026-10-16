@@ -7,7 +7,6 @@ import {
   Send, 
   CheckCircle2, 
   Calendar, 
-  ShieldCheck, 
   Building,
   Sparkles
 } from 'lucide-react';

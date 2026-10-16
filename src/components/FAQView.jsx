@@ -3,10 +3,7 @@ import {
   HelpCircle, 
   ChevronDown, 
   ChevronUp, 
-  Search, 
-  ShieldCheck, 
-  Home, 
-  DollarSign, 
+  Search,
   Calendar, 
   Phone,
   Sparkles
@@ -100,10 +97,9 @@ const FAQ_DATA = [
 ];
 
 export default function FAQView({
-  onNavigateGuidelines,
+  _onNavigateGuidelines,
   onOpenScheduleTour,
 }) {
-  const handleGuidelines = onNavigateGuidelines || (() => { window.location.href = '/income-guidelines'; });
   const handleSchedule = onOpenScheduleTour || ((bed = '', unit = '') => { window.dispatchEvent(new CustomEvent('open-schedule-tour', { detail: { bed, unit } })); });
 
   const [activeCategory, setActiveCategory] = useState('all');

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Dog, Calendar, Key, Sparkles, ChevronDown, ChevronUp, Plus, Minus, Check } from 'lucide-react';
+import { Users, Dog, Key, Sparkles, ChevronDown, ChevronUp, Plus, Minus } from 'lucide-react';
 
 export default function UnitControls({
   floorPlans,

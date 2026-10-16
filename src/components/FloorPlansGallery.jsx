@@ -1,16 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  Calendar,
-  Search,
   ChevronDown,
   ChevronRight,
   Maximize2,
-  X,
-  CheckCircle,
-  Home,
-  SlidersHorizontal,
-  ArrowRight,
-  Sparkles
+  X
 } from 'lucide-react';
 
 export const ALL_FLOOR_PLANS = [
@@ -115,21 +108,22 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
   const [selectedBathrooms, setSelectedBathrooms] = useState('all');
   const [selectedUnitSize, setSelectedUnitSize] = useState('all');
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
-  const [moveInFilterDate, setMoveInFilterDate] = useState('');
+  const [moveInFilterDate, setMoveInFilterDate] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const stored = sessionStorage.getItem('mb_move_in_date');
+      if (stored && !isNaN(Date.parse(stored))) {
+        sessionStorage.removeItem('mb_move_in_date');
+        return stored;
+      }
+    } catch { /* ignore */ }
+    return '';
+  });
   const [apartmentNumberQuery, setApartmentNumberQuery] = useState('');
 
   // Modals & Expand States
   const [activeLayoutModal, setActiveLayoutModal] = useState(null); // floorPlan object for zoom
   const [expandedAvailability, setExpandedAvailability] = useState(null); // floorPlan ID
-
-  // Initialize move-in filter from a homepage quick-search (mb_move_in_date)
-  useEffect(() => {
-    const stored = sessionStorage.getItem('mb_move_in_date');
-    sessionStorage.removeItem('mb_move_in_date');
-    if (stored && !isNaN(Date.parse(stored))) {
-      setMoveInFilterDate(stored);
-    }
-  }, []);
 
   const handleClearFilters = () => {
     setSelectedBedrooms('all');
@@ -622,7 +616,7 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
                       </button>
                       <button
                         onClick={() => {
-                          window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+                          window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
                             detail: {
                               item: 'holding_deposit',
                               unit: u.unit,

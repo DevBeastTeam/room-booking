@@ -8,7 +8,6 @@ import {
   ChevronDown,
   X,
   Send,
-  User,
   Clock,
   Phone,
   CheckCircle,
@@ -23,7 +22,6 @@ import {
 } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
 import {
-  getOrCreateUserId,
   getUserInfo,
   setUserInfo,
   getSession,
@@ -37,12 +35,32 @@ export default function Widgets({ onOpenScheduleTour }) {
   const [activeModal, setActiveModal] = useState(null); // 'chat', 'tour', 'email', 'call', 'accessibility'
 
   // ── Real Chat State (Admin & Customer Live Chat) ──────────────────────────
-  const [chatMessages, setChatMessages] = useState([]);
+  const [chatUser, setChatUser] = useState(() => {
+    if (typeof window === 'undefined') return { userId: '', displayName: 'Guest', email: '', isLoggedIn: false };
+    try { return getUserInfo(); } catch { return { userId: '', displayName: 'Guest', email: '', isLoggedIn: false }; }
+  });
+  const [chatMessages, setChatMessages] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const info = getUserInfo();
+      ensureSession(info.userId, info.displayName, info.email);
+      const session = getSession(info.userId);
+      return session?.messages || [];
+    } catch { return []; }
+  });
   const [inputMessage, setInputMessage] = useState('');
-  const [chatUser, setChatUser] = useState({ userId: '', displayName: 'Guest', email: '', isLoggedIn: false });
   const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
+  const [editName, setEditName] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const info = getUserInfo();
+      return info.displayName.startsWith('Guest') ? '' : info.displayName;
+    } catch { return ''; }
+  });
+  const [editEmail, setEditEmail] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try { return getUserInfo().email || ''; } catch { return ''; }
+  });
   const messagesEndRef = useRef(null);
 
   // Sync user info and load conversation
@@ -57,16 +75,6 @@ export default function Widgets({ onOpenScheduleTour }) {
       setChatMessages(session.messages);
     }
   };
-
-  useEffect(() => {
-    syncChatState();
-  }, []);
-
-  useEffect(() => {
-    if (activeModal === 'chat') {
-      syncChatState();
-    }
-  }, [activeModal]);
 
   // Real-time listener and polling for admin replies
   useEffect(() => {
@@ -361,7 +369,7 @@ export default function Widgets({ onOpenScheduleTour }) {
             >
               {/* 1. Chat with us (Clean unified design, no artificial gold background) */}
               <button
-                onClick={() => setActiveModal('chat')}
+                onClick={() => { syncChatState(); setActiveModal('chat'); }}
                 style={{
                   backgroundColor: 'transparent',
                   color: 'var(--text-main, #f4efe6)',

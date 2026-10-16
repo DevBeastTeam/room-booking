@@ -1,0 +1,16 @@
+# ==============================================================================
+# Monarch Pass Apartments - Migrations Security Protection
+# Deny direct web access to .sql schema files
+# ==============================================================================
+
+Options -Indexes
+
+<FilesMatch "\.sql$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

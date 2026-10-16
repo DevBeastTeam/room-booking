@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Users, 
   CheckCircle2, 
-  HelpCircle, 
-  Phone, 
-  FileText, 
   ArrowRight, 
   ShieldCheck, 
   ChevronDown, 
   ChevronUp, 
   Calculator, 
-  DollarSign, 
-  Info,
-  Calendar,
-  Sparkles,
-  Award
+  Sparkles
 } from 'lucide-react';
 
 export const INCOME_LIMITS = [

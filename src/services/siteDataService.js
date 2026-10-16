@@ -333,41 +333,78 @@ export async function fetchFloorPlansDB() {
   }
 }
 
-// ── Paddle Payment API Helpers ────────────────────────────────────────────────
-export async function fetchPaddleConfig() {
+// ── WorldFirst Payment Gateway API Helpers ─────────────────────────────────────
+export async function fetchWorldFirstConfig() {
   if (typeof fetch === 'undefined') return null;
   try {
-    const res = await fetch('/backend/api/paddle.php?action=config');
+    const res = await fetch('/backend/api/worldfirst.php?action=config');
     return await res.json();
   } catch (err) {
-    console.warn('Paddle config note:', err);
+    console.warn('WorldFirst config note:', err);
     return null;
   }
 }
 
-export async function createPaddleTransaction(paymentData) {
+export async function createWorldFirstPayment(paymentData) {
   if (typeof fetch === 'undefined') return null;
   try {
-    const res = await fetch('/backend/api/paddle.php?action=create_transaction', {
+    const res = await fetch('/backend/api/worldfirst.php?action=create_payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(paymentData)
     });
     return await res.json();
   } catch (err) {
-    console.error('Paddle transaction error:', err);
+    console.error('WorldFirst payment error:', err);
     return null;
   }
 }
 
-export async function verifyPaddleTransaction(txnId) {
+export async function verifyWorldFirstPayment(txnId) {
   if (typeof fetch === 'undefined') return null;
   try {
-    const res = await fetch(`/backend/api/paddle.php?action=verify_transaction&txn_id=${encodeURIComponent(txnId)}`);
+    const res = await fetch(`/backend/api/worldfirst.php?action=verify_payment&txn_id=${encodeURIComponent(txnId)}`);
     return await res.json();
   } catch (err) {
-    console.error('Paddle verify error:', err);
+    console.error('WorldFirst verify error:', err);
     return null;
   }
 }
+
+export async function cancelWorldFirstSubscription(txnId) {
+  if (typeof fetch === 'undefined') return null;
+  try {
+    const res = await fetch(`/backend/api/worldfirst.php?action=cancel_subscription&txn_id=${encodeURIComponent(txnId)}`);
+    return await res.json();
+  } catch (err) {
+    console.error('WorldFirst cancel subscription error:', err);
+    return null;
+  }
+}
+
+export async function fetchWorldFirstTransactions(filters = {}) {
+  if (typeof fetch === 'undefined') return { success: false, transactions: [] };
+  try {
+    const params = new URLSearchParams();
+    params.set('action', 'history');
+    if (filters.email) params.set('email', filters.email);
+    if (filters.status) params.set('status', filters.status);
+    if (filters.mode) params.set('mode', filters.mode);
+
+    const token = typeof localStorage !== 'undefined' ? (localStorage.getItem('admin_token') || localStorage.getItem('dev_token')) : null;
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`/backend/api/worldfirst.php?${params.toString()}`, { headers });
+    return await res.json();
+  } catch (err) {
+    console.error('WorldFirst fetch transactions error:', err);
+    return { success: false, transactions: [] };
+  }
+}
+
+// Backwards compatibility aliases
+export const fetchPaddleConfig = fetchWorldFirstConfig;
+export const createPaddleTransaction = createWorldFirstPayment;
+export const verifyPaddleTransaction = verifyWorldFirstPayment;
 

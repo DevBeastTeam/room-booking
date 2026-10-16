@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Database, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import DatabaseManager from './DatabaseManager.jsx';
 import AdminGate from './AdminGate.jsx';
 
@@ -70,9 +70,31 @@ export default function DatabaseGate() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const existing = getSession();
-    if (existing) setSession(existing);
-    setReady(true);
+    let cancelled = false;
+    (async () => {
+      const existing = getSession();
+      if (existing) setSession(existing);
+      try {
+        const res = await fetch('/backend/api/auth.php?action=session', { credentials: 'same-origin' });
+        const json = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (res.ok && json.authenticated && json.user) {
+          try {
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(json.user));
+          } catch { /* ignore */ }
+          setSession(json.user);
+        } else {
+          try {
+            sessionStorage.removeItem(SESSION_KEY);
+          } catch { /* ignore */ }
+          setSession(null);
+        }
+      } catch {
+        // network error, keep cached session if present
+      }
+      setReady(true);
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // Re-check on window focus

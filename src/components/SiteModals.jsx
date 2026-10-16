@@ -4,14 +4,14 @@ import ScheduleTourModal from './ScheduleTourModal';
 import LegalModal from './LegalModal';
 import SummerSavingsModal from './SummerSavingsModal';
 import Widgets from './Widgets';
-import PaddleCheckoutModal from './PaddleCheckoutModal';
+import WorldFirstCheckoutModal from './WorldFirstCheckoutModal';
 import { getSiteSettings, getLegalPages, getSupportInquiries } from '../services/siteDataService';
 import { trackEvent } from '../services/analytics.js';
 
 export default function SiteModals({ minimal = false }) {
   const [siteSettings, setSiteSettings] = useState(() => getSiteSettings());
   const [legalPages, setLegalPages] = useState(() => getLegalPages());
-  const [supportInquiries, setSupportInquiries] = useState(() => getSupportInquiries());
+  const [_supportInquiries, setSupportInquiries] = useState(() => getSupportInquiries());
 
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -58,6 +58,7 @@ export default function SiteModals({ minimal = false }) {
     window.addEventListener('open-schedule-tour', handleOpenSchedule);
     window.addEventListener('open-contact-modal', handleOpenContact);
     window.addEventListener('open-legal-modal', handleOpenLegal);
+    window.addEventListener('open-worldfirst-checkout', handleOpenPaddle);
     window.addEventListener('open-paddle-checkout', handleOpenPaddle);
     window.addEventListener('site-settings-updated', onSettingsUpdate);
     window.addEventListener('legal-pages-updated', onLegalUpdate);
@@ -67,6 +68,7 @@ export default function SiteModals({ minimal = false }) {
       window.removeEventListener('open-schedule-tour', handleOpenSchedule);
       window.removeEventListener('open-contact-modal', handleOpenContact);
       window.removeEventListener('open-legal-modal', handleOpenLegal);
+      window.removeEventListener('open-worldfirst-checkout', handleOpenPaddle);
       window.removeEventListener('open-paddle-checkout', handleOpenPaddle);
       window.removeEventListener('site-settings-updated', onSettingsUpdate);
       window.removeEventListener('legal-pages-updated', onLegalUpdate);
@@ -112,7 +114,7 @@ export default function SiteModals({ minimal = false }) {
         legalPages={legalPages}
       />
 
-      <PaddleCheckoutModal
+      <WorldFirstCheckoutModal
         isOpen={isPaddleOpen}
         onClose={() => setIsPaddleOpen(false)}
         initialItem={paddlePreset.item}

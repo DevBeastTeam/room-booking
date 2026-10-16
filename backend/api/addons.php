@@ -16,8 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
 
-// Add-ons tab permission
-auth_require_permission('addons');
+// Public add-ons catalog read ho sakti hai, lekin edits 'addons' permission chahti hain
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    auth_require_permission('addons');
+}
 $pdo = getDatabaseConnection();
 
 if (!$pdo) {

@@ -18,8 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
 
-// Theme & Colors tab permission
-auth_require_permission('theme');
+// Public site theme read ho sakti hai, lekin edits 'theme' permission chahti hain
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    auth_require_permission('theme');
+}
 
 $pdo = getDatabaseConnection();
 

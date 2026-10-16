@@ -7,19 +7,12 @@ import {
   ChevronDown, 
   LayoutDashboard, 
   ShieldCheck, 
-  Camera, 
-  Layers, 
   MapPin, 
   Calendar, 
-  HelpCircle,
-  Home,
-  Sparkles,
-  Compass,
-  CreditCard,
-  ArrowRight,
-  ExternalLink,
-  Sun,
-  Moon
+  CreditCard, 
+  ArrowRight, 
+  Sun, 
+  Moon 
 } from 'lucide-react';
 import { getThemeMode, toggleThemeMode } from '../config/themeConfig';
 
@@ -49,7 +42,7 @@ export default function Header({
   onNavigateDashboard,
   onNavigateAdmin,
   siteSettings,
-  onOpenContactSupport,
+  _onOpenContactSupport,
   onOpenScheduleTour,
 }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -333,7 +326,7 @@ export default function Header({
                   <button
                     onClick={() => {
                       setIsLoginOpen(false);
-                      window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+                      window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
                         detail: { item: 'holding_deposit', amount: 250.00 }
                       }));
                     }}

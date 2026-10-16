@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ChevronDown, CheckCircle2, Calendar, Clock, Sparkles } from 'lucide-react';
+import { X, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
 import { trackEvent } from '../services/analytics.js';
 

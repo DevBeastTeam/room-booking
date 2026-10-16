@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Lock, CreditCard, CheckCircle2, AlertCircle, X, ExternalLink,
-  Building, User, Mail, Phone, ArrowRight, RefreshCw, Sparkles, Check
+  Building, User, RefreshCw, Sparkles, Check
 } from 'lucide-react';
 import { createPaddleTransaction, verifyPaddleTransaction, fetchPaddleConfig } from '../services/siteDataService';
 import { trackEvent } from '../services/analytics.js';
@@ -57,16 +57,14 @@ export default function PaddleCheckoutModal({
 
   // Sync props when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+    const timer = setTimeout(() => {
       if (initialItem) setSelectedItem(initialItem);
       setUnitNumber(initialUnit || '');
       setCustomAmount(initialAmount ? String(initialAmount) : '');
-      if (customerPreset?.name) setName(customerPreset.name);
-      else setName('');
-      if (customerPreset?.email) setEmail(customerPreset.email);
-      else setEmail('');
-      if (customerPreset?.phone) setPhone(customerPreset.phone);
-      else setPhone('');
+      setName(customerPreset?.name || '');
+      setEmail(customerPreset?.email || '');
+      setPhone(customerPreset?.phone || '');
       setIsSuccess(false);
       setActiveTransaction(null);
       setErrorMessage('');
@@ -75,7 +73,8 @@ export default function PaddleCheckoutModal({
       fetchPaddleConfig().then(cfg => {
         if (cfg) setPaddleConfig(cfg);
       });
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [isOpen, initialItem, initialUnit, initialAmount, customerPreset]);
 
   if (!isOpen) return null;

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Maximize2, Layers, Compass } from 'lucide-react';
 
 export default function FloorPlanViewer({ floorPlan, unitNumber }) {
   const [activeTab, setActiveTab] = useState('2d'); // '2d', 'dimensions'

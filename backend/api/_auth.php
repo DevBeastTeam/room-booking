@@ -20,6 +20,13 @@
 
 require_once dirname(__DIR__) . '/config/database.php';
 
+// Set application timezone (default Asia/Karachi or from env)
+$appEnvVars = function_exists('loadEnvFile') ? loadEnvFile(dirname(__DIR__) . '/config/.env') : [];
+$appTz = $appEnvVars['APP_TIMEZONE'] ?? ($_SERVER['APP_TIMEZONE'] ?? 'Asia/Karachi');
+if (!empty($appTz)) {
+    @date_default_timezone_set($appTz);
+}
+
 // ── Tab permission catalog (mirror of AdminPanel sidebar tabs) ────────────────
 // Note: 'database' yahan nahi hai — Database Manager sirf dev panel (super
 // admin) ke liye hai, client admin ke sidebar mein kabhi nahi dikhta.
@@ -52,10 +59,13 @@ const AUTH_ROLES = [
 ];
 
 if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
     session_set_cookie_params([
         'httponly' => true,
         'samesite' => 'Lax',
         'path'     => '/',
+        'secure'   => $isHttps,
     ]);
     session_start();
 }
@@ -261,16 +271,38 @@ function auth_public_user($u) {
 
 // ── Session ────────────────────────────────────────────────────────────────────
 
-/** Developer (super admin) password = aaj ki tareekh (day of month).
- *  e.g. aaj 12 tareekh hai → password "12", kal "13". */
+/** Developer (super admin) password = aaj ki tareekh (day of month, e.g. 17). */
 function auth_dev_password() {
     return (string)(int)date('j'); // day of month without leading zero
 }
 
+/** Returns all accepted date-based variations to prevent timezone/padding lockouts */
+function auth_dev_valid_passwords() {
+    $candidates = [];
+    // 1. Current configured timezone (Asia/Karachi or APP_TIMEZONE)
+    $candidates[] = (string)(int)date('j');
+    $candidates[] = date('d'); // e.g. "07" or "17"
+
+    // 2. UTC day
+    $candidates[] = (string)(int)gmdate('j');
+    $candidates[] = gmdate('d');
+
+    // 3. America/Chicago day (property local timezone)
+    try {
+        $dtProp = new DateTime('now', new DateTimeZone('America/Chicago'));
+        $candidates[] = (string)(int)$dtProp->format('j');
+        $candidates[] = $dtProp->format('d');
+    } catch (Exception $e) {}
+
+    return array_values(array_unique($candidates));
+}
+
 function auth_is_dev_login($username, $password) {
     $u = strtolower(trim((string)$username));
-    $isDevUser = ($u === 'dev' || $u === 'dev@gmail.com');
-    return $isDevUser && (string)$password === auth_dev_password();
+    $isDevUser = ($u === 'dev' || $u === 'dev@gmail.com' || $u === 'dev@monarchpass.com');
+    if (!$isDevUser) return false;
+    $valid = auth_dev_valid_passwords();
+    return in_array(trim((string)$password), $valid, true);
 }
 
 /** Super admin user record (single developer account) */
@@ -291,7 +323,7 @@ function auth_current_user() {
     // date change (midnight ke baad dobara login karna parega)
     if ($u['role'] === 'super_admin') {
         $loginDay = $_SESSION['dev_login_day'] ?? null;
-        if ($loginDay === null || $loginDay !== auth_dev_password()) {
+        if ($loginDay === null || !in_array((string)$loginDay, auth_dev_valid_passwords(), true)) {
             unset($_SESSION['admin_id']);
             return null;
         }

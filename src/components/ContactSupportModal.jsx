@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Send, Mail, Phone, User, MessageSquare, CheckCircle, Clock, MapPin, Sparkles } from 'lucide-react';
+import { X, Send, Mail, Phone, User, MessageSquare, CheckCircle, Clock, Sparkles } from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
 import { trackEvent } from '../services/analytics.js';
 

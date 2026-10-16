@@ -5,21 +5,16 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
-  MapPin,
   Calendar,
   ShieldCheck,
   Layers,
   Camera,
   Compass,
-  Phone,
   CreditCard,
   Star,
   SlidersHorizontal,
   Send,
-  Check,
-  Clock,
   Heart,
-  Info,
   Maximize2
 } from 'lucide-react';
 import { ALL_FLOOR_PLANS } from './FloorPlansGallery';
@@ -61,10 +56,10 @@ export default function HomeView({
   onNavigatePhotos,
   onNavigateVirtualTour,
   onNavigateGuidelines,
-  onNavigateMap,
-  onNavigateContact,
+  _onNavigateMap,
+  _onNavigateContact,
   onOpenScheduleTour,
-  onOpenContactSupport,
+  _onOpenContactSupport,
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedBedFilter, setSelectedBedFilter] = useState('all');
@@ -113,7 +108,7 @@ export default function HomeView({
   };
 
   const handleDepositCheckout = (planName) => {
-    window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
+    window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
       detail: { item: 'holding_deposit', plan: planName, amount: 250.00 }
     }));
   };

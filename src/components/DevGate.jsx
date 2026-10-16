@@ -29,16 +29,6 @@ function persistSession(user) {
   } catch { /* ignore */ }
 }
 
-function getSession() {
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
 function clearSession() {
   try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
 }
@@ -266,12 +256,7 @@ export default function DevGate() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const cached = getSession();
-      if (cached && cached.role === 'super_admin') {
-        setSession(cached);
-        setReady(true);
-      }
-      // Always verify against the server session
+      // Always verify against the server session first
       const { ok, data } = await apiGet('session');
       if (cancelled) return;
       if (ok && data.authenticated && data.user && data.user.role === 'super_admin') {

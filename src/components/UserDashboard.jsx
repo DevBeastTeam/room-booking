@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { submitMaintenanceTicketDB } from '../services/siteDataService';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Home, CreditCard, FileText, Wrench, Bell, LogOut, ChevronRight,
-  CheckCircle, Clock, AlertCircle, Download, Plus, X, Star,
-  TrendingUp, Calendar, Package, Wifi, Car, Archive, Layers,
-  User, Settings, BarChart2, MessageSquare
+  submitMaintenanceTicketDB,
+  fetchWorldFirstTransactions,
+  cancelWorldFirstSubscription
+} from '../services/siteDataService';
+import {
+  Home, CreditCard, FileText, Bell, LogOut,
+  CheckCircle, AlertCircle, Download, Plus, X, Star,
+  Calendar, Package, Car, Archive, Layers,
+  BarChart2, MessageSquare, Repeat, RefreshCw
 } from 'lucide-react';
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
@@ -42,14 +46,6 @@ const RESIDENT = {
   deposit: 250,
 };
 
-const PAYMENT_HISTORY = [
-  { id: 1, month: 'September 2026', amount: 967, status: 'paid', date: 'Sep 1, 2026', method: 'Auto-Pay' },
-  { id: 2, month: 'August 2026',    amount: 967, status: 'paid', date: 'Aug 1, 2026', method: 'Auto-Pay' },
-  { id: 3, month: 'July 2026',      amount: 967, status: 'paid', date: 'Jul 1, 2026', method: 'Online'   },
-  { id: 4, month: 'June 2026',      amount: 967, status: 'paid', date: 'Jun 1, 2026', method: 'Auto-Pay' },
-  { id: 5, month: 'May 2026',       amount: 967, status: 'paid', date: 'May 1, 2026', method: 'Auto-Pay' },
-  { id: 6, month: 'April 2026',     amount: 967, status: 'late', date: 'Apr 6, 2026', method: 'Online'   },
-];
 
 const MAINTENANCE_REQUESTS = [
   { id: 'MR-001', title: 'AC not cooling properly', category: 'HVAC', priority: 'High',   status: 'in-progress', date: 'Sep 15, 2026', notes: 'Technician scheduled for Sep 20' },
@@ -247,40 +243,262 @@ function LeaseSection() {
 
 // ── Section: Payments ──────────────────────────────────────────────────────────
 function PaymentsSection() {
+  const [liveTxns, setLiveTxns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const loadPayments = useCallback(async () => {
+    setLoading(true);
+    const res = await fetchWorldFirstTransactions({ email: RESIDENT.email });
+    if (res && res.success && Array.isArray(res.transactions)) {
+      setLiveTxns(res.transactions);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadPayments();
+  }, [loadPayments]);
+
+  const activeSub = liveTxns.find(
+    (t) => t.payment_mode === 'subscription' && t.subscription_status === 'active'
+  );
+
+  const handleCancelAutoPay = async () => {
+    if (!activeSub) return;
+    if (!window.confirm('Are you sure you want to cancel automatic recurring rent payments? You will need to pay manually each month.')) {
+      return;
+    }
+    setCancelling(true);
+    const res = await cancelWorldFirstSubscription(activeSub.txn_id);
+    setCancelling(false);
+    if (res && res.success) {
+      setMsg({ type: 'success', text: 'Auto-Pay subscription cancelled. You can make one-time payments anytime.' });
+      loadPayments();
+    } else {
+      setMsg({ type: 'error', text: res?.error || 'Failed to cancel Auto-Pay.' });
+    }
+  };
+
   return (
     <div>
-      <SectionTitle>Payment History</SectionTitle>
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', marginBottom: '1rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto auto', gap: 0, padding: '0.75rem 1.4rem', borderBottom: `1px solid ${C.border}`, backgroundColor: 'rgba(255,255,255,0.03)' }}>
-          {['Month', 'Amount', 'Date', 'Method', 'Status'].map(h => (
-            <span key={h} style={{ color: C.muted, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div>
+          <SectionTitle>Billing & Payment History</SectionTitle>
+          <p style={{ color: C.muted, fontSize: '0.82rem', margin: '-0.75rem 0 0' }}>
+            Powered by WorldFirst Pay Solution. Track payments and manage auto-debit agreements.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            onClick={loadPayments}
+            disabled={loading}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              backgroundColor: C.card,
+              border: `1px solid ${C.border}`,
+              color: C.text,
+              borderRadius: 8,
+              padding: '0.45rem 0.85rem',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Refresh
+          </button>
+          <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
+                detail: {
+                  item: 'rent_payment',
+                  amount: RESIDENT.rent || 909,
+                  unit: RESIDENT.unit || '2104',
+                  customer: { name: RESIDENT.name, email: RESIDENT.email, phone: RESIDENT.phone }
+                }
+              }));
+            }}
+            style={{
+              padding: '0.45rem 1rem',
+              backgroundColor: C.accent,
+              color: '#0f1117',
+              borderRadius: 8,
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem'
+            }}
+          >
+            <CreditCard size={14} /> Pay Rent / Start Auto-Pay →
+          </button>
+        </div>
+      </div>
+
+      {msg && (
+        <div style={{
+          padding: '0.75rem 1rem',
+          borderRadius: 8,
+          marginBottom: '1rem',
+          fontSize: '0.82rem',
+          backgroundColor: msg.type === 'success' ? '#22c55e18' : '#ef444418',
+          border: `1px solid ${msg.type === 'success' ? '#22c55e44' : '#ef444444'}`,
+          color: msg.type === 'success' ? C.success : C.danger
+        }}>
+          {msg.text}
+        </div>
+      )}
+
+      {/* Active Auto-Subscription Card */}
+      {activeSub ? (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(201, 169, 110, 0.06))',
+          border: '1px solid rgba(56, 189, 248, 0.3)',
+          borderRadius: 14,
+          padding: '1.25rem 1.5rem',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, backgroundColor: 'rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Repeat size={20} color="#38bdf8" />
+            </div>
+            <div>
+              <div style={{ color: C.text, fontWeight: 700, fontSize: '0.92rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Auto-Pay Active
+                <span style={{ fontSize: '0.68rem', backgroundColor: '#22c55e20', color: C.success, padding: '0.1rem 0.45rem', borderRadius: 4, fontWeight: 700 }}>
+                  Active Mandate
+                </span>
+              </div>
+              <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.2rem' }}>
+                Cycle: <strong style={{ color: C.text }}>{activeSub.subscription_interval === '3_days' ? 'Every 3 Days (Test Cycle)' : 'Monthly (Every 30 Days)'}</strong>
+                {activeSub.next_billing_date && (
+                  <span> · Next Debit: <strong style={{ color: '#38bdf8' }}>{activeSub.next_billing_date}</strong></span>
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleCancelAutoPay}
+            disabled={cancelling}
+            style={{
+              padding: '0.4rem 0.85rem',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: C.danger,
+              borderRadius: 7,
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            {cancelling ? 'Cancelling…' : 'Cancel Auto-Pay'}
+          </button>
+        </div>
+      ) : (
+        <div style={{
+          background: C.card,
+          border: `1px solid ${C.border}`,
+          borderRadius: 12,
+          padding: '1rem 1.25rem',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '0.75rem'
+        }}>
+          <div>
+            <div style={{ color: C.text, fontWeight: 600, fontSize: '0.85rem' }}>No Active Auto-Pay Agreement</div>
+            <div style={{ color: C.muted, fontSize: '0.75rem' }}>Enable automated monthly debits to avoid late rent fees.</div>
+          </div>
+          <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
+                detail: {
+                  item: 'rent_payment',
+                  amount: RESIDENT.rent || 909,
+                  unit: RESIDENT.unit || '2104',
+                  customer: { name: RESIDENT.name, email: RESIDENT.email, phone: RESIDENT.phone }
+                }
+              }));
+            }}
+            style={{
+              padding: '0.4rem 0.85rem',
+              backgroundColor: `${C.accent}20`,
+              border: `1px solid ${C.accent}50`,
+              color: C.accent,
+              borderRadius: 7,
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Enable Auto-Pay
+          </button>
+        </div>
+      )}
+
+      {/* WorldFirst Live Payments Table */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr auto', gap: 0, padding: '0.75rem 1.4rem', borderBottom: `1px solid ${C.border}`, backgroundColor: 'rgba(255,255,255,0.03)' }}>
+          {['Transaction', 'Purpose / Item', 'Plan / Mode', 'Amount', 'Status'].map(h => (
+            <span key={h} style={{ color: C.muted, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</span>
           ))}
         </div>
-        {PAYMENT_HISTORY.map((p, i) => (
-          <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto auto', gap: 0, padding: '0.9rem 1.4rem', borderBottom: i < PAYMENT_HISTORY.length - 1 ? `1px solid ${C.border}` : 'none', alignItems: 'center' }}>
-            <span style={{ color: C.text, fontSize: '0.87rem', fontWeight: 500 }}>{p.month}</span>
-            <span style={{ color: C.accent, fontSize: '0.9rem', fontWeight: 700 }}>${p.amount}</span>
-            <span style={{ color: C.muted, fontSize: '0.82rem' }}>{p.date}</span>
-            <span style={{ color: C.muted, fontSize: '0.82rem', paddingRight: '1rem' }}>{p.method}</span>
-            <Badge status={p.status} />
+
+        {liveTxns.length > 0 ? (
+          liveTxns.map((p, i) => (
+            <div
+              key={p.txn_id || p.id}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1.2fr 1fr 1fr 1fr auto',
+                gap: 0,
+                padding: '0.9rem 1.4rem',
+                borderBottom: i < liveTxns.length - 1 ? `1px solid ${C.border}` : 'none',
+                alignItems: 'center'
+              }}
+            >
+              <div>
+                <div style={{ color: C.text, fontSize: '0.84rem', fontWeight: 700, fontFamily: 'monospace' }}>{p.txn_id}</div>
+                <div style={{ color: C.muted, fontSize: '0.7rem' }}>{p.created_at || 'Recently'}</div>
+              </div>
+              <div>
+                <div style={{ color: C.text, fontSize: '0.82rem', fontWeight: 600 }}>{p.item_name || p.item_type}</div>
+                {p.unit_number && <div style={{ color: C.accent, fontSize: '0.7rem' }}>Unit #{p.unit_number}</div>}
+              </div>
+              <div>
+                {p.payment_mode === 'subscription' ? (
+                  <span style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                    <Repeat size={11} /> Auto-Pay ({p.subscription_interval === '3_days' ? '3 Days' : 'Monthly'})
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: C.muted }}>One-Time</span>
+                )}
+              </div>
+              <div>
+                <span style={{ color: C.accent, fontSize: '0.92rem', fontWeight: 800 }}>${(parseFloat(p.amount) || 0).toFixed(2)}</span>
+                <span style={{ color: C.muted, fontSize: '0.68rem', marginLeft: '0.25rem' }}>{p.currency || 'USD'}</span>
+              </div>
+              <Badge status={p.status || 'completed'} />
+            </div>
+          ))
+        ) : (
+          <div style={{ padding: '2rem 1.4rem', textAlign: 'center', color: C.muted, fontSize: '0.82rem' }}>
+            {loading ? 'WorldFirst payment history loading…' : 'No previous payments recorded.'}
           </div>
-        ))}
+        )}
       </div>
-      <button
-        onClick={() => {
-          window.dispatchEvent(new CustomEvent('open-paddle-checkout', {
-            detail: {
-              item: 'rent_payment',
-              amount: RESIDENT.rent || 909,
-              unit: RESIDENT.unit || '2104',
-              customer: { name: RESIDENT.name, email: RESIDENT.email, phone: RESIDENT.phone }
-            }
-          }));
-        }}
-        style={{ padding: '0.65rem 1.4rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', border: 'none' }}
-      >
-        Pay Rent with Paddle →
-      </button>
     </div>
   );
 }

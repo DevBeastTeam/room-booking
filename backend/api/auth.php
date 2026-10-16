@@ -130,7 +130,7 @@ if ($action === 'admins') {
 // ── 6. VIEW CREDENTIALS (super admin only) ────────────────────────────────────
 if ($action === 'admins_credentials') {
     auth_require_super();
-    $id = $data['id'] ?? '';
+    $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
     if (!$u) {
         auth_json_out(false, ['error' => 'Admin not found.'], 404);
@@ -198,7 +198,7 @@ if ($action === 'admins_create') {
 // ── 8. UPDATE ADMIN (name/email/permissions) ──────────────────────────────────
 if ($action === 'admins_update') {
     auth_require_super();
-    $id = $data['id'] ?? '';
+    $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
     if (!$u) {
         auth_json_out(false, ['error' => 'Admin not found.'], 404);
@@ -231,7 +231,7 @@ if ($action === 'admins_update') {
 // ── 9. ENABLE / DISABLE ADMIN (super admin only) ──────────────────────────────
 if ($action === 'admins_toggle') {
     auth_require_super();
-    $id = $data['id'] ?? '';
+    $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
     if (!$u) {
         auth_json_out(false, ['error' => 'Admin not found.'], 404);
@@ -268,8 +268,8 @@ if ($action === 'admins_toggle') {
 // ── 10. RESET ADMIN PASSWORD (super admin only) ───────────────────────────────
 if ($action === 'admins_reset_password') {
     auth_require_super();
-    $id = $data['id'] ?? '';
-    $password = (string)($data['password'] ?? '');
+    $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
+    $password = (string)($data['password'] ?? ($_POST['password'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
     if (!$u) {
         auth_json_out(false, ['error' => 'Admin not found.'], 404);
@@ -293,7 +293,30 @@ if ($action === 'admins_reset_password') {
     auth_json_out(true, ['message' => 'Password reset successfully']);
 }
 
-// ── 11. ACTIVITY LOG (super admin only) ───────────────────────────────────────
+// ── 11. DELETE ADMIN (super admin only) ───────────────────────────────────────
+if ($action === 'admins_delete') {
+    auth_require_super();
+    $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
+    $u = $id ? auth_find_user($id, 'id') : null;
+    if (!$u) {
+        auth_json_out(false, ['error' => 'Admin not found.'], 404);
+    }
+    if ($u['role'] === 'super_admin' || ($u['id'] ?? '') === 'USR-DEV') {
+        auth_json_out(false, ['error' => 'Super admin account cannot be deleted.'], 403);
+    }
+    if (($u['id'] ?? '') === ($_SESSION['admin_id'] ?? '')) {
+        auth_json_out(false, ['error' => 'You cannot delete your own logged-in account.'], 400);
+    }
+
+    $users = auth_users();
+    $filtered = array_values(array_filter($users, fn($user) => ($user['id'] ?? '') !== $u['id']));
+    auth_save_users($filtered);
+    auth_users_reset_cache();
+    auth_log('admin_deleted', 'Admin: ' . $u['username'] . ' (' . $u['id'] . ')');
+    auth_json_out(true, ['message' => 'Admin account deleted successfully']);
+}
+
+// ── 12. ACTIVITY LOG (super admin only) ───────────────────────────────────────
 if ($action === 'logs') {
     auth_require_super();
     $logs = [];

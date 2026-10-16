@@ -13,8 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
 
-// Pages & Legal tab permission
-auth_require_permission('pages');
+// Public legal pages read ho sakti hain, lekin CMS edits 'pages' permission chahti hain
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    auth_require_permission('pages');
+}
 $pdo = getDatabaseConnection();
 if (!$pdo) { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Database connection failed']); exit; }
 

@@ -11,7 +11,6 @@ import {
   ShoppingBag, 
   ExternalLink, 
   Phone, 
-  Calendar,
   Sparkles
 } from 'lucide-react';
 
@@ -114,8 +113,8 @@ const POIS = [
 ];
 
 export default function MapDirectionsView({
-  onOpenScheduleTour,
-  siteSettings,
+  _onOpenScheduleTour,
+  _siteSettings,
 }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [userAddress, setUserAddress] = useState('');

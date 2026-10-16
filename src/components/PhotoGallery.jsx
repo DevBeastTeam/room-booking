@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, X, ZoomIn, Eye, Sparkles, Calendar, Phone } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ZoomIn, Calendar } from 'lucide-react';
 
 export const PHOTO_GALLERY_IMAGES = [
   {

@@ -20,10 +20,8 @@ import {
   Tv, 
   Fan, 
   Accessibility, 
-  CheckCircle2, 
   Calendar, 
-  Info,
-  Layers,
+  Layers, 
   ArrowRight
 } from 'lucide-react';
 

@@ -11,8 +11,14 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once __DIR__ . '/_auth.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
+
+// Modifying resident documents requires admin authorization
+if ($method === 'POST' || $method === 'DELETE') {
+    auth_require_permission('residents');
+}
 
 if ($method === 'GET') {
     // Unit-specific listing hi — bina unit poora document dump nahi hota

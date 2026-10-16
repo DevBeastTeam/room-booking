@@ -31,7 +31,7 @@ $dataFile = auth_data_dir() . '/analytics.json';
 $MAX_EVENTS = 20000; // keep last N events
 
 const ANALYTICS_TYPES = [
-    'pageview', 'buy_click', 'tour_scheduled', 'inquiry', 'paddle_started',
+    'pageview', 'buy_click', 'tour_scheduled', 'inquiry', 'paddle_started', 'worldfirst_payment_started',
 ];
 
 function analytics_load($dataFile) {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Sparkles, 
-  Maximize2, 
   Calendar, 
   Layers, 
   ExternalLink, 

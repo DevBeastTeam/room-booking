@@ -43,12 +43,12 @@ Apne computer terminal mein project folder ke andar yeh commands chalayein:
 # 1. Production build generate karein:
 npm run build
 
-# 2. dist folder ke andar mojood tamaam files ko zip karein:
+# 2. dist folder ke andar mojood tamaam files (ba-shumool .htaccess) ko zip karein:
 cd dist
-zip -r ../deploy.zip . -x ".*"
+zip -r ../deploy.zip . -x "*.DS_Store" -x "__MACOSX*"
 cd ..
 ```
-*(Ya manual: `dist` folder open karein, sari files select karein -> Right Click -> Compress/ZIP to `deploy.zip`)*
+*(Ya manual: `dist` folder open karein, sari files select karein (Hidden files show on karke `.htaccess` zaroor include karein) -> Right Click -> Compress/ZIP to `deploy.zip`)*
 
 ---
 
