@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Analytics API (Visitor tracking + event records)
+ * Monar Pass Apartments - Analytics API (Visitor tracking + event records)
  * ==============================================================================
  * Public actions (no auth):
  *   track      { type, path, visitor_id, meta }   -> record visit / buy click

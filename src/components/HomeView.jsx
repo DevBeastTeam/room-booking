@@ -71,7 +71,7 @@ export default function HomeView({
     email: '',
     phone: '',
     bedrooms: '2 Beds',
-    message: 'Hello, I would like more information on available apartments at Monarch Pass.',
+    message: 'Hello, I would like more information on available apartments at Monar Pass.',
   });
 
   // Slide Auto-play
@@ -123,7 +123,7 @@ export default function HomeView({
         email: '',
         phone: '',
         bedrooms: '2 Beds',
-        message: 'Hello, I would like more information on available apartments at Monarch Pass.',
+        message: 'Hello, I would like more information on available apartments at Monar Pass.',
       });
       setFormSubmitted(false);
     }, 6000);
@@ -624,7 +624,7 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* ── 4. THE MONARCH DISTINCTION (EDITORIAL STORY) ── */}
+      {/* ── 4. THE MONAR DISTINCTION (EDITORIAL STORY) ── */}
       <section style={{ padding: '4.5rem 0' }}>
         <div className="container">
           <div
@@ -648,7 +648,7 @@ export default function HomeView({
               >
                 <img
                   src="https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/36-web-or-mls-4500%20campus%20dr%201005-s2104-002.jpg"
-                  alt="Monarch Pass Architecture and Grounds"
+                  alt="Monar Pass Architecture and Grounds"
                   style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
                 />
               </div>
@@ -685,7 +685,7 @@ export default function HomeView({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c9a96e', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
                 <span style={{ width: '20px', height: '1px', backgroundColor: '#c9a96e', display: 'inline-block' }} />
-                <span>The Monarch Distinction</span>
+                <span>The Monar Distinction</span>
               </div>
 
               <h2
@@ -702,7 +702,7 @@ export default function HomeView({
               </h2>
 
               <p style={{ fontSize: '0.98rem', lineHeight: 1.8, color: '#b5a999', marginBottom: '1.25rem' }}>
-                At Monarch Pass, contemporary convenience meets suburban tranquility. Our 1, 2, 3, and 4-bedroom affordable apartment homes feature expansive open layouts, wood-style flooring, and high-efficiency appliance packages tailored for effortless living.
+                At Monar Pass, contemporary convenience meets suburban tranquility. Our 1, 2, 3, and 4-bedroom affordable apartment homes feature expansive open layouts, wood-style flooring, and high-efficiency appliance packages tailored for effortless living.
               </p>
 
               <p style={{ fontSize: '0.98rem', lineHeight: 1.8, color: '#b5a999', marginBottom: '2rem' }}>
@@ -994,7 +994,7 @@ export default function HomeView({
               Crafted for Relaxation & Everyday Ease
             </h2>
             <p style={{ color: '#9e9282', fontSize: '1rem', lineHeight: 1.7 }}>
-              From morning fitness sessions to sunset barbecue gatherings and weekend splash park fun, Monarch Pass provides a complete lifestyle sanctuary.
+              From morning fitness sessions to sunset barbecue gatherings and weekend splash park fun, Monar Pass provides a complete lifestyle sanctuary.
             </p>
           </div>
 
@@ -1288,7 +1288,7 @@ export default function HomeView({
                   Income-Qualified Living Guidelines
                 </h3>
                 <p style={{ color: '#a39886', fontSize: '0.92rem', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-                  Monarch Pass is an affordable housing community operating under established Area Median Income (AMI) guidelines at 30%, 50%, and 60% levels. Total household gross income must qualify under the applicable limit for your household size.
+                  Monar Pass is an affordable housing community operating under established Area Median Income (AMI) guidelines at 30%, 50%, and 60% levels. Total household gross income must qualify under the applicable limit for your household size.
                 </p>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <button
@@ -1450,7 +1450,7 @@ export default function HomeView({
                   Thank You for Your Inquiry
                 </h3>
                 <p style={{ color: '#a89d8e', fontSize: '0.96rem' }}>
-                  Your tour request has been delivered directly to the Monarch Pass on-site team. A leasing specialist will contact you promptly.
+                  Your tour request has been delivered directly to the Monar Pass on-site team. A leasing specialist will contact you promptly.
                 </p>
               </div>
             ) : (

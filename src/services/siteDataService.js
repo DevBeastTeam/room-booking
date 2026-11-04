@@ -1,19 +1,19 @@
 // ── Site Data Service (localStorage backed with default fallbacks) ─────────────
 
 export const DEFAULT_SITE_SETTINGS = {
-  siteName: 'Monarch Pass Apartments',
+  siteName: 'Monar Pass Apartments',
   tagline: 'Spacious 1-4 Bedroom Apartments in Fort Worth',
   logoUrl: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_325,h_60/s3/2/58193/pn_monarchpass_logo_pms%20web.png',
   heroImageUrl: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg',
   phone: '+1 817-857-8782', // Header click-to-call
   secondaryPhone: '+1 817-531-1750', // Office / Footer phone
-  email: 'leasing@monarchpassapts.com',
-  supportEmail: 'support@monarchpassapts.com',
+  email: 'leasing@monarpass.com',
+  supportEmail: 'support@monarpass.com',
   address: '4500 Campus Dr, Fort Worth, TX 76119',
   city: 'Fort Worth',
   state: 'TX',
   zip: '76119',
-  footerDescription: 'Come explore the wonders of Monarch Pass and find the perfect home that fits your lifestyle!',
+  footerDescription: 'Come explore the wonders of Monar Pass and find the perfect home that fits your lifestyle!',
   managedBy: 'Cushman & Wakefield',
   managedBySub: 'Excellence in Multifamily Living',
   copyrightText: '© 2026 Cushman & Wakefield All Rights Reserved. | Powered by RentCafe (© 2026 Yardi Systems, Inc. All Rights Reserved.)',
@@ -23,12 +23,12 @@ export const DEFAULT_SITE_SETTINGS = {
     sun: '1:00 PM - 5:00 PM',
   },
   social: {
-    facebook: 'https://www.facebook.com/MonarchPassAPTS',
-    instagram: 'https://www.instagram.com/lifeatmonarchpass',
+    facebook: 'https://www.facebook.com/MonarPassAPTS',
+    instagram: 'https://www.instagram.com/lifeatmonarpass',
   },
   portals: {
-    resident: 'https://monarchpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx',
-    applicant: 'https://monarchpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx',
+    resident: 'https://monarpassapts.securecafe.com/residentservices/ladera-palms-0/userlogin.aspx',
+    applicant: 'https://monarpassapts.securecafe.com/onlineleasing/ladera-palms-0/guestlogin.aspx',
   },
   mapsUrl: 'https://maps.app.goo.gl/E71XfBiE8dE9bAjV6',
 };
@@ -37,7 +37,7 @@ export const DEFAULT_LEGAL_PAGES = {
   terms: {
     title: 'Terms & Conditions',
     lastUpdated: 'September 2026',
-    content: `Welcome to Monarch Pass Apartments. By using this website, scheduling a tour, or submitting a rental application, you agree to comply with and be bound by the following terms of service.
+    content: `Welcome to Monar Pass Apartments. By using this website, scheduling a tour, or submitting a rental application, you agree to comply with and be bound by the following terms of service.
 
 1. Rental Application & Eligibility
 All applicants must be at least 18 years of age and satisfy our established credit, criminal background, and income qualification criteria (minimum 2.5x to 3x monthly rent). Application fees are non-refundable once background screening commences.
@@ -57,7 +57,7 @@ Subletting or unauthorized long-term occupants not listed on the lease contract 
   privacy: {
     title: 'Privacy Policy',
     lastUpdated: 'September 2026',
-    content: `At Monarch Pass Apartments, managed by Cushman & Wakefield, we are dedicated to protecting your privacy and ensuring the security of your personal data.
+    content: `At Monar Pass Apartments, managed by Cushman & Wakefield, we are dedicated to protecting your privacy and ensuring the security of your personal data.
 
 1. Information We Collect
 When you interact with our website or resident portal, we may collect:
@@ -80,12 +80,12 @@ We never sell, rent, or trade your personal data with third-party advertisers. I
 We utilize industry-standard TLS encryption, strict role-based admin access, and regular vulnerability audits to ensure your sensitive records remain confidential.
 
 5. Contact Our Privacy Officer
-For inquiries regarding your personal data or to request data removal, please contact our leasing office at leasing@monarchpassapts.com or call +1 817-857-8782.`,
+For inquiries regarding your personal data or to request data removal, please contact our leasing office at leasing@monarpass.com or call +1 817-857-8782.`,
   },
   accessibility: {
     title: 'Accessibility Statement',
     lastUpdated: 'September 2026',
-    content: `Monarch Pass Apartments, managed by Cushman & Wakefield, is committed to digital accessibility, and to ensuring that everyone, including persons with disabilities, has full and equal access to our digital offerings.
+    content: `Monar Pass Apartments, managed by Cushman & Wakefield, is committed to digital accessibility, and to ensuring that everyone, including persons with disabilities, has full and equal access to our digital offerings.
 
 1. Accessibility Standard
 We are continually improving the user experience for everyone, and applying the relevant accessibility standards. We aim to conform to Web Content Accessibility Guidelines (WCAG) 2.1, Level AA standards.
@@ -99,7 +99,7 @@ We are continually improving the user experience for everyone, and applying the 
 3. Feedback & Assistance
 If you encounter accessibility difficulties with any part of our website or resident services, please contact our on-site team directly:
 • Phone: +1 817-857-8782
-• Email: leasing@monarchpassapts.com
+• Email: leasing@monarpass.com
 • Address: 4500 Campus Dr, Fort Worth, TX 76119
 We welcome your feedback and will provide whatever assistance is necessary to ensure you have complete access.`,
   },
@@ -167,9 +167,42 @@ export function getSiteSettings() {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SITE_SETTINGS;
     const parsed = JSON.parse(raw);
-    // Auto-migrate if stored values had previous test placeholders
-    if (parsed.phone === '+1 817-646-5785' || parsed.officeHours?.sun === 'Closed') {
-      const merged = { ...parsed, ...DEFAULT_SITE_SETTINGS };
+    // Auto-migrate if stored values had previous test placeholders or cached Monarch siteName
+    const hasMonarch = (parsed.siteName && parsed.siteName.includes('Monarch')) ||
+      (parsed.facebook && parsed.facebook.includes('Monarch')) ||
+      (parsed.instagram && parsed.instagram.includes('monarch')) ||
+      (parsed.social?.facebook && parsed.social.facebook.includes('Monarch')) ||
+      (parsed.social?.instagram && parsed.social.instagram.includes('monarch')) ||
+      (parsed.portals?.resident && parsed.portals.resident.includes('monarch')) ||
+      (parsed.portals?.applicant && parsed.portals.applicant.includes('monarch'));
+    const hasLegacyDefaults = parsed.phone === '+1 817-646-5785' || parsed.officeHours?.sun === 'Closed';
+
+    if (hasMonarch || hasLegacyDefaults) {
+      if (hasMonarch) {
+        parsed.siteName = 'Monar Pass Apartments';
+        if (parsed.email && parsed.email.includes('monarch')) {
+          parsed.email = 'leasing@monarpass.com';
+        }
+        if (parsed.supportEmail && parsed.supportEmail.includes('monarch')) {
+          parsed.supportEmail = 'support@monarpass.com';
+        }
+        if (parsed.footerDescription && parsed.footerDescription.includes('Monarch')) {
+          parsed.footerDescription = 'Come explore the wonders of Monar Pass and find the perfect home that fits your lifestyle!';
+        }
+        if (parsed.social?.facebook && parsed.social.facebook.includes('Monarch')) {
+          parsed.social.facebook = 'https://www.facebook.com/MonarPassAPTS';
+        }
+        if (parsed.social?.instagram && parsed.social.instagram.includes('monarch')) {
+          parsed.social.instagram = 'https://www.instagram.com/lifeatmonarpass';
+        }
+        if (parsed.portals?.resident && parsed.portals.resident.includes('monarch')) {
+          parsed.portals.resident = parsed.portals.resident.replaceAll('monarchpassapts', 'monarpassapts');
+        }
+        if (parsed.portals?.applicant && parsed.portals.applicant.includes('monarch')) {
+          parsed.portals.applicant = parsed.portals.applicant.replaceAll('monarchpassapts', 'monarpassapts');
+        }
+      }
+      const merged = { ...DEFAULT_SITE_SETTINGS, ...parsed };
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
       return merged;
     }
@@ -221,7 +254,22 @@ export function getLegalPages() {
   try {
     const raw = localStorage.getItem(LEGAL_PAGES_KEY);
     if (!raw) return DEFAULT_LEGAL_PAGES;
-    return { ...DEFAULT_LEGAL_PAGES, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    let changed = false;
+    ['terms', 'privacy', 'accessibility'].forEach(key => {
+      if (parsed[key]?.content && parsed[key].content.includes('Monarch')) {
+        parsed[key].content = parsed[key].content
+          .replaceAll('Monarch Pass', 'Monar Pass')
+          .replaceAll('leasing@monarchpassapts.com', 'leasing@monarpass.com');
+        changed = true;
+      }
+    });
+    if (changed) {
+      const merged = { ...DEFAULT_LEGAL_PAGES, ...parsed };
+      localStorage.setItem(LEGAL_PAGES_KEY, JSON.stringify(merged));
+      return merged;
+    }
+    return { ...DEFAULT_LEGAL_PAGES, ...parsed };
   } catch {
     return DEFAULT_LEGAL_PAGES;
   }

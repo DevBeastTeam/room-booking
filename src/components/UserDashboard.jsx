@@ -188,7 +188,7 @@ function LeaseSection() {
 
   const handleDownloadLease = () => {
     const summary = [
-      'Monarch Pass Apartments - Lease Summary',
+      'Monar Pass Apartments - Lease Summary',
       '========================================',
       `Resident: ${RESIDENT.name}`,
       `Unit: #${RESIDENT.unit} (${RESIDENT.floorPlan})`,
@@ -647,7 +647,7 @@ function AddOnsSection() {
 function DocumentsSection() {
   const handleDownload = (doc) => {
     const content = [
-      'Monarch Pass Apartments - Resident Portal',
+      'Monar Pass Apartments - Resident Portal',
       `Document: ${doc.name}`,
       `Unit: #${RESIDENT.unit}  Resident: ${RESIDENT.name}`,
       `Size: ${doc.size}  Date: ${doc.date}`,
@@ -809,7 +809,7 @@ export default function UserDashboard({ onBack }) {
               Welcome back, {RESIDENT.name.split(' ')[0]}! 👋
             </h1>
             <p style={{ color: C.muted, fontSize: '0.875rem', margin: '0.3rem 0 0' }}>
-              Monarch Pass Apartments · Resident Portal
+              Monar Pass Apartments · Resident Portal
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

@@ -148,7 +148,7 @@ export function ensureSession(userId, displayName = 'Guest', email = '') {
       messages: [
         {
           sender: 'admin',
-          text: `Hi ${greetingName}! 👋 Welcome to Monarch Pass. How can our leasing team assist you today? Feel free to ask about floor plans, pricing, tour schedules, or specials!`,
+          text: `Hi ${greetingName}! 👋 Welcome to Monar Pass. How can our leasing team assist you today? Feel free to ask about floor plans, pricing, tour schedules, or specials!`,
           ts: Date.now(),
         }
       ],

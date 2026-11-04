@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Inquiries & Contact API
+ * Monar Pass Apartments - Inquiries & Contact API
  * ==============================================================================
  */
 

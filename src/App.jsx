@@ -254,7 +254,7 @@ export default function App() {
                 <div className="container">
                   {/* Introductory Paragraph */}
                   <div style={{ marginBottom: '1.75rem', color: '#334155', fontSize: '0.975rem', lineHeight: 1.6 }}>
-                    Check out our 1-, 2-, 3-, and 4-bedroom apartments for rent in Fort Worth, TX and see which of our various layouts fits your lifestyle! We ensure that our stunning homes at {siteSettings?.siteName || 'Monarch Pass'} can accommodate your every need. Call today to schedule a tour!
+                    Check out our 1-, 2-, 3-, and 4-bedroom apartments for rent in Fort Worth, TX and see which of our various layouts fits your lifestyle! We ensure that our stunning homes at {siteSettings?.siteName || 'Monar Pass'} can accommodate your every need. Call today to schedule a tour!
                   </div>
 
                   {/* Lease Cost Calculator Blue Info Box */}
@@ -345,7 +345,7 @@ export default function App() {
             )}
 
             {/* ========================================================================= */}
-            {/* VIEW 4: PHOTO GALLERY (MONARCH PASS TILED CAROUSEL & LIGHTBOX) */}
+            {/* VIEW 4: PHOTO GALLERY (MONAR PASS TILED CAROUSEL & LIGHTBOX) */}
             {/* ========================================================================= */}
             {currentView === 'photos' && (
               <div className="animate-fade-in" style={{ padding: '1.5rem 0 3rem' }}>
@@ -356,7 +356,7 @@ export default function App() {
             )}
 
             {/* ========================================================================= */}
-            {/* VIEW 5: INCOME GUIDELINES (MONARCH PASS AMI PROGRAM) */}
+            {/* VIEW 5: INCOME GUIDELINES (MONAR PASS AMI PROGRAM) */}
             {/* ========================================================================= */}
             {currentView === 'guidelines' && (
               <div className="animate-fade-in" style={{ padding: '1.5rem 0 3rem' }}>
@@ -469,7 +469,7 @@ export default function App() {
             }}
           />
 
-          {/* Schedule with Monarch Pass Tour Modal */}
+          {/* Schedule with Monar Pass Tour Modal */}
           <ScheduleTourModal
             isOpen={isScheduleModalOpen}
             onClose={() => setIsScheduleModalOpen(false)}

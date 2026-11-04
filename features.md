@@ -1,6 +1,6 @@
-# 📖 Monarch Pass Apartments - Complete Features & Architecture Documentation (`features.md`)
+# 📖 Monar Pass Apartments - Complete Features & Architecture Documentation (`features.md`)
 
-Yeh document **Monarch Pass Apartments** web platform ke tamam pages, client-side, resident user dashboard, admin panel, database schema aur management tools ki mukammal tafseelat (features & headings) faraham karta hai.
+Yeh document **Monar Pass Apartments** web platform ke tamam pages, client-side, resident user dashboard, admin panel, database schema aur management tools ki mukammal tafseelat (features & headings) faraham karta hai.
 
 ---
 
@@ -105,7 +105,7 @@ Platform par total **9 public pages** hain jo SEO optimized hain aur Astro 5 + R
   - Prospect Name, Email, Phone, Preferred Floor Plan, Desired Move-in Date, Message.
   - Saves in real-time to MySQL `inquiries` and `tours` tables.
 * **Property Information Sidebar:**
-  - Direct Phone: `+1 817-857-8782`, Email: `leasing@monarchpassapts.com`.
+  - Direct Phone: `+1 817-857-8782`, Email: `leasing@monarpass.com`.
   - Office Hours: Mon-Fri 10am-6pm, Sat 10am-5pm, Sun 1pm-5pm.
   - Turn-by-turn driving directions.
 

@@ -159,7 +159,7 @@ export default function LegalModal({ isOpen, onClose, pageType = 'terms', legalP
             color: '#94a3b8',
           }}
         >
-          <span>Monarch Pass Residences · Cushman & Wakefield Management</span>
+          <span>Monar Pass Residences · Cushman & Wakefield Management</span>
           <button
             onClick={onClose}
             className="btn-gold"

@@ -1,5 +1,5 @@
 # ==============================================================================
-# Monarch Pass Apartments - Config Security Protection
+# Monar Pass Apartments - Config Security Protection
 # Deny all direct web access to sensitive config files (.env, database.php)
 # ==============================================================================
 

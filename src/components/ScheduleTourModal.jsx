@@ -232,7 +232,7 @@ export default function ScheduleTourModal({
           </div>
 
           <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#c9a96e', fontWeight: 700 }}>
-            {siteSettings?.siteName || 'Monarch Pass Residences'}
+            {siteSettings?.siteName || 'Monar Pass Residences'}
           </span>
           <h2
             style={{

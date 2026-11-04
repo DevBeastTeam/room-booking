@@ -247,7 +247,7 @@ export default function WorldFirstCheckoutModal({
                 </span>
               </div>
               <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>
-                Monarch Pass Apartments · Secure International & Domestic Checkout
+                Monar Pass Apartments · Secure International & Domestic Checkout
               </p>
             </div>
           </div>

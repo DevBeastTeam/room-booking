@@ -15,20 +15,20 @@ const FAQ_DATA = [
     categoryLabel: 'General Information',
     items: [
       {
-        q: 'Where is Monarch Pass Apartments located?',
-        a: 'Monarch Pass is located at 4500 Campus Drive, Fort Worth, TX 76119. We are conveniently situated in Southeast Fort Worth right off Campus Drive, walking distance from Tarrant County College South Campus, with quick access to I-20 and I-35W.',
+        q: 'Where is Monar Pass Apartments located?',
+        a: 'Monar Pass is located at 4500 Campus Drive, Fort Worth, TX 76119. We are conveniently situated in Southeast Fort Worth right off Campus Drive, walking distance from Tarrant County College South Campus, with quick access to I-20 and I-35W.',
       },
       {
         q: 'What are your leasing office hours?',
         a: 'Our on-site leasing office is open Monday through Friday from 10:00 AM to 6:00 PM, and Saturday from 10:00 AM to 5:00 PM, Sunday from 1:00 PM to 5:00 PM. You can call our office directly at (817) 857-8782.',
       },
       {
-        q: 'Who manages Monarch Pass Apartments?',
-        a: 'Monarch Pass is professionally managed by Cushman & Wakefield, one of the nation\'s premier residential and commercial real estate management firms.',
+        q: 'Who manages Monar Pass Apartments?',
+        a: 'Monar Pass is professionally managed by Cushman & Wakefield, one of the nation\'s premier residential and commercial real estate management firms.',
       },
       {
         q: 'Which school district serves this community?',
-        a: 'Monarch Pass is served by the Fort Worth Independent School District (FWISD), including South Hills High School, nearby middle schools, and elementary campuses.',
+        a: 'Monar Pass is served by the Fort Worth Independent School District (FWISD), including South Hills High School, nearby middle schools, and elementary campuses.',
       },
     ],
   },
@@ -38,7 +38,7 @@ const FAQ_DATA = [
     items: [
       {
         q: 'What is the Affordable Housing / AMI program?',
-        a: 'Monarch Pass participates in established Section 42 Low-Income Housing Tax Credit (LIHTC) programs administered by the Texas Department of Housing and Community Affairs (TDHCA). This program offers high-quality apartment homes at restricted rental rates to households qualifying under 30%, 50%, or 60% Area Median Income (AMI) limits for the Fort Worth metro area.',
+        a: 'Monar Pass participates in established Section 42 Low-Income Housing Tax Credit (LIHTC) programs administered by the Texas Department of Housing and Community Affairs (TDHCA). This program offers high-quality apartment homes at restricted rental rates to households qualifying under 30%, 50%, or 60% Area Median Income (AMI) limits for the Fort Worth metro area.',
       },
       {
         q: 'What are the current maximum income limits?',
@@ -64,7 +64,7 @@ const FAQ_DATA = [
       },
       {
         q: 'What is your pet policy?',
-        a: 'Monarch Pass welcomes up to 2 pets (cats and dogs) per apartment home. There is a one-time non-refundable fee of $350, monthly pet rent of $20 per pet, and a $150 refundable pet deposit. Breed restrictions apply.',
+        a: 'Monar Pass welcomes up to 2 pets (cats and dogs) per apartment home. There is a one-time non-refundable fee of $350, monthly pet rent of $20 per pet, and a $150 refundable pet deposit. Breed restrictions apply.',
       },
       {
         q: 'Is parking included with the apartment?',
@@ -343,7 +343,7 @@ export default function FAQView({
             }}
           >
             <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.85rem', fontWeight: 500, color: '#f4efe6', margin: '0 0 0.5rem' }}>
-              Still have questions about Monarch Pass?
+              Still have questions about Monar Pass?
             </h3>
             <p style={{ color: '#a89d8e', fontSize: '0.94rem', maxWidth: '520px', margin: '0 auto 1.75rem', lineHeight: 1.6 }}>
               Our dedicated on-site leasing office is here to help with personalized tours, income certification, and residence availability.

@@ -164,7 +164,7 @@ export default function EmailModal({
                   M
                 </div>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.1em', color: '#dfc285', textTransform: 'uppercase' }}>
-                  Monarch Pass
+                  Monar Pass
                 </span>
               </div>
 
@@ -367,7 +367,7 @@ export default function EmailModal({
 
                   {showMoreSms && (
                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.4rem', lineHeight: 1.4 }}>
-                      By checking this box, you agree to receive SMS communications from Monarch Pass leasing. Msg & data rates may apply.
+                      By checking this box, you agree to receive SMS communications from Monar Pass leasing. Msg & data rates may apply.
                     </div>
                   )}
                 </div>

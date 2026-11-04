@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Monarch Pass Apartments - Complete MySQL Database Schema (001_initial_schema.sql)
+-- Monar Pass Apartments - Complete MySQL Database Schema (001_initial_schema.sql)
 -- Database Name: roombookingdb
 -- Engine: InnoDB, Charset: utf8mb4, Collation: utf8mb4_unicode_ci
 -- ==============================================================================

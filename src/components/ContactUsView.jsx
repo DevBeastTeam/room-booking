@@ -137,7 +137,7 @@ export default function ContactUsView({
               color: '#f4efe6',
             }}
           >
-            Contact Monarch Pass
+            Contact Monar Pass
           </h1>
 
           <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 1.5rem', maxWidth: '680px' }}>
@@ -278,10 +278,10 @@ export default function ContactUsView({
                   <div>
                     <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Email Inquiries</div>
                     <a
-                      href={`mailto:${siteSettings?.email || 'leasing@monarchpassapts.com'}`}
+                      href={`mailto:${siteSettings?.email || 'leasing@monarpass.com'}`}
                       style={{ color: '#dfc285', fontSize: '0.9rem', textDecoration: 'none' }}
                     >
-                      {siteSettings?.email || 'leasing@monarchpassapts.com'}
+                      {siteSettings?.email || 'leasing@monarpass.com'}
                     </a>
                   </div>
                 </div>
@@ -341,7 +341,7 @@ export default function ContactUsView({
                   </span>
                 </div>
                 <p style={{ fontSize: '0.84rem', color: '#9e9282', margin: 0, lineHeight: 1.6 }}>
-                  Monarch Pass Apartments is proudly managed by Cushman & Wakefield, ensuring attentive customer care and prompt maintenance response.
+                  Monar Pass Apartments is proudly managed by Cushman & Wakefield, ensuring attentive customer care and prompt maintenance response.
                 </p>
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function ContactUsView({
                     Message Sent Successfully
                   </h3>
                   <p style={{ color: '#a89d8e', fontSize: '0.95rem', maxWidth: '420px', margin: '0 auto 2rem', lineHeight: 1.6 }}>
-                    Thank you for contacting Monarch Pass. Our leasing team will respond via email or telephone within one business day.
+                    Thank you for contacting Monar Pass. Our leasing team will respond via email or telephone within one business day.
                   </p>
                   <button
                     onClick={handleReset}
@@ -581,7 +581,7 @@ export default function ContactUsView({
                       style={{ marginTop: '3px' }}
                     />
                     <label htmlFor="contact-consent" style={{ fontSize: '0.8rem', color: '#8c8273', lineHeight: 1.5 }}>
-                      I agree to receive calls and text messages from Monarch Pass regarding my inquiry at the contact number provided. Message and data rates may apply.
+                      I agree to receive calls and text messages from Monar Pass regarding my inquiry at the contact number provided. Message and data rates may apply.
                     </label>
                   </div>
 

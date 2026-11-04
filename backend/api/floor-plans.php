@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Floor Plans & Units Inventory API
+ * Monar Pass Apartments - Floor Plans & Units Inventory API
  * ==============================================================================
  */
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - WorldFirst Payment Gateway API (WorldFirst Pay Solution)
+ * Monar Pass Apartments - WorldFirst Payment Gateway API (WorldFirst Pay Solution)
  * ==============================================================================
  * Supports:
  *  1. One-time Manual Payments (Application Fee, Holding Deposit, Pet Fee, Rent)
@@ -33,7 +33,7 @@ $envVars = function_exists('loadEnvFile') ? loadEnvFile(dirname(__DIR__) . '/con
 $wfEnv = strtolower($envVars['WORLDFIRST_ENV'] ?? 'sandbox');
 $isSandbox = ($wfEnv !== 'live');
 
-$clientId     = $envVars['WORLDFIRST_CLIENT_ID'] ?? 'wf_client_sandbox_monarch2026';
+$clientId     = $envVars['WORLDFIRST_CLIENT_ID'] ?? 'wf_client_sandbox_monar2026';
 $merchantId   = $envVars['WORLDFIRST_MERCHANT_ID'] ?? 'WF_US_8839210';
 $apiKey       = $envVars['WORLDFIRST_API_KEY'] ?? '';
 $privateKey   = $envVars['WORLDFIRST_PRIVATE_KEY'] ?? '';
@@ -219,15 +219,15 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
         $orderPayload = [
             'productCode'   => 'CASHIER_PAYMENT',
             'order'         => [
-                'orderDescription' => "Monarch Pass - {$itemName} (Unit: " . ($unitNumber ?: 'General') . ")",
+                'orderDescription' => "Monar Pass - {$itemName} (Unit: " . ($unitNumber ?: 'General') . ")",
                 'orderAmount'      => [
                     'currency' => $currency,
                     'value'    => (string)((int)round($amount * 100))
                 ],
                 'merchantOrderId'  => $localTxnId,
             ],
-            'paymentNotifyUrl' => ($envVars['SITE_URL'] ?? 'https://monarchpassapts.com') . '/backend/api/worldfirst.php?action=webhook',
-            'paymentRedirectUrl'=> ($envVars['SITE_URL'] ?? 'https://monarchpassapts.com') . '/dashboard?payment=success&txn_id=' . $localTxnId,
+            'paymentNotifyUrl' => ($envVars['SITE_URL'] ?? 'https://monarpass.com') . '/backend/api/worldfirst.php?action=webhook',
+            'paymentRedirectUrl'=> ($envVars['SITE_URL'] ?? 'https://monarpass.com') . '/dashboard?payment=success&txn_id=' . $localTxnId,
             'buyer'            => [
                 'buyerName'  => $customerName,
                 'buyerEmail' => $customerEmail,

@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * MONARCH PASS APARTMENTS - DUAL LUXURY THEME CONFIGURATION (LIGHT & DARK)
+ * MONAR PASS APARTMENTS - DUAL LUXURY THEME CONFIGURATION (LIGHT & DARK)
  * ============================================================================
  * 
  * Supports full runtime theme switching between Dark Luxury & Light Luxury,

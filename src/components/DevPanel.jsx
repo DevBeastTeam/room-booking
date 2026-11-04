@@ -298,7 +298,7 @@ export default function DevPanel({ user, onLogout }) {
         <div className="dev-topbar">
           <div>
             <h1>{NAV.find(n => n.id === section)?.label}</h1>
-            <p>Monarch Pass Apartments · Developer Dashboard</p>
+            <p>Monar Pass Apartments · Developer Dashboard</p>
           </div>
           <div className="dev-topbar-right">
             <div style={{ textAlign: 'right' }}>
@@ -683,7 +683,7 @@ function DevTransactionsSection() {
           </div>
           <div style={{ fontSize: '0.75rem' }}>
             <span style={{ color: S.muted }}>Client ID: </span>
-            <span style={{ color: S.text, fontFamily: 'monospace' }}>wf_client_sandbox_monarch2026</span>
+            <span style={{ color: S.text, fontFamily: 'monospace' }}>wf_client_sandbox_monar2026</span>
           </div>
         </div>
       </div>
@@ -1302,7 +1302,7 @@ function CreateAdminModal({ onClose, onSaved, onError }) {
         <div className="dev-form-grid">
           <Field label="Username"><input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="manager2" /></Field>
           <Field label="Name"><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Property Manager" /></Field>
-          <Field label="Email"><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="name@monarchpass.com" /></Field>
+          <Field label="Email"><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="name@monarpass.com" /></Field>
           <Field label="Password"><input value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Min 6 characters" /></Field>
         </div>
 

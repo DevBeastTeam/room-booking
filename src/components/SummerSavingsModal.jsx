@@ -161,7 +161,7 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
               >
                 <img
                   src="https://cdngeneralcf.rentcafe.com/dmslivecafe/2/58193/Buchanan Pop Ups (4).png"
-                  alt="Monarch Pass Summer Savings Promo"
+                  alt="Monar Pass Summer Savings Promo"
                   style={{
                     width: '100%',
                     height: 'auto',

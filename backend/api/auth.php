@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Authentication API (Super Admin + Admin)
+ * Monar Pass Apartments - Authentication API (Super Admin + Admin)
  * ==============================================================================
  * Actions (GET or POST):
  *   login                     { username, password }            -> public

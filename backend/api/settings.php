@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Site Settings API
+ * Monar Pass Apartments - Site Settings API
  * ==============================================================================
  */
 
@@ -50,9 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo file_get_contents($settingsFile);
     } else {
         echo json_encode([
-            'siteName' => 'Monarch Pass Apartments',
+            'siteName' => 'Monar Pass Apartments',
             'tagline' => 'Spacious 1-4 Bedroom Apartments in Fort Worth',
-            'phone' => '+1 817-857-8782'
+            'phone' => '+1 817-857-8782',
+            'email' => 'leasing@monarpass.com'
         ]);
     }
     exit();

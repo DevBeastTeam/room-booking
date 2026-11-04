@@ -1,6 +1,6 @@
 <?php
 /**
- * Monarch Pass Apartments - Email Logs API
+ * Monar Pass Apartments - Email Logs API
  */
 
 header('Content-Type: application/json; charset=UTF-8');

@@ -538,7 +538,7 @@ export default function Widgets({ onOpenScheduleTour }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285, #c9a96e))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--btn-gold-text, #08090f)', fontWeight: 800, fontSize: '0.95rem' }}>M</div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main, #f8fafc)', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>Monarch Pass Concierge</div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main, #f8fafc)', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>Monar Pass Concierge</div>
                 <div style={{ fontSize: '0.68rem', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
                   Live Chat with Leasing Staff

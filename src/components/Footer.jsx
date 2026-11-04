@@ -65,7 +65,7 @@ export default function Footer({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.3rem', fontWeight: 600, color: '#f4efe6' }}>
-                  MONARCH PASS
+                  MONAR PASS
                 </span>
                 <span style={{ fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#c9a96e' }}>
                   Luxury Apartment Residences
@@ -121,7 +121,7 @@ export default function Footer({
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
               <a
-                href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarchPassAPTS'}
+                href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarPassAPTS'}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Facebook"
@@ -150,7 +150,7 @@ export default function Footer({
               </a>
 
               <a
-                href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarchpass'}
+                href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarpass'}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
@@ -376,7 +376,7 @@ export default function Footer({
           </div>
 
           <div>
-            {siteSettings?.copyrightText || `© ${currentYear} Monarch Pass Apartments · Cushman & Wakefield. All Rights Reserved.`}
+            {siteSettings?.copyrightText || `© ${currentYear} Monar Pass Apartments · Cushman & Wakefield. All Rights Reserved.`}
           </div>
         </div>
       </div>

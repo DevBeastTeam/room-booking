@@ -142,7 +142,7 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 Contact & Support Concierge
               </h3>
               <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: '#dfc285' }}>
-                {siteSettings?.siteName || 'Monarch Pass Residences'} · Executive Leasing Office
+                {siteSettings?.siteName || 'Monar Pass Residences'} · Executive Leasing Office
               </p>
             </div>
           </div>

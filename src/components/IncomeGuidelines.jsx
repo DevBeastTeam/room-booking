@@ -71,7 +71,7 @@ export default function IncomeGuidelines({
       a: 'Income eligibility is determined at the time of application certification. Our dedicated leasing specialists can review any updates or anticipated changes with you.',
     },
     {
-      q: 'Does everyone qualify for affordable housing at Monarch Pass?',
+      q: 'Does everyone qualify for affordable housing at Monar Pass?',
       a: 'Affordable housing is program-based according to HUD Fort Worth guidelines. Reviewing the AMI limits table below is the ideal first step before scheduling your consultation.',
     },
     {
@@ -121,7 +121,7 @@ export default function IncomeGuidelines({
         </h1>
 
         <p style={{ fontSize: '1.05rem', color: '#94a3b8', lineHeight: 1.8, marginBottom: '2rem', maxWidth: '780px', margin: '0 auto 2rem' }}>
-          {siteSettings?.siteName || 'Monarch Pass'} offers premium apartment residences with reduced rents through the Fort Worth affordable housing program. Eligibility is determined by total gross household income and household occupancy size.
+          {siteSettings?.siteName || 'Monar Pass'} offers premium apartment residences with reduced rents through the Fort Worth affordable housing program. Eligibility is determined by total gross household income and household occupancy size.
         </p>
 
         <div

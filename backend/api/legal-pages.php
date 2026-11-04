@@ -1,6 +1,6 @@
 <?php
 /**
- * Monarch Pass Apartments - Legal Pages CMS API
+ * Monar Pass Apartments - Legal Pages CMS API
  */
 
 header('Content-Type: application/json; charset=UTF-8');

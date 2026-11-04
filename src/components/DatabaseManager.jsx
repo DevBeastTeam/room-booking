@@ -310,7 +310,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
         a.href     = url;
-        a.download = `monarch_db_export_${Date.now()}.json`;
+        a.download = `monar_db_export_${Date.now()}.json`;
         a.click();
         URL.revokeObjectURL(url);
         showToast('📁 JSON Export download ho gaya!', 'success');

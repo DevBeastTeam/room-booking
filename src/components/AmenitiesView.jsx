@@ -116,7 +116,7 @@ export default function AmenitiesView({
               lineHeight: 1.15,
             }}
           >
-            Curated Amenities at Monarch Pass
+            Curated Amenities at Monar Pass
           </h1>
 
           <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 2.25rem', maxWidth: '680px' }}>

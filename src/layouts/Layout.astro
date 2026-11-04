@@ -14,22 +14,22 @@ interface Props {
 }
 
 const {
-  title = 'Monarch Pass Apartments | 1-4 Bedroom Apartments in Fort Worth, TX',
-  description = 'Welcome to Monarch Pass Apartments in Fort Worth, TX. Discover affordable luxury with 1, 2, 3, and 4-bedroom floor plans, swimming pool, resident clubhouse, and modern amenities.',
+  title = 'Monar Pass Apartments | 1-4 Bedroom Apartments in Fort Worth, TX',
+  description = 'Welcome to Monar Pass Apartments in Fort Worth, TX. Discover affordable luxury with 1, 2, 3, and 4-bedroom floor plans, swimming pool, resident clubhouse, and modern amenities.',
   currentView = 'home',
   canonicalUrl,
   schemaData,
   hideHeaderFooter = false,
 } = Astro.props;
 
-const siteUrl = 'https://monarchpassapts.com';
+const siteUrl = 'https://monarpass.com';
 const canonical = canonicalUrl || new URL(Astro.url.pathname, siteUrl).href;
 const heroImage = 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg';
 
 const baseApartmentSchema = {
   '@context': 'https://schema.org',
   '@type': 'ApartmentComplex',
-  'name': 'Monarch Pass Apartments',
+  'name': 'Monar Pass Apartments',
   'description': description,
   'url': canonical,
   'telephone': '+1-817-857-8782',
@@ -88,7 +88,7 @@ const baseApartmentSchema = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={heroImage} />
-    <meta property="og:site_name" content="Monarch Pass Apartments" />
+    <meta property="og:site_name" content="Monar Pass Apartments" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />

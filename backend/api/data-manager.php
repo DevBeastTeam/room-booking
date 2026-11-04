@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Modular Database Manager API
+ * Monar Pass Apartments - Modular Database Manager API
  * ==============================================================================
  * Handles:
  *  - Live table statistics (row counts)
@@ -234,10 +234,10 @@ function seedModule($pdo, $table) {
                 ) VALUES (?, ?, ?, ?, ?, ?)
             ");
             $emails = [
-                ['jordan.m@example.com', 'Tour Scheduled: Monarch Pass Apartments', 'tour_confirmation', 'sent', 'Confirmation for Saturday tour of unit 2104', date('Y-m-d H:i:s', strtotime('-1 day'))],
+                ['jordan.m@example.com', 'Tour Scheduled: Monar Pass Apartments', 'tour_confirmation', 'sent', 'Confirmation for Saturday tour of unit 2104', date('Y-m-d H:i:s', strtotime('-1 day'))],
                 ['sarah.j@example.com',  'Payment Receipt: September Rent',        'receipt',           'sent', 'Paddle receipt for $909.00 holding/rent payment', date('Y-m-d H:i:s', strtotime('-2 days'))],
                 ['david.m@example.com',  'Application Under Review (APP-001)',     'application',       'sent', 'Notice of background screening commencement', date('Y-m-d H:i:s', strtotime('-3 days'))],
-                ['support@monarchpass.com', 'New Maintenance Work Order (MR-001)', 'admin_alert',      'sent', 'High priority HVAC ticket created for unit 2104', date('Y-m-d H:i:s', strtotime('-4 days'))],
+                ['support@monarpass.com', 'New Maintenance Work Order (MR-001)', 'admin_alert',      'sent', 'High priority HVAC ticket created for unit 2104', date('Y-m-d H:i:s', strtotime('-4 days'))],
             ];
             foreach ($emails as $em) { $stmt->execute($em); }
             return count($emails);
@@ -276,19 +276,19 @@ function seedModule($pdo, $table) {
         case 'site_settings':
             $pdo->exec("DELETE FROM `site_settings`");
             $defaultSettings = [
-                'siteName' => 'Monarch Pass Apartments',
+                'siteName' => 'Monar Pass Apartments',
                 'tagline' => 'Spacious 1-4 Bedroom Apartments in Fort Worth',
                 'logoUrl' => 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_325,h_60/s3/2/58193/pn_monarchpass_logo_pms%20web.png',
                 'heroImageUrl' => 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg',
                 'phone' => '+1 817-857-8782',
                 'secondaryPhone' => '+1 817-531-1750',
-                'email' => 'leasing@monarchpassapts.com',
-                'supportEmail' => 'support@monarchpassapts.com',
+                'email' => 'leasing@monarpass.com',
+                'supportEmail' => 'support@monarpass.com',
                 'address' => '4500 Campus Dr, Fort Worth, TX 76119',
                 'city' => 'Fort Worth',
                 'state' => 'TX',
                 'zip' => '76119',
-                'footerDescription' => 'Come explore the wonders of Monarch Pass and find the perfect home that fits your lifestyle!',
+                'footerDescription' => 'Come explore the wonders of Monar Pass and find the perfect home that fits your lifestyle!',
                 'managedBy' => 'Cushman & Wakefield',
                 'officeHours' => [
                     'monFri' => '10:00 AM - 6:00 PM',
@@ -296,8 +296,8 @@ function seedModule($pdo, $table) {
                     'sun' => '1:00 PM - 5:00 PM',
                 ],
                 'social' => [
-                    'facebook' => 'https://www.facebook.com/MonarchPassAPTS',
-                    'instagram' => 'https://www.instagram.com/lifeatmonarchpass',
+                    'facebook' => 'https://www.facebook.com/MonarPassAPTS',
+                    'instagram' => 'https://www.instagram.com/lifeatmonarpass',
                 ],
                 'portals' => [
                     'resident' => '/dashboard',
@@ -333,7 +333,7 @@ function seedModule($pdo, $table) {
             $legals = [
                 ['terms', 'Terms & Conditions', 'September 2026', "1. Rental Eligibility: All applicants must satisfy background and income criteria (2.5x to 3x monthly rent).\n2. Pricing Disclaimer: Rates and availability subject to change until lease signing.\n3. Community Rules: Quiet hours 10:00 PM - 8:00 AM.\n4. Subletting: Unauthorized occupants strictly prohibited."],
                 ['privacy', 'Privacy Policy', 'September 2026', "1. Data Collection: We collect contact info, lease applications, and maintenance tickets.\n2. Use: Used strictly for property leasing, communications, and payments.\n3. Security: TLS encryption and role-based access control enforced."],
-                ['accessibility', 'Accessibility Statement', 'September 2026', "Monarch Pass Apartments is committed to digital accessibility complying with WCAG 2.1 Level AA standards."]
+                ['accessibility', 'Accessibility Statement', 'September 2026', "Monar Pass Apartments is committed to digital accessibility complying with WCAG 2.1 Level AA standards."]
             ];
             foreach ($legals as $l) { $stmt->execute($l); }
             return count($legals);
@@ -459,7 +459,7 @@ if ($action === 'export') {
     data_manager_require_allowed_tables($requestedTables);
 
     $exportData = [
-        'app' => 'Monarch Pass Apartments',
+        'app' => 'Monar Pass Apartments',
         'exportDate' => date('Y-m-d H:i:s'),
         'version' => '1.0.0',
         'tables' => []

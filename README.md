@@ -1,4 +1,4 @@
-# Monarch Pass Apartments - Room & Apartment Booking Platform
+# Monar Pass Apartments - Room & Apartment Booking Platform
 
 A high-performance modern web application built with **Astro 5**, **React 19 Islands**, **PHP 8.2 Backend**, **MySQL Database**, and **Paddle Payment Gateway (One-Time Payments)**.
 

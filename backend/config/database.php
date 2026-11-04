@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Database Configuration & PDO Singleton Helper
+ * Monar Pass Apartments - Database Configuration & PDO Singleton Helper
  * ==============================================================================
  */
 

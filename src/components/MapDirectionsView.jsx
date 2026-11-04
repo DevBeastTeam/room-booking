@@ -222,7 +222,7 @@ export default function MapDirectionsView({
                 </h3>
               </div>
               <p style={{ color: '#9e9282', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-                Enter your starting location or address to get step-by-step navigation directly to Monarch Pass Apartments.
+                Enter your starting location or address to get step-by-step navigation directly to Monar Pass Apartments.
               </p>
 
               <form onSubmit={handleGetDirections}>
@@ -325,7 +325,7 @@ export default function MapDirectionsView({
               }}
             >
               <iframe
-                title="Monarch Pass Location Map"
+                title="Monar Pass Location Map"
                 src="https://maps.google.com/maps?q=4500%20Campus%20Drive%2C%20Fort%20Worth%2C%20TX%2076119&t=&z=14&ie=UTF8&iwloc=&output=embed"
                 style={{ width: '100%', height: '100%', border: 0 }}
                 allowFullScreen=""

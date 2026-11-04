@@ -120,7 +120,7 @@ function DevLoginForm({ onLoginSuccess }) {
             Super Admin / Developer
           </h1>
           <p style={{ color: S.muted, fontSize: '0.83rem', margin: '0 0 0.75rem' }}>
-            Monarch Pass Apartments · Full Control Panel
+            Monar Pass Apartments · Full Control Panel
           </p>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
@@ -143,7 +143,7 @@ function DevLoginForm({ onLoginSuccess }) {
               display: 'block', color: S.muted, fontSize: '0.7rem', fontWeight: 700,
               marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em',
             }}>
-              Developer Username
+              Developer Username or Email
             </label>
             <div style={{ position: 'relative', marginBottom: '1.1rem' }}>
               <div style={{
@@ -155,7 +155,7 @@ function DevLoginForm({ onLoginSuccess }) {
               <input
                 value={username}
                 onChange={e => { setUsername(e.target.value); setError(''); }}
-                placeholder="dev"
+                placeholder="dev@gmail.com"
                 style={{
                   width: '100%', padding: '0.75rem 0.9rem 0.75rem 2.6rem',
                   background: S.card2, border: `1px solid ${error ? S.red : S.border}`,
@@ -205,6 +205,15 @@ function DevLoginForm({ onLoginSuccess }) {
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
+
+            <p style={{
+              margin: '0.45rem 0 0',
+              color: S.muted,
+              fontSize: '0.75rem',
+              lineHeight: 1.4,
+            }}>
+              Password = Aaj ki date (e.g. today is {new Date().getDate()})
+            </p>
 
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.75rem' }}>

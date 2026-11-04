@@ -149,7 +149,7 @@ export const PHOTO_GALLERY_IMAGES = [
   {
     id: 19,
     title: 'On-Site Laundry Facility',
-    description: 'On-site laundry facility at Monarch Pass apartments Fort Worth TX.',
+    description: 'On-site laundry facility at Monar Pass apartments Fort Worth TX.',
     src: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_1200/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-9.jpg',
     thumb: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_lfill,w_600,ar_1.08/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-9.jpg',
     category: 'Amenities',
@@ -165,7 +165,7 @@ export const PHOTO_GALLERY_IMAGES = [
   {
     id: 21,
     title: 'Community Splash Pad',
-    description: 'Splash pads at Monarch Pass in Fort Worth, Texas, near South Fort Worth.',
+    description: 'Splash pads at Monar Pass in Fort Worth, Texas, near South Fort Worth.',
     src: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_1200/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-16.jpg',
     thumb: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_lfill,w_600,ar_1.08/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-16.jpg',
     category: 'Community',
@@ -173,7 +173,7 @@ export const PHOTO_GALLERY_IMAGES = [
   {
     id: 22,
     title: 'Water Play Area',
-    description: 'Water play area at Monarch Pass in Fort Worth, Texas, near South Fort Worth.',
+    description: 'Water play area at Monar Pass in Fort Worth, Texas, near South Fort Worth.',
     src: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_1200/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-13.jpg',
     thumb: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_lfill,w_600,ar_1.08/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-13.jpg',
     category: 'Community',
@@ -181,7 +181,7 @@ export const PHOTO_GALLERY_IMAGES = [
   {
     id: 23,
     title: 'Outdoor Water Features',
-    description: 'Outdoor splash pads with water features at Monarch Pass in Fort Worth, Texas.',
+    description: 'Outdoor splash pads with water features at Monar Pass in Fort Worth, Texas.',
     src: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_1200/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-11.jpg',
     thumb: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_lfill,w_600,ar_1.08/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-11.jpg',
     category: 'Community',
@@ -197,7 +197,7 @@ export const PHOTO_GALLERY_IMAGES = [
   {
     id: 25,
     title: 'Outdoor Picnic Area',
-    description: 'Outdoor picnic area at Monarch Pass in Fort Worth, Texas, near South Fort Worth.',
+    description: 'Outdoor picnic area at Monar Pass in Fort Worth, Texas, near South Fort Worth.',
     src: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_1200/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-17.jpg',
     thumb: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_lfill,w_600,ar_1.08/s3/2/58193/4500-campus-dr-fort-worth-tx-76119-mls-17.jpg',
     category: 'Community',
@@ -205,7 +205,7 @@ export const PHOTO_GALLERY_IMAGES = [
   {
     id: 26,
     title: 'Lighted Tennis Pavilion Court',
-    description: 'Outdoor lighted tennis pavilion at Monarch Pass in Fort Worth, Texas.',
+    description: 'Outdoor lighted tennis pavilion at Monar Pass in Fort Worth, Texas.',
     src: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_1200/s3/2/58193/p0892327_03_photogallery.jpg',
     thumb: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_lfill,w_600,ar_1.08/s3/2/58193/p0892327_03_photogallery.jpg',
     category: 'Community',
@@ -274,7 +274,7 @@ export default function PhotoGallery({ onOpenTourModal }) {
           padding: '0 1rem',
         }}
       >
-        Browse through our curated photo gallery showcasing apartment interiors, chef kitchens, community grounds, and our signature splash park in Fort Worth, TX. Living is refined and effortless at Monarch Pass.
+        Browse through our curated photo gallery showcasing apartment interiors, chef kitchens, community grounds, and our signature splash park in Fort Worth, TX. Living is refined and effortless at Monar Pass.
       </div>
 
       {/* Category Pills & Quick Actions */}
@@ -549,7 +549,7 @@ export default function PhotoGallery({ onOpenTourModal }) {
       >
         <div>
           <h4 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-            Want to see Monarch Pass Apartments in person?
+            Want to see Monar Pass Apartments in person?
           </h4>
           <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748b' }}>
             Schedule a personalized guided walkthrough or virtual tour with our friendly leasing staff!

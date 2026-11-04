@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Automated Migration & Seeder Runner
+ * Monar Pass Apartments - Automated Migration & Seeder Runner
  * ==============================================================================
  * Run from terminal: php backend/migrations/migrate.php
  * Or via web: http://localhost/backend/migrations/migrate.php (with setup key)
@@ -259,7 +259,7 @@ try {
 }
 
 if (php_sapi_name() === 'cli') {
-    echo "\n=== Monarch Pass Database Migration Runner ===\n";
+    echo "\n=== Monar Pass Database Migration Runner ===\n";
     echo "Database: " . $results['database'] . " (" . $results['host'] . ")\n";
     echo "Status:   " . ($results['success'] ? "SUCCESS [OK]" : "FAILED") . "\n";
     if (!empty($results['steps'])) {

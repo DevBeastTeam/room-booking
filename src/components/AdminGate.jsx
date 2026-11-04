@@ -161,7 +161,7 @@ function AdminLoginForm({ onLoginSuccess }) {
             Admin Panel
           </h1>
           <p style={{ color: S.muted, fontSize: '0.83rem', margin: 0 }}>
-            Monarch Pass Apartments · Secure Login
+            Monar Pass Apartments · Secure Login
           </p>
           <div style={{
             marginTop: '0.6rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
@@ -187,7 +187,7 @@ function AdminLoginForm({ onLoginSuccess }) {
               type="text"
               value={username}
               onChange={e => { setUsername(e.target.value); setError(''); }}
-              placeholder="admin  ya  admin@monarchpass.com"
+              placeholder="admin  ya  admin@monarpass.com"
               icon={User}
               error={error && !password.trim() ? error : ''}
             />

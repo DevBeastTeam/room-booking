@@ -1,6 +1,6 @@
 # WorldFirst Payment Gateway & Auto-Subscription Integration Guide
 
-> **Project:** Monarch Pass Luxury Student Housing  
+> **Project:** Monar Pass Luxury Student Housing  
 > **Gateway:** WorldFirst Pay Solution (Ant International / Alibaba Group)  
 > **Status:** Sandbox Ready (with Production Live Switch)  
 > **Replaces:** Paddle Payment Gateway  
@@ -32,7 +32,7 @@ Follow these direct links to register, retrieve your sandbox credentials, and tr
 | Key Name | Description | Direct Portal Link |
 | :--- | :--- | :--- |
 | **Merchant Account ID** | Your unique WorldFirst business entity ID (`WF_US_XXXXXXX`) | [WorldFirst Account Profile](https://portal.worldfirst.com/account/details) |
-| **Client ID / App ID** | Application identifier for the Monarch Pass booking engine | [WorldFirst App Management](https://open.worldfirst.com/platform/app/manage) |
+| **Client ID / App ID** | Application identifier for the Monar Pass booking engine | [WorldFirst App Management](https://open.worldfirst.com/platform/app/manage) |
 | **API Key / Secret** | Primary API token used to authorize server-to-server requests | [WorldFirst Developer Keys](https://open.worldfirst.com/platform/developer/keys) |
 | **RSA Private Key** | Your private key to sign JSON-RPC request payloads | [RSA Keypair Signature Guide](https://open.worldfirst.com/docs/api/security/signature) |
 | **WorldFirst Public Key** | Ant International's public certificate to verify webhook callbacks | [WorldFirst Public Certificates](https://open.worldfirst.com/platform/developer/keys) |
@@ -52,7 +52,7 @@ In `backend/config/.env` (and documented in `backend/config/.env.example`), the 
 WORLDFIRST_ENV=sandbox
 
 # 1. Partner App / Client ID (from https://open.worldfirst.com/platform/app/manage)
-WORLDFIRST_CLIENT_ID=wf_client_sandbox_monarch2026
+WORLDFIRST_CLIENT_ID=wf_client_sandbox_monar2026
 
 # 2. Merchant ID (from https://portal.worldfirst.com/account/details)
 WORLDFIRST_MERCHANT_ID=WF_US_8839210

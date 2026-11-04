@@ -3024,7 +3024,7 @@ function ThemeConfigSection() {
 
   const generateConfigFileCode = () => {
     return `/**
- * MONARCH PASS APARTMENTS - DUAL PALETTE CONFIGURATION (LIGHT & DARK)
+ * MONAR PASS APARTMENTS - DUAL PALETTE CONFIGURATION (LIGHT & DARK)
  * File: src/config/themeConfig.js
  */
 export const DEFAULT_DARK_PALETTE = ${JSON.stringify(palettes.dark, null, 2)};
@@ -3748,7 +3748,7 @@ export default function AdminPanel({
             </div>
             <div>
               <div style={{ color: A.text, fontWeight: 800, fontSize: '0.9rem', lineHeight: 1 }}>Admin Panel</div>
-              <div style={{ color: A.muted, fontSize: '0.7rem' }}>{siteSettings?.siteName || 'Monarch Pass'}</div>
+              <div style={{ color: A.muted, fontSize: '0.7rem' }}>{siteSettings?.siteName || 'Monar Pass'}</div>
             </div>
           </div>
           <div style={{ marginTop: '0.6rem', padding: '0.35rem 0.6rem', backgroundColor: `${A.accent}22`, borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: '0.3rem', border: `1px solid ${A.accent}44` }}>
@@ -3857,7 +3857,7 @@ export default function AdminPanel({
               {ADMIN_NAV.find((n) => n.id === currentSection)?.label}
             </h1>
             <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0.25rem 0 0' }}>
-              {siteSettings?.siteName || 'Monarch Pass Apartments'} · Admin Dashboard
+              {siteSettings?.siteName || 'Monar Pass Apartments'} · Admin Dashboard
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

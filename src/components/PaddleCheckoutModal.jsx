@@ -218,7 +218,7 @@ export default function PaddleCheckoutModal({
             </div>
             <div>
               <div style={{ fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.01em', color: 'var(--text-main)', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
-                Monarch Pass Secure Checkout
+                Monar Pass Secure Checkout
               </div>
               <div style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <span>Powered by Paddle Merchant Services</span>

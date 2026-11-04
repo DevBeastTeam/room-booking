@@ -1,6 +1,6 @@
 <?php
 /**
- * Monarch Pass Apartments - Add-ons & Extra Services API
+ * Monar Pass Apartments - Add-ons & Extra Services API
  */
 
 header('Content-Type: application/json; charset=UTF-8');

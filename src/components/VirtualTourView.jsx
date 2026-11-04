@@ -12,7 +12,7 @@ import {
 const TOURS = [
   {
     id: 'community-tour',
-    title: 'Monarch Pass Community & Grounds Tour',
+    title: 'Monar Pass Community & Grounds Tour',
     badge: 'Interactive 360° Experience',
     description: 'Explore our grounds, splash park, courtyard, resident clubhouse, and community spaces from the comfort of your device.',
     embedUrl: 'https://tour.tourbuilder.com/?tour=62aca4fd2039d022020bc5de&sourceId=1001',
@@ -93,7 +93,7 @@ export default function VirtualTourView({
               color: '#f4efe6',
             }}
           >
-            Virtual Tours of Monarch Pass
+            Virtual Tours of Monar Pass
           </h1>
 
           <p style={{ fontSize: '1.05rem', color: '#b5a999', lineHeight: 1.7, margin: '0 auto 2.25rem', maxWidth: '680px' }}>

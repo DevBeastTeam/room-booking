@@ -161,7 +161,7 @@ export default function Header({
             {/* Social Icons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <a 
-                href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarchPassAPTS'} 
+                href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarPassAPTS'} 
                 target="_blank" 
                 rel="noreferrer"
                 aria-label="Facebook"
@@ -190,7 +190,7 @@ export default function Header({
               </a>
 
               <a 
-                href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarchpass'} 
+                href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarpass'} 
                 target="_blank" 
                 rel="noreferrer"
                 aria-label="Instagram"
@@ -473,7 +473,7 @@ export default function Header({
                   transition: 'color 0.3s ease',
                 }}
               >
-                MONARCH PASS
+                MONAR PASS
               </span>
               <span
                 style={{
@@ -699,7 +699,7 @@ export default function Header({
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1rem', fontWeight: 600, color: 'var(--text-main, #f4efe6)' }}>
-                    MONARCH PASS
+                    MONAR PASS
                   </span>
                   <span style={{ fontSize: '0.6rem', color: 'var(--primary-color, #c9a96e)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                     Fort Worth, TX

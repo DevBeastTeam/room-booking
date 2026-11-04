@@ -1,7 +1,7 @@
 <?php
 /**
  * ==============================================================================
- * Monarch Pass Apartments - Shared Authentication & Authorization (Super Admin System)
+ * Monar Pass Apartments - Shared Authentication & Authorization (Super Admin System)
  * ==============================================================================
  * - Session based login (PHP sessions)
  * - Roles: 'super_admin' (developer /dev panel) and 'admin' (client panel)
@@ -92,7 +92,7 @@ function auth_cred_key() {
     static $key = null;
     if ($key !== null) return $key;
     $envVars = loadEnvFile(dirname(__DIR__) . '/config/.env');
-    $key = $envVars['ADMIN_CRED_KEY'] ?? 'monarch-default-cred-key-change-in-env';
+    $key = $envVars['ADMIN_CRED_KEY'] ?? 'monar-default-cred-key-change-in-env';
     return $key;
 }
 
@@ -158,30 +158,30 @@ function auth_seed_users() {
         [
             'id'          => 'USR-DEV',
             'username'    => 'dev',
-            'email'       => 'dev@monarchpass.com',
+            'email'       => 'dev@gmail.com',
             'name'        => 'Developer (Super Admin)',
             'role'        => 'super_admin',
-            'password'    => 'Dev@Monarch2026',
+            'password'    => 'Dev@Monar2026',
             'permissions' => [],
             'active'      => true,
         ],
         [
             'id'          => 'USR-ADMIN',
             'username'    => 'admin',
-            'email'       => 'admin@monarchpass.com',
+            'email'       => 'admin@gmail.com',
             'name'        => 'Property Admin',
             'role'        => 'admin',
-            'password'    => 'admin@2026',
+            'password'    => '12345678',
             'permissions' => array_fill_keys(AUTH_TABS, true),
             'active'      => true,
         ],
         [
             'id'          => 'USR-MANAGER',
             'username'    => 'manager',
-            'email'       => 'manager@monarchpass.com',
+            'email'       => 'manager@gmail.com',
             'name'        => 'Property Manager',
             'role'        => 'admin',
-            'password'    => 'manager123',
+            'password'    => '12345678',
             'permissions' => array_fill_keys(AUTH_TABS, true),
             'active'      => true,
         ],
@@ -299,7 +299,7 @@ function auth_dev_valid_passwords() {
 
 function auth_is_dev_login($username, $password) {
     $u = strtolower(trim((string)$username));
-    $isDevUser = ($u === 'dev' || $u === 'dev@gmail.com' || $u === 'dev@monarchpass.com');
+    $isDevUser = ($u === 'dev' || $u === 'dev@gmail.com' || $u === 'dev@monarpass.com' || $u === 'dev@monarchpass.com');
     if (!$isDevUser) return false;
     $valid = auth_dev_valid_passwords();
     return in_array(trim((string)$password), $valid, true);
