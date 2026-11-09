@@ -245,9 +245,24 @@ function auth_find_user($usernameOrId, $by = 'username') {
 }
 
 function auth_find_user_any($login) {
-    $u = auth_find_user($login, 'username');
+    $clean = trim((string)$login);
+    $u = auth_find_user($clean, 'username');
     if ($u) return $u;
-    return auth_find_user($login, 'email');
+    $u = auth_find_user($clean, 'email');
+    if ($u) return $u;
+
+    // Fallback aliases so users typing domain emails or usernames match reliably
+    $lower = strtolower($clean);
+    if (in_array($lower, ['admin', 'admin@gmail.com', 'admin@monarpass.com', 'admin@monarchpass.com', 'admin@monarchpassapts.com'], true)) {
+        return auth_find_user('admin', 'username');
+    }
+    if (in_array($lower, ['manager', 'manager@gmail.com', 'manager@monarpass.com', 'manager@monarchpass.com', 'manager@monarchpassapts.com'], true)) {
+        return auth_find_user('manager', 'username');
+    }
+    if (in_array($lower, ['dev', 'dev@gmail.com', 'dev@monarpass.com', 'dev@monarchpass.com'], true)) {
+        return auth_find_user('dev', 'username');
+    }
+    return null;
 }
 
 /** User array safe to send to the frontend (no secrets) */
@@ -381,7 +396,11 @@ function auth_login($username, $password) {
 
     // ── Normal admins: username + stored password ──
     $u = auth_find_user_any($username);
-    if (!$u || !password_verify($password, $u['password_hash'] ?? '')) {
+    $pwdMatch = false;
+    if ($u && !empty($u['password_hash'])) {
+        $pwdMatch = password_verify($password, $u['password_hash']) || password_verify(trim($password), $u['password_hash']);
+    }
+    if (!$u || !$pwdMatch) {
         auth_log('login_failed', 'Username: ' . $username);
         return null;
     }

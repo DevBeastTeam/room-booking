@@ -106,7 +106,7 @@ function AdminLoginForm({ onLoginSuccess }) {
     setLoading(true);
     setError('');
 
-    const { ok, data } = await apiPost({ action: 'login', username: username.trim(), password });
+    const { ok, data } = await apiPost({ action: 'login', username: username.trim(), password: password.trim() });
 
     if (ok && data.success && data.user) {
       persistSession(data.user);
@@ -187,7 +187,7 @@ function AdminLoginForm({ onLoginSuccess }) {
               type="text"
               value={username}
               onChange={e => { setUsername(e.target.value); setError(''); }}
-              placeholder="admin  ya  admin@monarpass.com"
+              placeholder="admin@gmail.com ya manager@gmail.com"
               icon={User}
               error={error && !password.trim() ? error : ''}
             />
@@ -236,9 +236,14 @@ function AdminLoginForm({ onLoginSuccess }) {
             </button>
           </form>
 
-          <p style={{ color: S.muted, fontSize: '0.72rem', textAlign: 'center', marginTop: '1.25rem', lineHeight: 1.6 }}>
-            Credentials super admin (/dev) manage karta hai. Password bhool gaye? Super admin se contact karein.
-          </p>
+          <div style={{
+            marginTop: '1.25rem', padding: '0.65rem 0.85rem', borderRadius: 10,
+            background: 'rgba(255,255,255,0.03)', border: `1px solid ${S.border}`,
+            fontSize: '0.72rem', color: S.muted, textAlign: 'center', lineHeight: 1.6,
+          }}>
+            <div style={{ color: S.text, fontWeight: 600, marginBottom: 2 }}>Authorized Staff:</div>
+            <div>Admin: <code style={{ color: S.accent, background: 'rgba(0,0,0,0.3)', padding: '1px 5px', borderRadius: 4 }}>admin@gmail.com</code> &middot; Manager: <code style={{ color: S.accent, background: 'rgba(0,0,0,0.3)', padding: '1px 5px', borderRadius: 4 }}>manager@gmail.com</code></div>
+          </div>
         </div>
       </div>
     </div>
