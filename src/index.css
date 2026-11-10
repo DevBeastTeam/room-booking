@@ -731,6 +731,17 @@ section { position: relative; }
 .d-md-none { display: none; }
 @media (max-width: 768px) { .d-md-none { display: flex; } }
 
+/* ── Responsive visibility helpers ────────────────────────────────────────────
+   The React components set their layout with inline styles, and inline styles
+   win over ordinary class rules. These helpers therefore use !important so
+   they can reliably switch an element on or off per breakpoint.            */
+@media (max-width: 767px) {
+  .hide-on-mobile { display: none !important; }
+}
+@media (min-width: 768px) {
+  .show-on-mobile { display: none !important; }
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .header-nav { display: none; }
@@ -1036,4 +1047,46 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+/* ── Hero carousel controls on small screens ─────────────────────────────────
+   Vertically-centred arrows landed straight on top of the hero paragraph on
+   phones, so on mobile they move down beside the slide indicators.          */
+@media (max-width: 767px) {
+  .hero-arrow-prev,
+  .hero-arrow-next {
+    top: auto !important;
+    bottom: 54px !important;
+    transform: none !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .hero-arrow-prev { left: 14px !important; }
+  .hero-arrow-next { right: 14px !important; }
+}
+
+/* ── Floating widget positions on small screens ──────────────────────────────
+   The mobile promo strip is pinned to the bottom of the viewport, so the
+   floating buttons have to move up or they sit on top of it.              */
+@media (max-width: 767px) {
+  .accessibility-floating-btn {
+    bottom: 84px !important;
+    left: 16px !important;
+    width: 42px !important;
+    height: 42px !important;
+  }
+  .concierge-widget {
+    bottom: 84px !important;
+    right: 16px !important;
+  }
+}
+
+/* On phones the hero arrows collided with the floating widgets and the sticky
+   promo strip, so they are replaced by touch swipe + the (now tappable) dots. */
+@media (max-width: 767px) {
+  .hero-arrow-prev,
+  .hero-arrow-next {
+    display: none !important;
+  }
+  .hero-section { touch-action: pan-y; }
 }

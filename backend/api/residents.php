@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/config/store.php';
 require_once __DIR__ . '/_auth.php';
 
 auth_send_cors_headers();
@@ -19,8 +20,14 @@ auth_require_csrf_if_mutating();
 $pdo = getDatabaseConnection();
 
 if (!$pdo) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
+    // Database outage → serve the last known mirror instead of a hard 500.
+    $mirror = mp_store_rows('residents');
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        echo json_encode(['success' => true, 'data' => $mirror, 'source' => 'json_mirror']);
+        exit;
+    }
+    http_response_code(503);
+    echo json_encode(['success' => false, 'error' => 'Database unavailable — please retry shortly.', 'code' => 'db_unavailable']);
     exit;
 }
 

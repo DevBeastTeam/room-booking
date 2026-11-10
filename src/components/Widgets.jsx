@@ -31,7 +31,11 @@ import {
 } from '../services/chatService';
 
 export default function Widgets({ onOpenScheduleTour }) {
-  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+  // On phones the expanded panel covered the hero CTAs, so it starts closed.
+  const [isMenuCollapsed, setIsMenuCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768;
+  });
   const [activeModal, setActiveModal] = useState(null); // 'chat', 'tour', 'email', 'call', 'accessibility'
 
   // ── Real Chat State (Admin & Customer Live Chat) ──────────────────────────
@@ -241,6 +245,7 @@ export default function Widgets({ onOpenScheduleTour }) {
           left: '24px',
           width: '46px',
           height: '46px',
+          // (the class below lifts it clear of the mobile sticky promo bar)
           borderRadius: '50%',
           backgroundColor: 'var(--card-bg, #0c101c)',
           border: '1px solid var(--card-border, rgba(201, 169, 110, 0.3))',
@@ -333,6 +338,7 @@ export default function Widgets({ onOpenScheduleTour }) {
       {/* ========================================================================= */}
       {!activeModal && (
         <div
+          className="concierge-widget"
           style={{
             position: 'fixed',
             bottom: '24px',

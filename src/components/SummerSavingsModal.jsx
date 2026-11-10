@@ -4,20 +4,46 @@ import { X, Sparkles, ArrowRight } from 'lucide-react';
 export default function SummerSavingsModal({ onNavigateFloorPlans }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Auto-launch after 3.5 seconds if not dismissed in current session
+  // ── When to show it ──────────────────────────────────────────────────────
+  // A fixed 3.5s timer interrupted whatever the visitor came to look at.
+  // Now it waits for exit intent (mouse leaving through the top of the page)
+  // and only falls back to a long timer. It never appears twice per session.
   useEffect(() => {
-    const hasDismissed = sessionStorage.getItem('monarch_savings_dismissed');
-    if (!hasDismissed) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
+    if (typeof window === 'undefined') return;
+
+    let dismissed = false;
+    try {
+      dismissed = sessionStorage.getItem('monarch_savings_dismissed') === 'true';
+    } catch { /* storage unavailable */ }
+    if (dismissed) return;
+
+    const open = () => {
+      if (dismissed) return;
+      dismissed = true;
+      setIsOpen(true);
+    };
+
+    // Exit intent — only for pointer devices.
+    const onMouseLeave = (e) => {
+      if (e.relatedTarget || e.clientY > 8) return;
+      open();
+    };
+
+    // Fallback: a patient timer.
+    const timer = setTimeout(open, 12000);
+
+    document.addEventListener('mouseleave', onMouseLeave, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mouseleave', onMouseLeave);
+    };
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    sessionStorage.setItem('monarch_savings_dismissed', 'true');
+    try {
+      sessionStorage.setItem('monarch_savings_dismissed', 'true');
+    } catch { /* storage unavailable */ }
   };
 
   const handleAction = () => {

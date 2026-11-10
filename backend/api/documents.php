@@ -6,6 +6,7 @@
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/config/store.php';
 require_once __DIR__ . '/_auth.php';
 
 auth_send_cors_headers();
@@ -27,21 +28,28 @@ if ($method === 'GET') {
         exit;
     }
     $pdo = getDatabaseConnection();
-    if (!$pdo) { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Database connection failed']); exit; }
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM `documents` WHERE `unit_number` = ? ORDER BY `id` ASC");
-        $stmt->execute([trim($unit)]);
-        echo json_encode(['success' => true, 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM `documents` WHERE `unit_number` = ? ORDER BY `id` ASC");
+            $stmt->execute([trim($unit)]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            mp_store_write($STORE, $rows);
+            echo json_encode(['success' => true, 'data' => $rows]);
+            exit;
+        } catch (Exception $e) {
+            error_log('documents.php read error: ' . $e->getMessage());
+        }
     }
+    $mirrored = array_values(array_filter(mp_store_rows($STORE), function ($r) use ($unit) {
+        return (string)($r['unit_number'] ?? '') === trim($unit);
+    }));
+    echo json_encode(['success' => true, 'data' => $mirrored, 'source' => 'json_mirror']);
     exit;
 }
 
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $pdo = getDatabaseConnection();
-if (!$pdo) { http_response_code(500); echo json_encode(['success' => false, 'error' => 'Database connection failed']); exit; }
+$STORE = 'documents';
 
 if ($method === 'POST') {
     try {

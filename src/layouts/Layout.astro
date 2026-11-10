@@ -219,6 +219,6 @@ const baseApartmentSchema = {
     </main>
 
     {!hideHeaderFooter && <Footer client:load />}
-    {!hideHeaderFooter && <SiteModals client:idle />}
+    {!hideHeaderFooter && <SiteModals client:idle currentView={currentView} />}
   </body>
 </html>

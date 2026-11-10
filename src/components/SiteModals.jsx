@@ -8,7 +8,7 @@ import WorldFirstCheckoutModal from './WorldFirstCheckoutModal';
 import { getSiteSettings, getLegalPages, getSupportInquiries } from '../services/siteDataService';
 import { trackEvent } from '../services/analytics.js';
 
-export default function SiteModals({ minimal = false }) {
+export default function SiteModals({ minimal = false , currentView = 'home' }) {
   const [siteSettings, setSiteSettings] = useState(() => getSiteSettings());
   const [legalPages, setLegalPages] = useState(() => getLegalPages());
   const [_supportInquiries, setSupportInquiries] = useState(() => getSupportInquiries());
@@ -123,7 +123,11 @@ export default function SiteModals({ minimal = false }) {
         customerPreset={paddlePreset.customer}
       />
 
-      {!minimal && <SummerSavingsModal onNavigateFloorPlans={handleNavigateFloorPlans} />}
+      {/* The promo popup interrupts browsing on every page, so it is limited to
+          the home page — where the visitor has just arrived. */}
+      {!minimal && currentView === 'home' && (
+        <SummerSavingsModal onNavigateFloorPlans={handleNavigateFloorPlans} />
+      )}
 
       {!minimal && <Widgets onOpenScheduleTour={handleOpenScheduleTour} />}
     </>

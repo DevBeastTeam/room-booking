@@ -490,7 +490,10 @@ export default function App() {
           />
 
           {/* Promotional Summer Savings Nudge Modal & Mobile Nudge Strip */}
-          <SummerSavingsModal onNavigateFloorPlans={handleNavigateFloorPlans} />
+          {/* Home only — the popup must not interrupt browsing on other views. */}
+          {currentView === 'home' && (
+            <SummerSavingsModal onNavigateFloorPlans={handleNavigateFloorPlans} />
+          )}
 
           {/* Knock Doorway & Accessibility Floating Widgets */}
           <Widgets onOpenScheduleTour={handleOpenScheduleTour} />

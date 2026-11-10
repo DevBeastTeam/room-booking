@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -62,6 +62,24 @@ export default function HomeView({
   _onOpenContactSupport,
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // ── Touch swipe for the hero carousel (phones have no room for arrows) ──
+  const touchStartX = useRef(null);
+  const handleTouchStart = (e) => {
+    const touch = e.touches && e.touches[0];
+    touchStartX.current = touch ? touch.clientX : null;
+  };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const touch = (e.changedTouches && e.changedTouches[0]) || null;
+    if (!touch) { touchStartX.current = null; return; }
+    const delta = touch.clientX - touchStartX.current;
+    touchStartX.current = null;
+    const threshold = 45; // px — ignore accidental taps
+    if (Math.abs(delta) < threshold) return;
+    if (delta < 0) handleNextSlide();
+    else handlePrevSlide();
+  };
   const [selectedBedFilter, setSelectedBedFilter] = useState('all');
   const [quickDate, setQuickDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -138,7 +156,12 @@ export default function HomeView({
   return (
     <div style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)', minHeight: '100vh', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* ── 1. CINEMATIC LUXURY HERO SECTION ── */}
-      <section className="hero-section" style={{ position: 'relative', width: '100%', minHeight: '86vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+      <section
+        className="hero-section"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ position: 'relative', width: '100%', minHeight: '86vh', display: 'flex', alignItems: 'center', overflow: 'hidden' }}
+      >
         {/* Background Slide Images */}
         {HERO_SLIDES.map((slide, idx) => (
           <div
@@ -415,16 +438,30 @@ export default function HomeView({
               key={idx}
               onClick={() => setCurrentSlide(idx)}
               aria-label={`Go to slide ${idx + 1}`}
+              aria-current={idx === currentSlide ? 'true' : undefined}
               style={{
-                width: idx === currentSlide ? '32px' : '10px',
-                height: '6px',
-                borderRadius: '3px',
-                backgroundColor: idx === currentSlide ? '#c9a96e' : 'rgba(255,255,255,0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '9px 0',
+                background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
               }}
-            />
+            >
+              {/* The visual bar stays 6px tall; the button around it is the
+                  touch target (24px+) so it is comfortably tappable. */}
+              <span
+                style={{
+                  display: 'block',
+                  width: idx === currentSlide ? '32px' : '10px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  backgroundColor: idx === currentSlide ? '#c9a96e' : 'rgba(255,255,255,0.25)',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            </button>
           ))}
         </div>
       </section>
@@ -481,10 +518,12 @@ export default function HomeView({
 
             {/* Move-in Date */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.5rem' }}>
+              <label htmlFor="hero-move-in-date" style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.5rem' }}>
                 Move-In Target
               </label>
               <input
+                id="hero-move-in-date"
+                aria-label="Preferred move-in date"
                 type="date"
                 value={quickDate}
                 onChange={(e) => setQuickDate(e.target.value)}

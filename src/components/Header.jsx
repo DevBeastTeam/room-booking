@@ -127,11 +127,13 @@ export default function Header({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0.5rem 1.5rem',
-            gap: '1rem',
+            gap: '0.75rem',
+            minWidth: 0,
+            flexWrap: 'nowrap',
           }}
         >
           {/* Left: Quick Contact & Address */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', minWidth: 0, overflow: 'hidden' }}>
             <a 
               href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
               style={{
@@ -142,6 +144,8 @@ export default function Header({
                 fontWeight: 600,
                 textDecoration: 'none',
                 transition: 'color 0.2s',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--primary-color, #c9a96e)'}
               onMouseLeave={e => e.currentTarget.style.color = 'var(--text-main, #e8e0d4)'}
@@ -157,9 +161,9 @@ export default function Header({
           </div>
 
           {/* Right: Actions, Translate, Portals & Mobile Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
             {/* Social Icons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <a 
                 href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarPassAPTS'} 
                 target="_blank" 
@@ -255,7 +259,7 @@ export default function Header({
 
 
             {/* Login Menu Dropdown */}
-            <div style={{ position: 'relative' }}>
+            <div className="hide-on-mobile" style={{ position: 'relative' }}>
               <button
                 onClick={() => setIsLoginOpen(!isLoginOpen)}
                 style={{
@@ -320,7 +324,7 @@ export default function Header({
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <LayoutDashboard size={14} />
-                    <span>Resident Dashboard (Demo)</span>
+                    <span>Resident Dashboard</span>
                   </a>
 
                   <button
@@ -349,7 +353,7 @@ export default function Header({
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <CreditCard size={14} />
-                    <span>Pay Deposit / Rent (Paddle)</span>
+                    <span>Pay Deposit / Rent</span>
                   </button>
 
                   <a
@@ -374,7 +378,7 @@ export default function Header({
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <ShieldCheck size={14} />
-                    <span>Admin Panel (Demo)</span>
+                    <span>Admin Panel</span>
                   </a>
                 </div>
               )}
@@ -566,8 +570,8 @@ export default function Header({
             ))}
           </div>
 
-          {/* Right Action CTAs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          {/* Right Action CTAs — hidden on mobile, the drawer carries the CTA */}
+          <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
             <button
               id="btn-schedule-tour"
               onClick={() => handleScheduleTour()}
@@ -616,8 +620,7 @@ export default function Header({
                 background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
                 color: 'var(--btn-gold-text, #08090f)',
                 cursor: 'pointer',
-                display: 'none',
-                sm: 'inline-flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.45rem',
                 boxShadow: '0 4px 15px var(--shadow-color, rgba(201, 169, 110, 0.3))',

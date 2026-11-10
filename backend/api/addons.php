@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/config/store.php';
 require_once __DIR__ . '/_auth.php';
 
 auth_send_cors_headers();
@@ -19,24 +20,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     auth_require_csrf_if_mutating();
 }
 $pdo = getDatabaseConnection();
-
-if (!$pdo) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
-    exit;
-}
+$STORE = 'addons';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    try {
-        $stmt = $pdo->query("SELECT * FROM `addons` ORDER BY `id` ASC");
-        $addons = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['success' => true, 'data' => $addons]);
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    if ($pdo) {
+        try {
+            $stmt = $pdo->query("SELECT * FROM `addons` ORDER BY `id` ASC");
+            $addons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            mp_store_write($STORE, $addons);
+            echo json_encode(['success' => true, 'data' => $addons]);
+            exit;
+        } catch (Exception $e) {
+            error_log('addons.php read error: ' . $e->getMessage());
+        }
     }
+    // Database unavailable → serve the last known mirror instead of a 500.
+    echo json_encode(['success' => true, 'data' => mp_store_rows($STORE), 'source' => 'json_mirror']);
     exit;
 }
 

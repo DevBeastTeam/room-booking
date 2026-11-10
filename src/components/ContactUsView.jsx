@@ -409,10 +409,12 @@ export default function ContactUsView({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      <label htmlFor="contact-first-name-" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         First Name *
                       </label>
+                      
                       <input
+                        id="contact-first-name-"
                         type="text"
                         required
                         value={formData.firstName}
@@ -432,10 +434,12 @@ export default function ContactUsView({
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      <label htmlFor="contact-last-name" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Last Name
                       </label>
+                      
                       <input
+                        id="contact-last-name"
                         type="text"
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
@@ -456,10 +460,12 @@ export default function ContactUsView({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      <label htmlFor="contact-email-address-" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Email Address *
                       </label>
+                      
                       <input
+                        id="contact-email-address-"
                         type="email"
                         required
                         value={formData.email}
@@ -479,10 +485,12 @@ export default function ContactUsView({
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      <label htmlFor="contact-phone-number" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Phone Number
                       </label>
+                      
                       <input
+                        id="contact-phone-number"
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -503,10 +511,12 @@ export default function ContactUsView({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      <label htmlFor="contact-desired-move-in-date" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Desired Move-In Date
                       </label>
+                      
                       <input
+                        id="contact-desired-move-in-date"
                         type="date"
                         value={formData.moveInDate}
                         onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })}
@@ -524,10 +534,12 @@ export default function ContactUsView({
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                      <label htmlFor="contact-preferred-residence-layout" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                         Preferred Residence Layout
                       </label>
+                      
                       <select
+                        id="contact-preferred-residence-layout"
                         value={formData.bedrooms}
                         onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
                         style={{
@@ -550,10 +562,12 @@ export default function ContactUsView({
                   </div>
 
                   <div style={{ marginBottom: '1.25rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
+                    <label htmlFor="contact-questions-or-special-inquiries" style={{ display: 'block', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: '0.45rem' }}>
                       Questions or Special Inquiries
                     </label>
+                      
                     <textarea
+                        id="contact-questions-or-special-inquiries"
                       rows={4}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}

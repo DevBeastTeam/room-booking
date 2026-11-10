@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/config/store.php';
 require_once __DIR__ . '/_auth.php';
 
 auth_send_cors_headers();
@@ -17,12 +18,7 @@ auth_send_cors_headers();
 auth_require_permission('emaillogs');
 auth_require_csrf_if_mutating();
 $pdo = getDatabaseConnection();
-
-if (!$pdo) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
-    exit;
-}
+$STORE = 'email_logs';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -30,6 +26,7 @@ if ($method === 'GET') {
     try {
         $stmt = $pdo->query("SELECT * FROM `email_logs` ORDER BY `id` DESC LIMIT 100");
         $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        mp_store_write($STORE, $logs);
         echo json_encode(['success' => true, 'data' => $logs]);
     } catch (Exception $e) {
         http_response_code(500);
