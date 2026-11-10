@@ -190,6 +190,8 @@ function AdminLoginForm({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                   style={{ background: 'none', border: 'none', color: S.muted, cursor: 'pointer', padding: 4 }}
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}

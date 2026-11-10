@@ -408,9 +408,9 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
               >
                 {plan.availableCount} Available Residences
               </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
                 {plan.name}
-              </h3>
+              </h2>
               <div
                 style={{
                   fontSize: '0.88rem',

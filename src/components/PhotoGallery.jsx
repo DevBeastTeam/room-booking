@@ -561,9 +561,9 @@ export default function PhotoGallery({ onOpenTourModal }) {
         }}
       >
         <div>
-          <h4 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+          <h2 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
             Want to see Monar Pass Apartments in person?
-          </h4>
+          </h2>
           <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748b' }}>
             Schedule a personalized guided walkthrough or virtual tour with our friendly leasing staff!
           </p>

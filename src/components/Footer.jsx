@@ -184,9 +184,9 @@ export default function Footer({
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '1rem' }}>
               <Clock size={16} style={{ color: '#c9a96e' }} />
-              <h4 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#c9a96e', margin: 0 }}>
+              <h3 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#c9a96e', margin: 0 }}>
                 Leasing Office Hours
-              </h4>
+              </h3>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.84rem', color: '#b5a999' }}>

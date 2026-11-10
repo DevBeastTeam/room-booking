@@ -217,9 +217,9 @@ export default function MapDirectionsView({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
                 <Navigation size={22} style={{ color: '#c9a96e' }} />
-                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.65rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
+                <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.65rem', fontWeight: 600, color: '#f4efe6', margin: 0 }}>
                   Get Driving Directions
-                </h3>
+                </h2>
               </div>
               <p style={{ color: '#9e9282', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
                 Enter your starting location or address to get step-by-step navigation directly to Monar Pass Apartments.
