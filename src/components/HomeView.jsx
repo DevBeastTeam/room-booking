@@ -430,6 +430,7 @@ export default function HomeView({
 
         {/* Slide Indicators */}
         <div
+          className="hero-dots"
           style={{
             position: 'absolute',
             bottom: '24px',

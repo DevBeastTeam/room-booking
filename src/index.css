@@ -1107,3 +1107,9 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
 @media (max-width: 767px) {
   .mp-auto-grid { grid-template-columns: 1fr !important; }
 }
+
+/* The mobile promo strip is pinned to the bottom of the viewport, so the hero
+   slide indicators have to sit above it instead of being hidden behind it. */
+@media (max-width: 767px) {
+  .hero-dots { bottom: 78px !important; }
+}
