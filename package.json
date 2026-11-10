@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && cp -r backend dist/",
+    "build": "astro build && npm run build:backend",
+    "build:backend": "cp -r backend dist/ && rm -f dist/backend/config/.env && rm -rf dist/backend/data/*.json && rm -f dist/backend/data/.cred_key",
     "migrate": "php backend/migrations/migrate.php",
     "lint": "oxlint",
     "preview": "astro preview"

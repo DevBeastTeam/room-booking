@@ -27,7 +27,7 @@ SKIP_BUILD=0
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "==> [1/5] Build"
+echo "==> [1/6] Build"
 if [ "$SKIP_BUILD" -eq 0 ]; then
   npm run build
 else
@@ -35,7 +35,7 @@ else
   [ -d dist ] || { echo "dist/ missing — run without --skip-build"; exit 1; }
 fi
 
-echo "==> [2/5] Sanity check: sensitive files must NOT be in dist/"
+echo "==> [2/6] Sanity check: sensitive files must NOT be in dist/"
 for f in dist/backend/config/.env dist/backend/data/admins.json; do
   if [ -f "$f" ]; then
     echo "    ✗ $f would be uploaded — aborting"; exit 1
@@ -43,7 +43,7 @@ for f in dist/backend/config/.env dist/backend/data/admins.json; do
 done
 echo "    ✓ no .env / admins.json in dist"
 
-echo "==> [3/5] Create archive"
+echo "==> [3/6] Create archive"
 ARCHIVE="$(mktemp -d)/deploy.zip"
 ( cd dist && zip -qr "$ARCHIVE" . -x "*.DS_Store" -x "__MACOSX*" )
 echo "    → $(du -h "$ARCHIVE" | cut -f1)"
@@ -53,7 +53,7 @@ if [ -f "$KEY_FILE" ]; then
   SSH_OPTS+=(-i "$KEY_FILE" -o IdentitiesOnly=yes)
 fi
 
-echo "==> [4/5] Upload to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
+echo "==> [4/6] Upload to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
 # Back up the current live tree before overwriting.
 ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" \
   "cd '$REMOTE_DIR' && tar czf /tmp/monar_backup_\$(date +%Y%m%d_%H%M%S).tar.gz . 2>/dev/null || true"
@@ -62,11 +62,16 @@ scp -P "$SSH_PORT" ${KEY_FILE:+-i "$KEY_FILE"} -o StrictHostKeyChecking=no \
 ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "
   set -e
   cd '$REMOTE_DIR'
-  # Wipe the app files but keep backend/config/.env (it lives only on the server)
+  # Wipe the app files but KEEP the two directories that only exist on the server:
+  #   backend/config  -> holds the real .env (secrets, WorldFirst keys)
+  #   backend/data    -> holds admins.json, transactions, inquiries, chat, ...
+  #                     (runtime data — wiping it would reset every admin
+  #                      account and destroy the property's live data)
   find . -mindepth 1 -maxdepth 1 ! -name 'backend' -exec rm -rf {} +
   if [ -d backend ]; then
-    find backend -mindepth 1 -maxdepth 1 ! -name 'config' -exec rm -rf {} +
+    find backend -mindepth 1 -maxdepth 1 ! -name 'config' ! -name 'data' -exec rm -rf {} +
     [ -d backend/config ] && rm -f backend/config/.env
+    [ -d backend/data ] && rm -f backend/data/*.json backend/data/.cred_key
   fi
   unzip -oq /tmp/monar_deploy.zip -d .
   rm -f /tmp/monar_deploy.zip
@@ -76,7 +81,47 @@ ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "
   echo 'extracted'
 "
 
-echo "==> [5/5] Verify"
+echo "==> [5/6] Make sure the server .env has the security variables"
+# The new auth layer needs these. If the server's .env predates them, add them
+# now — otherwise the super admin would be locked out after the update.
+ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "
+  set -e
+  cd '$REMOTE_DIR'
+  ENVF=backend/config/.env
+  [ -f \"\$ENVF\" ] || { echo 'FATAL: backend/config/.env missing on the server'; exit 1; }
+
+  add_if_missing () {
+    grep -q \"^\$1=\" \"\$ENVF\" || printf '%s\n' \"\$2\" >> \"\$ENVF\"
+  }
+
+  add_if_missing SITE_URL 'SITE_URL=$SITE_URL'
+  add_if_missing ADMIN_ALLOW_DATE_PASSWORD 'ADMIN_ALLOW_DATE_PASSWORD=false'
+  add_if_missing AUTH_FORCE_PASSWORD_CHANGE 'AUTH_FORCE_PASSWORD_CHANGE=true'
+  add_if_missing AUTH_MAX_LOGIN_ATTEMPTS 'AUTH_MAX_LOGIN_ATTEMPTS=8'
+  add_if_missing AUTH_LOCKOUT_MINUTES 'AUTH_LOCKOUT_MINUTES=15'
+  add_if_missing WORLDFIRST_DEFAULT_RENT 'WORLDFIRST_DEFAULT_RENT=909.00'
+
+  # Credential + super-admin keys: generate once and never overwrite.
+  if ! grep -q '^ADMIN_CRED_KEY=' \"\$ENVF\" || grep -q '^ADMIN_CRED_KEY=change-me' \"\$ENVF\"; then
+    KEY=\$(php -r 'echo bin2hex(random_bytes(32));')
+    sed -i \"/^ADMIN_CRED_KEY=/d\" \"\$ENVF\"
+    printf 'ADMIN_CRED_KEY=%s\n' \"\$KEY\" >> \"\$ENVF\"
+  fi
+  if ! grep -q '^ADMIN_SUPER_PASSWORD=' \"\$ENVF\" || grep -q '^ADMIN_SUPER_PASSWORD=change-me' \"\$ENVF\"; then
+    PW=\$(php -r 'echo bin2hex(random_bytes(12));')
+    sed -i \"/^ADMIN_SUPER_PASSWORD=/d\" \"\$ENVF\"
+    printf 'ADMIN_SUPER_PASSWORD=%s\n' \"\$PW\" >> \"\$ENVF\"
+    printf '\n@@@@@@@@@@@@@@@@@@@@@@@@\n'
+    printf '  SUPER ADMIN PASSWORD (save it!): %s\n' \"\$PW\"
+    printf '  Login: /dev/  username: dev\n'
+    printf '@@@@@@@@@@@@@@@@@@@@@@@@\n'
+  else
+    echo 'ADMIN_SUPER_PASSWORD already set — left untouched.'
+  fi
+  echo '.env is ready.'
+"
+
+echo "==> [6/6] Verify"
 CODE=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/")
 echo "    home      → HTTP $CODE"
 for p in admin dev dashboard floor-plans contact; do
@@ -86,7 +131,15 @@ printf "    .env leak   → HTTP %s (expect 403)\n" \
   "$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/backend/config/.env")"
 printf "    admins leak → HTTP %s (expect 403)\n" \
   "$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/backend/data/admins.json")"
+printf "    wf history  → HTTP %s (expect 401)\n" \
+  "$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/backend/api/worldfirst.php?action=history")"
+printf "    chat list   → HTTP %s (expect 401)\n" \
+  "$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL/backend/api/chat.php?action=sessions")"
 
 echo
 echo "✅ Deploy complete. Previous version backed up in /tmp/monar_backup_*.tar.gz on the server."
-echo "   Reminder: set ADMIN_SUPER_PASSWORD in backend/config/.env if you have not yet."
+echo "   Next: run the DB migration for the new tables —"
+echo "     ssh -p $SSH_PORT $SSH_USER@$SSH_HOST 'cd $REMOTE_DIR && php backend/migrations/migrate.php'"
+echo "   and seed the resident portal login —"
+echo "     ssh -p $SSH_PORT $SSH_USER@$SSH_HOST 'cd $REMOTE_DIR && php backend/migrations/seed_residents.php'"
+
