@@ -38,8 +38,8 @@ Platform par total **9 public pages** hain jo SEO optimized hain aur Astro 5 + R
   - Transparent fees breakdown: Base Rent, Trash ($15), Pest Control ($5), Parking ($35), Admin Fee ($150), Deposit ($250).
 * **Individual Unit Inventory Grid (`UnitControls.jsx`):**
   - Unit #1002, #2104, #3505, #4101 with real-time status: `Available`, `Occupied`, `Under Maintenance`.
-* **Reserve Unit & Paddle Checkout (`PaddleCheckoutModal.jsx`):**
-  - One-time payment for Holding Deposit ($250) or Application Fee ($50) via Paddle Gateway.
+* **Reserve Unit & Checkout (`PaddleCheckoutModal.jsx`):**
+  - One-time payment for Holding Deposit ($250) or Application Fee ($50) via the WorldFirst gateway.
 
 ---
 
@@ -113,6 +113,13 @@ Platform par total **9 public pages** hain jo SEO optimized hain aur Astro 5 + R
 
 ## 👤 2. Resident / User Portal Dashboard (`/dashboard`)
 
+**Real, authenticated portal** (pehle yeh ek hardcoded mockup tha):
+- Login by **email + unit number + password** (`backend/api/resident.php`), apna **alag session namespace** hai — staff session se mix nahi hota
+- Har data call resident ke apne `unit_number` tak scoped hai; client se bheja gaya unit kabhi use nahi hota
+- Pehli login par password **forcibly** change karwana zaroori hai
+- MySQL unavailable ho to JSON fallback store se kaam chalta hai
+- Data source: `residents`, `units`, `floor_plans`, `maintenance_tickets`, `addons`, `documents`, `notifications`, `transactions`, `resident_activity`
+
 Dedicated portal for apartment residents with **7 interactive sections**:
 
 1. **📊 Overview:**
@@ -125,9 +132,9 @@ Dedicated portal for apartment residents with **7 interactive sections**:
    - Lease Start Date, Lease Expiration Date, Lease Term (12 Months).
    - Security Deposit recorded: $250.
    - Comprehensive rent breakdown (Base Rent $909 + Trash $15 + Pest $5 + Carport $35 + Washer/Dryer $40).
-3. **💳 Payments & Paddle Gateway:**
-   - **One-Time Pay via Paddle Button:** Allows resident to pay current month rent ($909) securely via Paddle Billing v2.
-   - Payment History table: Month, Amount, Date, Payment Method (Online, Paddle, Auto-pay), Status (Paid, Late).
+3. **💳 Payments & WorldFirst Gateway:**
+   - **Pay Rent via WorldFirst:** Resident current month rent ($909) securely pay karta hai (server-resolved amount, gateway-verified).
+   - Payment History table: Month, Amount, Date, Payment Method (Online, WorldFirst, Auto-pay), Status (Paid, Late).
 4. **🔧 Maintenance Service Requests:**
    - "Submit New Work Order" interactive modal (Category: HVAC, Plumbing, Electrical, Appliances; Priority: Low, Medium, High, Emergency).
    - Live tickets tracking board with real-time status: `pending`, `in-progress`, `completed`.
@@ -177,20 +184,28 @@ Comprehensive property management suite with **12 complete modules**:
    - View prospect inquiries submitted via website forms.
    - Filter by status: `New`, `In-Progress`, `Resolved`.
    - Add internal staff notes and follow-up logging.
+10. **💬 Server-Backed Live Chat (`backend/api/chat.php`):**
+    - Visitor ka chat admin panel mein **dusre device se bhi** dikhta hai (pehle yeh sirf usi browser ki localStorage mein tha, to leasing team ko kabhi nazar nahi aati thi)
+    - `chat_sessions` + `chat_messages` tables, MySQL ke saath JSON fallback
+    - Admin: session list, unread badge, reply, close/reopen, delete
+    - Visitor widget 4s par polling, admin panel 5s par polling
+    - Saare admin writes par tab permission (`livechat`) + CSRF token zaroori
 10. **📜 Pages & Legal CMS:**
     - Live content editor for **Terms & Conditions**, **Privacy Policy**, and **Accessibility Statement**.
     - Rich text editing, last updated date tracker, and one-click save.
-11. **⚙️ Site Settings CMS:**
+    - **DB-backed**: legal pages `legal_pages` table se load hoti hain aur save par wapas likhi jati hain (pehle sirf localStorage mein thi — save karna kaam hi nahi karta tha).
+12. **⚙️ Site Settings CMS:**
     - Property Name, Tagline, Phone, Secondary Phone, Leasing Email, Support Email.
     - Physical Street Address, City, State, Zip Code.
     - Office Hours (Mon-Fri, Sat, Sun).
     - Social Media Links (Facebook, Instagram).
     - Resident & Applicant External Portal URLs.
-12. **🎨 Theme & Colors Live Styler (`themeConfig.js`):**
+13. **🎨 Theme & Colors Live Styler (`themeConfig.js`):**
     - Live Color Picker: Primary Accent Color, Secondary Color, Dark Mode Card tones.
     - 6 Pre-configured Designer Themes: *Emerald Teal (Default)*, *Navy Prestige*, *Sunset Luxury*, *Rose Gold*, *Midnight Amber*, *Forest Green*.
     - AI-Powered Harmonious Palette Generator.
     - Instant preview across the live website.
+    - **DB-first**: palette `theme_config` table se load hoti hai, phir localStorage, phir defaults — admin ki change ab visitors tak pohochti hai (pehle sirf browser mein mehfooz hoti thi).
 
 ---
 
@@ -199,7 +214,7 @@ Comprehensive property management suite with **12 complete modules**:
 Dedicated administrative dashboard to seed, format, export, and import database tables modularly:
 
 * **Modular Card Selection:**
-  - Har table ka alag card: Floor Plans, Units, Applications, Residents, Maintenance Tickets, Add-ons, Email Logs, Inquiries, Tours, Site Settings, Theme Config, Legal Pages, Documents, Notifications, Paddle Transactions.
+  - Har table ka alag card: Floor Plans, Units, Applications, Residents, Maintenance Tickets, Add-ons, Email Logs, Inquiries, Tours, Site Settings, Theme Config, Legal Pages, Documents, Notifications, WorldFirst Transactions.
 * **Multi-Select & Bulk Controls:**
   - "Select All" aur "Deselect All" buttons.
   - Multi-select checkboxes for granular control.
@@ -230,15 +245,36 @@ Dedicated administrative dashboard to seed, format, export, and import database 
 | 12 | `legal_pages` | Terms, Privacy & Accessibility | `slug`, `title`, `last_updated`, `content` |
 | 13 | `documents` | Downloadable tenant documents | `name`, `category`, `file_size`, `doc_date`, `file_url`, `unit_number` |
 | 14 | `notifications` | User alerts & notices | `user_unit`, `type`, `message`, `time_text`, `is_read` |
-| 15 | `transactions` | Paddle one-time payment orders | `txn_id`, `paddle_order_id`, `user_name`, `user_email`, `amount`, `status` |
+| 15 | `transactions` | WorldFirst one-time + subscription payment orders | `txn_id`, `paddle_order_id`, `user_name`, `user_email`, `amount`, `status`, `verify_token` |
+| 16 | `chat_sessions` | Live chat conversations | `session_key`, `visitor_name`, `visitor_email`, `status`, `unread_admin`, `last_message` |
+| 17 | `chat_messages` | Live chat messages | `session_key`, `sender` (`user`/`admin`), `message`, `read_by_admin` |
+| 18 | `resident_accounts` | Resident portal logins | `unit_number`, `email`, `full_name`, `password_hash`, `active`, `must_change_password` |
+| 19 | `resident_activity` | Resident activity feed | `unit_number`, `kind`, `title`, `amount`, `status`, `occurred_at` |
 
 ---
 
 ## 🔒 6. Security & Payment Safeguards
 
-1. **Paddle Billing v2 (One-Time Payments Only):**
-   - `billing_cycle => null` explicitly set in Paddle checkout creation. No auto-renewal, no recurring subscriptions.
-2. **Direct Download Protection:**
+1. **Payment Amount Server-Authoritative:**
+   - Client `amount` kabhi use nahi hota — fee table (`$50` / `$250` / `$300`) aur unit/floor-plan record se resolve hota hai
+   - `WORLDFIRST_DEFAULT_RENT` sirf tab use hota hai jab DB lookup fail ho (transient outage ke liye)
+2. **Payment Verification:**
+   - `live` mode mein transaction tabhi "paid" hota hai jab WorldFirst gateway confirm kare
+   - `sandbox` mode mein per-transaction `verify_token` chahiye (sirf creator confirm kar sakta hai)
+   - Inbound webhook **signature-verified** hai; unsigned webhook → HTTP 401
+3. **Authentication Hardening:**
+   - Super admin ke liye strong `ADMIN_SUPER_PASSWORD` (legacy date-based password opt-in aur default OFF)
+   - Credential encryption key hardcoded fallback ke bajaye auto-generated persistent key (`.cred_key`)
+   - Login rate limiting: 8 failed attempts → 15 min lockout (username + IP)
+   - **CSRF token** har mutating request par enforce hota hai; GET se state mutate karna 405 hai
+   - Seeded accounts (`admin` / `manager`) par **forced password rotation** pehli login par
+4. **Same-Origin CORS:**
+   - Koi bhi endpoint `Access-Control-Allow-Origin: *` nahi deta — sirf `SITE_URL` allow hai
+5. **Direct Download Protection:**
    - `backend/config/.env`, `backend/migrations/*.sql`, and `backend/data/*.json` are protected via Apache `.htaccess` (`Deny from all`) and `.gitignore`.
-3. **Database Security:**
+6. **Security Headers (`public/.htaccess`):**
+   - CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, HSTS, `Permissions-Policy`, `Cache-Control: no-store` on PHP responses
+7. **Database Security:**
    - PDO Prepared statements used across all API endpoints with parameterized queries to prevent SQL Injection.
+8. **Database Manager:**
+   - Sirf `super_admin`; strict table allowlist + column validation; destructive actions par CSRF

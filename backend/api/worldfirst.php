@@ -92,6 +92,12 @@ function wf_resolve_amount($pdo, $itemType, $unitNumber) {
                 error_log('WorldFirst floor plan lookup failed: ' . $e->getMessage());
             }
         }
+        // Last resort: a configured server-side default, so a transient database
+        // outage can never block rent payments (and never trusts the client).
+        $fallback = (float)auth_env('WORLDFIRST_DEFAULT_RENT', 0);
+        if ($fallback > 0) {
+            return ['amount' => round($fallback, 2), 'source' => 'env_default'];
+        }
         return ['amount' => 0.0, 'source' => 'unresolved'];
     }
     return ['amount' => 0.0, 'source' => 'unresolved'];

@@ -885,11 +885,7 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
   }, []);
 
   // ── Load the real dashboard data ────────────────────────────────────────────
-  const loadOverview = useCallback(async (isActive = () => true) => {
-    setLoading(true);
-    const { ok, status, data } = await residentApi('overview');
-    if (!isActive()) return;
-    setLoading(false);
+  const applyOverview = useCallback((ok, status, data) => {
     if (!ok) {
       if (status === 401) {
         setSignedOut(true);
@@ -903,11 +899,25 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
     setOverview(data);
   }, []);
 
+  /** Refresh trigger — buttons (Add-ons, Maintenance…) isko call karte hain. */
+  const loadOverview = useCallback(async () => {
+    setLoading(true);
+    const { ok, status, data } = await residentApi('overview');
+    setLoading(false);
+    applyOverview(ok, status, data);
+  }, [applyOverview]);
+
   useEffect(() => {
     let active = true;
-    loadOverview(() => active);
+    residentApi('overview')
+      .then(({ ok, status, data }) => {
+        if (!active) return;
+        applyOverview(ok, status, data);
+      })
+      .catch(() => { if (active) setError('Could not load your dashboard right now.'); })
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [loadOverview]);
+  }, [applyOverview]);
 
   // ── Handle the payment gateway redirect (?payment=success&txn_id=…) ─────────
   useEffect(() => {
