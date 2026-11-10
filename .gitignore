@@ -43,3 +43,4 @@ backend/data/chat.json
 backend/data/residents.json
 backend/data/resident_accounts.json
 backend/data/settings.json
+deploy.zip
