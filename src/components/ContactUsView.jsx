@@ -149,10 +149,10 @@ export default function ContactUsView({
       {/* ── 2. CONTACT CONTENT (TWO COLUMNS) ── */}
       <section style={{ padding: '4.5rem 0' }}>
         <div className="container" style={{ maxWidth: '1120px' }}>
-          <div
+          <div className="mp-auto-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
               gap: '3.5rem',
               alignItems: 'start',
             }}

@@ -510,7 +510,7 @@ export default function WorldFirstCheckoutModal({
                 <label style={{ display: 'block', color: '#dfc285', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>
                   Select Payment Item
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '0.75rem' }}>
                   {PAYMENT_OPTIONS.map(opt => {
                     const active = selectedItem === opt.id;
                     const Icon = opt.icon;
@@ -646,7 +646,7 @@ export default function WorldFirstCheckoutModal({
               </div>
 
               {/* 3. Customer Info */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
+              <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '0.85rem', marginBottom: '1.25rem' }}>
                 <div>
                   <label style={{ display: 'block', color: '#dfc285', fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.35rem', textTransform: 'uppercase' }}>
                     Full Legal Name *

@@ -195,7 +195,7 @@ function OverviewSection({ resident, lease }) {
   return (
     <div>
       <SectionTitle>Overview</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(210px, 100%), 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <StatCard icon={Home}       label="Your Unit"      value={`#${resident?.unit_number ?? '—'}`} sub={resident?.floor_plan ?? '—'} color={C.accent}  />
         <StatCard icon={CreditCard} label="Monthly Rent"   value={`$${Number(rent).toFixed(0)}`} sub="Due on 1st of each month" color={C.info}    />
         <StatCard icon={Calendar}   label="Lease Expires"  value={daysLeft !== null ? `${daysLeft}d` : '—'} sub={leaseEnd || '—'} color={C.warning} />
@@ -636,7 +636,7 @@ function MaintenanceSection({ maintenance, onRefresh, csrfToken }) {
       {showForm && (
         <div style={{ background: C.card, border: `1px solid ${C.accent}44`, borderRadius: 14, padding: '1.4rem', marginBottom: '1.25rem' }}>
           <h3 style={{ color: C.text, fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem' }}>Submit New Request</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
             {[['Issue Title', 'title', 'text', 'e.g. Leaking faucet'], ['Category', 'category', 'select', ''], ['Priority', 'priority', 'select', '']].map(([label, key, type, ph]) => (
               <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 <label style={{ color: C.muted, fontSize: '0.78rem', fontWeight: 600 }}>{label}</label>
@@ -727,7 +727,7 @@ function AddOnsSection({ addons, onRefresh, csrfToken }) {
     <div>
       <SectionTitle>My Add-ons & Amenities</SectionTitle>
       {msg && <Notice type={msg.type} text={msg.text} />}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '1rem' }}>
         {list.length === 0 ? (
           <div style={{ gridColumn: '1 / -1' }}>
             <EmptyState icon={Package} title="No add-ons available" subtitle="Add-ons published by the leasing office will appear here." />

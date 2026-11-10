@@ -1090,3 +1090,20 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
   }
   .hero-section { touch-action: pan-y; }
 }
+
+/* The header carries two CTAs. Below this width the nav links plus both
+   buttons no longer fit inside the container and the row spilled past the
+   viewport, so the secondary CTA is dropped and the primary one is kept. */
+@media (max-width: 1499px) {
+  .header-cta-secondary { display: none !important; }
+}
+
+/* ── Marketing / form grids ───────────────────────────────────────────────────
+   `repeat(auto-fit, minmax(260px, 1fr))` keeps its minimum track width even
+   when the container is narrower, which pushed a second track past the
+   viewport and gave the page a horizontal scrollbar on phones. Below the
+   phone breakpoint these grids collapse to a single column, which is the
+   intended layout anyway.                                                    */
+@media (max-width: 767px) {
+  .mp-auto-grid { grid-template-columns: 1fr !important; }
+}

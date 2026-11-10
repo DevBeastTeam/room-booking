@@ -613,7 +613,7 @@ export default function Header({
 
             <button
               onClick={handleNavFloorPlans}
-              className="btn-gold"
+              className="btn-gold header-cta-secondary"
               style={{
                 padding: '0.55rem 1.25rem',
                 fontSize: '0.78rem',

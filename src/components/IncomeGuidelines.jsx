@@ -384,10 +384,10 @@ export default function IncomeGuidelines({
           Verify your preliminary qualification before initiating your online application. Select your household size and enter your estimated annual gross income.
         </p>
 
-        <div
+        <div className="mp-auto-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
             gap: '2rem',
             marginBottom: '2rem',
           }}
@@ -570,10 +570,10 @@ export default function IncomeGuidelines({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', marginBottom: '4rem' }}>
         
         {/* Section 1: How Affordable Housing Works */}
-        <div
+        <div className="mp-auto-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(201, 169, 110, 0.25)',
@@ -622,10 +622,10 @@ export default function IncomeGuidelines({
         </div>
 
         {/* Section 2: What Is Considered Household Income? */}
-        <div
+        <div className="mp-auto-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(201, 169, 110, 0.25)',
@@ -662,10 +662,10 @@ export default function IncomeGuidelines({
         </div>
 
         {/* Section 3: What You’ll Need to Apply */}
-        <div
+        <div className="mp-auto-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
             borderRadius: '16px',
             overflow: 'hidden',
             border: '1px solid rgba(201, 169, 110, 0.25)',

@@ -365,10 +365,10 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
       {/* ========================================================================= */}
       {/* 2. FLOOR PLANS 3-COLUMN GRID */}
       {/* ========================================================================= */}
-      <div
+      <div className="mp-auto-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
           gap: '2.5rem',
           alignItems: 'start',
         }}

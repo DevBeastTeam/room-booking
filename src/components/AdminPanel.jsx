@@ -230,7 +230,7 @@ function OverviewSection() {
   return (
     <div>
       <SectionTitle>Dashboard Overview</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(190px, 100%), 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <StatCard icon={Building}   label="Total Units"     value={totalUnits}          sub="All floor plans"          color={A.teal}    />
         <StatCard icon={UserCheck}  label="Occupancy"       value={`${Math.round((occupied/totalUnits)*100)}%`} sub={`${occupied}/${totalUnits} units`} color={A.success} />
         <StatCard icon={Home}       label="Available"       value={available}           sub="Ready to rent"            color={A.info}    />
@@ -590,7 +590,7 @@ function AddOnsManagementSection() {
   return (
     <div>
       <SectionTitle>Add-ons & Amenities Management</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '1rem' }}>
         {addons.map(a => (
           <div key={a.id} style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: '1.4rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
@@ -757,7 +757,7 @@ function PaymentsManagementSection() {
       )}
 
       {/* Metric Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <div style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 12, padding: '1.2rem' }}>
           <div style={{ color: A.muted, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total Revenue</div>
           <div style={{ color: A.accent, fontSize: '1.75rem', fontWeight: 800, margin: '0.35rem 0 0.15rem' }}>${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
@@ -1257,7 +1257,7 @@ function AdminActivitySection() {
       <SectionTitle>Admin Activity — Team Logins &amp; Activity Log</SectionTitle>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
         {stats.map(([label, value, color, Icon]) => (
           <div key={label} style={{ background: A.card, border: `1px solid ${A.border}`, borderRadius: 14, padding: '1.1rem 1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -1697,7 +1697,7 @@ function ContactSupportSection({ supportInquiries = [], setSupportInquiries }) {
       </div>
 
       {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <StatCard icon={Inbox} label="Total Inquiries" value={totalCount} color={A.info} />
         <StatCard icon={AlertCircle} label="New / Action Required" value={newCount} sub="Needs response" color={A.warning} />
         <StatCard icon={Clock} label="In Progress" value={inProgressCount} color={A.teal} />
@@ -2464,7 +2464,7 @@ function SiteSettingsSection({ siteSettings, setSiteSettings }) {
             <Building size={16} color={A.accent} /> Property Branding & Identity
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+          <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '1.25rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
                 Website / Property Name
@@ -2549,7 +2549,7 @@ function SiteSettingsSection({ siteSettings, setSiteSettings }) {
             <Phone size={16} color={A.teal} /> Contact Numbers, Email & Address
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+          <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '1.25rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
                 Primary Phone Number (Header & Footer)
@@ -2693,7 +2693,7 @@ function SiteSettingsSection({ siteSettings, setSiteSettings }) {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+            <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '1.25rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.4rem', textTransform: 'uppercase' }}>
                   Management Company Name
@@ -2744,7 +2744,7 @@ function SiteSettingsSection({ siteSettings, setSiteSettings }) {
               <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: A.muted, marginBottom: '0.5rem', textTransform: 'uppercase' }}>
                 Leasing Office Hours
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: '1rem' }}>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: A.muted }}>Monday - Friday:</span>
                   <input
@@ -3300,7 +3300,7 @@ export const DEFAULT_LIGHT_PALETTE = ${JSON.stringify(palettes.light, null, 2)};
           Choose your primary accent and secondary highlight for <strong>{activeEditMode === 'dark' ? 'Dark Mode' : 'Light Mode'}</strong>. Clicking <strong>Auto-Generate</strong> calculates balanced tints, borders, and hover states!
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem', alignItems: 'end' }}>
+        <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '1.25rem', alignItems: 'end' }}>
           {/* Custom Primary */}
           <div style={{ backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, padding: '1rem' }}>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: A.text, marginBottom: '0.5rem' }}>
@@ -3506,7 +3506,7 @@ export const DEFAULT_LIGHT_PALETTE = ${JSON.stringify(palettes.light, null, 2)};
         <h3 style={{ fontSize: '1rem', fontWeight: 800, color: A.text, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Sparkles size={16} style={{ color: A.accent }} /> 1-Click Curated Presets for {activeEditMode === 'dark' ? 'Dark Mode' : 'Light Mode'}
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.85rem' }}>
+        <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))', gap: '0.85rem' }}>
           {presets.map((preset, idx) => (
             <button
               key={idx}
@@ -3540,7 +3540,7 @@ export const DEFAULT_LIGHT_PALETTE = ${JSON.stringify(palettes.light, null, 2)};
         <h3 style={{ fontSize: '1rem', fontWeight: 800, color: A.text, marginBottom: '1.25rem' }}>
           Fine-tune Individual Tokens ({activeEditMode === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'})
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+        <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '1.25rem' }}>
           {colorFields.map((field) => (
             <div key={field.key} style={{ backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, padding: '0.85rem 1rem' }}>
               <div style={{ fontWeight: 700, fontSize: '0.82rem', color: A.text, marginBottom: '0.2rem' }}>

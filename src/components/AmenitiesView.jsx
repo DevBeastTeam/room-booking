@@ -338,7 +338,7 @@ export default function AmenitiesView({
           )}
 
           {/* ── 4. PET POLICY CALLOUT BOX ── */}
-          <div
+          <div className="mp-auto-grid"
             style={{
               backgroundColor: 'rgba(12, 16, 28, 0.85)',
               border: '1px solid rgba(201, 169, 110, 0.25)',
@@ -346,7 +346,7 @@ export default function AmenitiesView({
               padding: '2.25rem',
               marginBottom: '3.5rem',
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
               gap: '2.5rem',
               alignItems: 'center',
             }}
@@ -377,7 +377,7 @@ export default function AmenitiesView({
             </div>
 
             <div style={{ gridColumn: 'span 2' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
                 <div>
                   <div style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c9a96e', fontWeight: 700 }}>Max Pets</div>
                   <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f4efe6' }}>2 Pets Max</div>

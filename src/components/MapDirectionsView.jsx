@@ -196,10 +196,10 @@ export default function MapDirectionsView({
       {/* ── 2. MAP & GET DIRECTIONS SECTION ── */}
       <section style={{ padding: '4rem 0' }}>
         <div className="container">
-          <div
+          <div className="mp-auto-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
               gap: '2.5rem',
               alignItems: 'start',
               marginBottom: '4.5rem',

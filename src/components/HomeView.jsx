@@ -173,6 +173,10 @@ export default function HomeView({
             style={{
               position: 'absolute',
               inset: 0,
+              // The background is scaled slightly for the Ken Burns effect.
+              // Without clipping, the scaled layer pushed the page 8px wider
+              // than the viewport on phones and created a horizontal scroll.
+              overflow: 'hidden',
               opacity: idx === currentSlide ? 1 : 0,
               transition: 'opacity 1.2s ease-in-out',
               pointerEvents: idx === currentSlide ? 'auto' : 'none',
@@ -483,10 +487,10 @@ export default function HomeView({
             WebkitBackdropFilter: 'blur(20px)',
           }}
         >
-          <div
+          <div className="mp-auto-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
               gap: '1.5rem',
               alignItems: 'center',
             }}
@@ -604,10 +608,10 @@ export default function HomeView({
       {/* ── 3. LUXURY STATS STRIP ── */}
       <section style={{ padding: '4.5rem 0 2rem' }}>
         <div className="container">
-          <div
+          <div className="mp-auto-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
               gap: '1.5rem',
               backgroundColor: 'rgba(12, 16, 28, 0.6)',
               border: '1px solid rgba(201, 169, 110, 0.15)',
@@ -669,10 +673,10 @@ export default function HomeView({
       {/* ── 4. THE MONAR DISTINCTION (EDITORIAL STORY) ── */}
       <section style={{ padding: '4.5rem 0' }}>
         <div className="container">
-          <div
+          <div className="mp-auto-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
               gap: '4rem',
               alignItems: 'center',
             }}
@@ -852,7 +856,7 @@ export default function HomeView({
           </div>
 
           {/* Floor Plan Cards Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+          <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '2rem' }}>
             {filteredPlans.slice(0, 4).map((plan) => (
               <div
                 key={plan.id}
@@ -1041,7 +1045,7 @@ export default function HomeView({
           </div>
 
           {/* Amenities Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+          <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '1.5rem' }}>
             {[
               {
                 title: 'Community Splash Park',
@@ -1175,10 +1179,10 @@ export default function HomeView({
       {/* ── 7. INTERACTIVE 3D / VIRTUAL TOUR SHOWCASE ── */}
       <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-page)', borderTop: '1px solid var(--border-color)' }}>
         <div className="container">
-          <div
+          <div className="mp-auto-grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
               gap: '3.5rem',
               alignItems: 'center',
             }}
@@ -1320,7 +1324,7 @@ export default function HomeView({
               boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
             }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', alignItems: 'center' }}>
+            <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '2.5rem', alignItems: 'center' }}>
               <div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#c9a96e', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                   <ShieldCheck size={14} />
@@ -1406,7 +1410,7 @@ export default function HomeView({
             </h2>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+          <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '2rem' }}>
             {[
               {
                 quote: 'The staff made the application and move-in process so smooth! The splash park is wonderful for my kids on hot weekends, and our 3-bedroom is huge.',
@@ -1496,7 +1500,7 @@ export default function HomeView({
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmitContact} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
+              <form className="mp-auto-grid" onSubmit={handleSubmitContact} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '1.25rem' }}>
                 <div>
                   <label className="form-label" style={{ color: '#c9a96e', fontSize: '0.73rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.45rem', display: 'block' }}>
                     First Name *

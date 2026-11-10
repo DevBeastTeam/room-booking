@@ -34,10 +34,10 @@ export default function Footer({
     <footer style={{ backgroundColor: 'var(--footer-bg, var(--bg-elevated))', color: 'var(--text-main)', borderTop: '1px solid var(--border-color)', marginTop: '4rem', transition: 'background-color 0.25s ease, color 0.25s ease' }}>
       {/* Top Footer Section */}
       <div className="container" style={{ padding: '4rem 1.5rem 2.5rem' }}>
-        <div
+        <div className="mp-auto-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
             gap: '3rem',
             marginBottom: '3rem',
           }}

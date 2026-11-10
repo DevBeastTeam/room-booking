@@ -126,7 +126,7 @@ export default function EmailModal({
         </div>
 
         {/* Modal Body: 2 Columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', minHeight: '440px' }}>
+        <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', minHeight: '440px' }}>
           {/* Left Column: Summary Card */}
           <div
             style={{

@@ -848,7 +848,7 @@ export default function Widgets({ onOpenScheduleTour }) {
               </div>
             ) : (
               <form onSubmit={handleTourSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                   {/* Col 1: Tour Type */}
                   <div>
                     <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '0.85rem' }}>

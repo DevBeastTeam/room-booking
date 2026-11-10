@@ -517,17 +517,30 @@ export default function PhotoGallery({ onOpenTourModal }) {
             key={idx}
             onClick={() => setCurrentPage(idx)}
             aria-label={`Go to photo gallery page ${idx + 1}`}
+            aria-current={safePage === idx ? 'true' : undefined}
             style={{
-              width: safePage === idx ? '26px' : '10px',
-              height: '10px',
-              borderRadius: '5px',
-              backgroundColor: safePage === idx ? '#1e293b' : '#cbd5e1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              // The dot stays 10px wide but the button around it is a real
+              // touch target instead of a 10px sliver.
+              padding: '8px 0',
+              background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              padding: 0,
-              transition: 'all 0.25s ease',
             }}
-          />
+          >
+            <span
+              style={{
+                display: 'block',
+                width: safePage === idx ? '26px' : '10px',
+                height: '10px',
+                borderRadius: '5px',
+                backgroundColor: safePage === idx ? '#1e293b' : '#cbd5e1',
+                transition: 'all 0.25s ease',
+              }}
+            />
+          </button>
         ))}
       </div>
 
