@@ -620,5 +620,38 @@
             "interval": "monthly",
             "txn": "WF-TXN-753A5BC5"
         }
+    },
+    {
+        "id": "EVT-7878948D",
+        "type": "pageview",
+        "ts": "2026-11-10 19:17:43",
+        "date": "2026-11-10",
+        "path": "\/contact\/",
+        "visitor_id": "v-0d0onjzbmwaqno7l",
+        "device": "desktop",
+        "referrer": "http:\/\/localhost:4321\/contact\/",
+        "meta": []
+    },
+    {
+        "id": "EVT-7A721571",
+        "type": "pageview",
+        "ts": "2026-11-10 19:18:15",
+        "date": "2026-11-10",
+        "path": "\/contact\/",
+        "visitor_id": "v-0d0onjzbmwaqno7l",
+        "device": "desktop",
+        "referrer": "http:\/\/localhost:4321\/contact\/",
+        "meta": []
+    },
+    {
+        "id": "EVT-94F15908",
+        "type": "pageview",
+        "ts": "2026-11-10 19:25:19",
+        "date": "2026-11-10",
+        "path": "\/dashboard\/",
+        "visitor_id": "v-0d0onjzbmwaqno7l",
+        "device": "desktop",
+        "referrer": "http:\/\/localhost:4321\/dashboard\/",
+        "meta": []
     }
 ]

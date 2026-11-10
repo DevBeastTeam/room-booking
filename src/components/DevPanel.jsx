@@ -46,8 +46,8 @@ const S = {
   card:     '#111827',
   card2:    '#1a2234',
   border:   '#1f2d44',
-  accent:   '#f59e0b',
-  accentLt: '#fbbf24',
+  accent:   '#c9a96e',   // Monar Pass brand gold
+  accentLt: '#dfc285',
   text:     '#e2e8f0',
   muted:    '#6b7fa3',
   success:  '#22c55e',

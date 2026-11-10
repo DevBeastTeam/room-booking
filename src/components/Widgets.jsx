@@ -31,32 +31,30 @@ import {
 } from '../services/chatService';
 
 export default function Widgets({ onOpenScheduleTour }) {
-  // On phones the expanded panel covered the hero CTAs, so it starts closed.
-  const [isMenuCollapsed, setIsMenuCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth < 768;
-  });
+  // The expanded quick-actions panel covers page content (it sat on top of the
+  // hero CTAs on phones and over the pricing cards on desktop), so it starts
+  // collapsed everywhere and is opened on demand.
+  const [isMenuCollapsed, setIsMenuCollapsed] = useState(true);
   const [activeModal, setActiveModal] = useState(null); // 'chat', 'tour', 'email', 'call', 'accessibility'
 
   // ── Real Chat State (Admin & Customer Live Chat) ──────────────────────────
-  const [chatUser, setChatUser] = useState(() => {
-    if (typeof window === 'undefined') return { userId: '', displayName: 'Guest', email: '', isLoggedIn: false };
-    try { return getUserInfo(); } catch { return { userId: '', displayName: 'Guest', email: '', isLoggedIn: false }; }
-  });
+  // Server-rendered island — the stored chat identity is applied after mount
+  // so the first client render matches the server markup (hydration #418).
+  const [chatUser, setChatUser] = useState({ userId: '', displayName: 'Guest', email: '', isLoggedIn: false });
   const [chatMessages, setChatMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const [editName, setEditName] = useState(() => {
-    if (typeof window === 'undefined') return '';
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+
+  useEffect(() => {
     try {
       const info = getUserInfo();
-      return info.displayName.startsWith('Guest') ? '' : info.displayName;
-    } catch { return ''; }
-  });
-  const [editEmail, setEditEmail] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    try { return getUserInfo().email || ''; } catch { return ''; }
-  });
+      setChatUser(info);
+      setEditName(info.displayName.startsWith('Guest') ? '' : info.displayName);
+      setEditEmail(info.email || '');
+    } catch { /* storage unavailable */ }
+  }, []);
   const messagesEndRef = useRef(null);
   const chatMountedRef = useRef(true);
 

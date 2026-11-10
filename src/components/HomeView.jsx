@@ -81,7 +81,10 @@ export default function HomeView({
     else handlePrevSlide();
   };
   const [selectedBedFilter, setSelectedBedFilter] = useState('all');
-  const [quickDate, setQuickDate] = useState(() => new Date().toISOString().split('T')[0]);
+  // Set after mount so the server-rendered markup matches the first client
+  // render (hydration mismatch otherwise).
+  const [quickDate, setQuickDate] = useState('');
+  useEffect(() => { setQuickDate(new Date().toISOString().split('T')[0]); }, []);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',

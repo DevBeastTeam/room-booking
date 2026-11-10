@@ -47,9 +47,14 @@ export default function Header({
 }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [themeMode, setLocalThemeMode] = useState(() => getThemeMode());
+  // The header is server-rendered and then hydrated. Reading localStorage in
+  // the state initialiser made the first client render differ from the server
+  // markup (React hydration error #418), so the stored value is applied after
+  // mount instead.
+  const [themeMode, setLocalThemeMode] = useState('dark');
 
   useEffect(() => {
+    setLocalThemeMode(getThemeMode());
     const handleThemeChange = (e) => {
       if (e.detail?.mode) setLocalThemeMode(e.detail.mode);
     };

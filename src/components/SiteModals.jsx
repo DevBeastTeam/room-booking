@@ -9,9 +9,11 @@ import { getSiteSettings, getLegalPages, getSupportInquiries } from '../services
 import { trackEvent } from '../services/analytics.js';
 
 export default function SiteModals({ minimal = false , currentView = 'home' }) {
-  const [siteSettings, setSiteSettings] = useState(() => getSiteSettings());
-  const [legalPages, setLegalPages] = useState(() => getLegalPages());
-  const [_supportInquiries, setSupportInquiries] = useState(() => getSupportInquiries());
+  // Server-rendered island: the stored values are applied after mount so the
+  // first client render matches the server markup (hydration error #418).
+  const [siteSettings, setSiteSettings] = useState(null);
+  const [legalPages, setLegalPages] = useState(null);
+  const [_supportInquiries, setSupportInquiries] = useState(null);
 
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -21,6 +23,12 @@ export default function SiteModals({ minimal = false , currentView = 'home' }) {
   // Paddle Checkout Modal state
   const [isPaddleOpen, setIsPaddleOpen] = useState(false);
   const [paddlePreset, setPaddlePreset] = useState({ item: 'holding_deposit', unit: '', amount: null, customer: null });
+
+  useEffect(() => {
+    setSiteSettings(getSiteSettings());
+    setLegalPages(getLegalPages());
+    setSupportInquiries(getSupportInquiries());
+  }, []);
 
   useEffect(() => {
     const handleOpenSchedule = (e) => {

@@ -51,8 +51,8 @@ const A = {
   card:     '#111827',
   card2:    '#1a2234',
   border:   '#1f2d44',
-  accent:   '#f59e0b',   // amber – admin feel
-  accentLt: '#fbbf24',
+  accent:   '#c9a96e',   // Monar Pass brand gold
+  accentLt: '#dfc285',
   text:     '#e2e8f0',
   muted:    '#6b7fa3',
   success:  '#22c55e',
@@ -247,14 +247,17 @@ function OverviewSection() {
             <TrendingUp size={14} /> +3.6% vs last month
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', height: 140 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', height: 160 }}>
           {REVENUE_MONTHLY.map((r, i) => {
-            const pct = (r.revenue / maxRev) * 100;
+            // A percentage height needs a parent with a definite height. The
+            // column is auto-sized, so `height: '87%'` collapsed the bars to
+            // nothing. Pixel heights against the chart area are used instead.
+            const barH = Math.max(10, Math.round((r.revenue / maxRev) * 110));
             const isLast = i === REVENUE_MONTHLY.length - 1;
             return (
-              <div key={r.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <div key={r.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', gap: '0.35rem', height: '100%' }}>
                 <div style={{ fontSize: '0.7rem', color: isLast ? A.accent : A.muted, fontWeight: 700 }}>${(r.revenue / 1000).toFixed(1)}k</div>
-                <div style={{ width: '100%', height: `${pct}%`, background: isLast ? `linear-gradient(180deg, ${A.accent}, ${A.accentLt})` : `linear-gradient(180deg, #253048, #1f2d44)`, borderRadius: '6px 6px 0 0', minHeight: 8, border: isLast ? `1px solid ${A.accent}44` : 'none', transition: 'height 0.5s ease' }} />
+                <div style={{ width: '100%', maxWidth: 56, height: `${barH}px`, background: isLast ? `linear-gradient(180deg, ${A.accent}, ${A.accentLt})` : `linear-gradient(180deg, #253048, #1f2d44)`, borderRadius: '6px 6px 0 0', minHeight: 10, border: isLast ? `1px solid ${A.accent}44` : 'none', transition: 'height 0.5s ease' }} />
                 <div style={{ fontSize: '0.72rem', color: isLast ? A.accent : A.muted, fontWeight: isLast ? 700 : 400 }}>{r.month}</div>
               </div>
             );

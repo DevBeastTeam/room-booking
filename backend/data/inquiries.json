@@ -1,5 +1,57 @@
 [
     {
+        "id": "INQ-EDB66C",
+        "tracking_id": "INQ-EDB66C",
+        "name": "Jamie Rivera",
+        "email": "jamie@example.com",
+        "phone": "817-555-0142",
+        "preferred_bedroom": "Any",
+        "move_in_date": "",
+        "message": "Interested in a 2 bedroom for September.",
+        "category": "Contact Page Inquiry - 2 Beds (Move-in: Flexible)",
+        "created_at": "2026-11-10 19:18:22",
+        "status": "new"
+    },
+    {
+        "id": "INQ-E7C8BF",
+        "tracking_id": "INQ-E7C8BF",
+        "name": "Jamie Rivera",
+        "email": "jamie@example.com",
+        "phone": "817-555-0142",
+        "preferred_bedroom": "2 Beds",
+        "move_in_date": "",
+        "message": "Interested in a 2 bedroom for September.",
+        "category": "Contact Page Inquiry",
+        "created_at": "2026-11-10 19:18:22",
+        "status": "new"
+    },
+    {
+        "id": "INQ-06834B",
+        "tracking_id": "INQ-06834B",
+        "name": "Jamie Rivera",
+        "email": "jamie@example.com",
+        "phone": "817-555-0142",
+        "preferred_bedroom": "Any",
+        "move_in_date": "",
+        "message": "Interested in a 2 bedroom for September.",
+        "category": "Contact Page Inquiry - 2 Beds (Move-in: Flexible)",
+        "created_at": "2026-11-10 19:17:52",
+        "status": "new"
+    },
+    {
+        "id": "INQ-033BE9",
+        "tracking_id": "INQ-033BE9",
+        "name": "Jamie Rivera",
+        "email": "jamie@example.com",
+        "phone": "817-555-0142",
+        "preferred_bedroom": "2 Beds",
+        "move_in_date": "",
+        "message": "Interested in a 2 bedroom for September.",
+        "category": "Contact Page Inquiry",
+        "created_at": "2026-11-10 19:17:52",
+        "status": "new"
+    },
+    {
         "id": "INQ-028153",
         "tracking_id": "INQ-028153",
         "name": "Bilal",

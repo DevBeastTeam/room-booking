@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calculator } from 'lucide-react';
 import FloorPlansGallery, { ALL_FLOOR_PLANS } from './FloorPlansGallery';
 import CostEstimateHeader from './CostEstimateHeader';
@@ -31,19 +31,20 @@ const INITIAL_ADDONS = [
 ];
 
 export default function FloorPlansView() {
-  const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('view') === 'estimator' ? 'estimator' : 'gallery';
-    }
-    return 'gallery';
-  });
+  // The deep-link tab comes from the query string. Reading it during the
+  // initial render made the client markup differ from the server's
+  // (hydration mismatch), so it is applied after mount.
+  const [activeTab, setActiveTab] = useState('gallery');
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('view') === 'estimator') setActiveTab('estimator');
+  }, []);
   const [selectedFloorPlan, setSelectedFloorPlan] = useState(ALL_FLOOR_PLANS[0]);
   const [selectedUnit, setSelectedUnit] = useState(ALL_FLOOR_PLANS[0].availableUnits[0].unit);
-  const [moveInDate, setMoveInDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  });
+  const [moveInDate, setMoveInDate] = useState('');
+  useEffect(() => {
+    setMoveInDate(new Date().toISOString().split('T')[0]);
+  }, []);
   const [leaseTerm, setLeaseTerm] = useState(12);
   const [occupants, setOccupants] = useState(1);
   const [pets, setPets] = useState(0);
