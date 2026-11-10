@@ -64,4 +64,19 @@ DirectoryIndex index.html index.php
     Header set X-Content-Type-Options "nosniff"
     Header set X-XSS-Protection "1; mode=block"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Clickjacking / embedding protection
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Content-Security-Policy "default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; frame-src 'self' https://www.google.com https://maps.google.com https://*.matterport.com"
+
+    # HSTS (only meaningful over HTTPS, which Hostinger enforces)
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Do not expose the browser fingerprint surface we do not need
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(self), interest-cohort=()"
+
+    # Never cache the API / admin responses
+    <FilesMatch "\.php$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate"
+    </FilesMatch>
 </IfModule>

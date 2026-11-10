@@ -31,3 +31,15 @@ dist-ssr
 # Admin auth store (contains password hashes + encrypted passwords)
 backend/data/admins.json
 backend/data/admin_logs.json
+
+# Generated credential key (created at runtime when ADMIN_CRED_KEY is unset)
+backend/data/.cred_key
+
+# Login attempt counters (brute-force lockout state)
+backend/data/login_attempts.json
+
+# Runtime fallback stores that contain personal data
+backend/data/chat.json
+backend/data/residents.json
+backend/data/resident_accounts.json
+backend/data/settings.json

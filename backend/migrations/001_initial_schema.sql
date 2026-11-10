@@ -234,4 +234,58 @@ CREATE TABLE IF NOT EXISTS `notifications` (
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 16. Chat Sessions (live chat — visitor ⇄ leasing team)
+CREATE TABLE IF NOT EXISTS `chat_sessions` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `session_key` VARCHAR(128) NOT NULL UNIQUE,
+    `visitor_name` VARCHAR(191) DEFAULT 'Guest',
+    `visitor_email` VARCHAR(191) DEFAULT NULL,
+    `visitor_unit` VARCHAR(32) DEFAULT NULL,
+    `status` ENUM('open','closed') DEFAULT 'open',
+    `unread_admin` INT NOT NULL DEFAULT 0,
+    `last_message` TEXT DEFAULT NULL,
+    `last_ts` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 17. Chat Messages
+CREATE TABLE IF NOT EXISTS `chat_messages` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `session_key` VARCHAR(128) NOT NULL,
+    `sender` ENUM('user','admin') NOT NULL DEFAULT 'user',
+    `message` TEXT NOT NULL,
+    `read_by_admin` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_session` (`session_key`),
+    INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 18. Resident Portal Accounts (login for /dashboard)
+CREATE TABLE IF NOT EXISTS `resident_accounts` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `unit_number` VARCHAR(32) NOT NULL UNIQUE,
+    `email` VARCHAR(191) NOT NULL,
+    `full_name` VARCHAR(191) NOT NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `password_enc` VARCHAR(255) DEFAULT NULL,
+    `active` TINYINT(1) NOT NULL DEFAULT 1,
+    `must_change_password` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `last_login` DATETIME DEFAULT NULL,
+    INDEX `idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 19. Resident Activity (payments, lease & portal activity feed)
+CREATE TABLE IF NOT EXISTS `resident_activity` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `unit_number` VARCHAR(32) NOT NULL,
+    `kind` ENUM('payment','lease','maintenance','addon','document','notice') DEFAULT 'notice',
+    `title` VARCHAR(191) NOT NULL,
+    `detail` VARCHAR(255) DEFAULT NULL,
+    `amount` DECIMAL(10,2) DEFAULT NULL,
+    `status` VARCHAR(32) DEFAULT NULL,
+    `occurred_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_unit` (`unit_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

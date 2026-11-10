@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { apiRequest } from '../services/apiClient';
 import {
   ShieldCheck, Users, UserCog, KeyRound, Eye, EyeOff, Power, PowerOff,
   LogOut, UserPlus, Activity, Check, X, AlertCircle, ExternalLink, Database,
@@ -58,17 +59,11 @@ const S = {
 };
 
 async function api(action, body) {
-  const opts = { credentials: 'same-origin' };
-  if (body) {
-    opts.method = 'POST';
-    opts.headers = { 'Content-Type': 'application/json' };
-    opts.body = JSON.stringify({ action, ...body });
-  } else {
-    opts.method = 'GET';
-  }
-  const res = await fetch(`${API}${body ? '' : `?action=${action}`}`, opts);
-  const json = await res.json().catch(() => ({}));
-  return { ok: res.ok && (json.success !== false), data: json };
+  const { ok, data } = await apiRequest(
+    `${API}${body ? '' : `?action=${action}`}`,
+    body ? { method: 'POST', body: { action, ...body } } : { method: 'GET' }
+  );
+  return { ok: ok && (data?.success !== false), data: data || {} };
 }
 
 const fullPermissions = () => Object.fromEntries(TABS.map(([k]) => [k, true]));
@@ -198,7 +193,7 @@ export default function DevPanel({ user, onLogout }) {
 
   const loadDbStatus = useCallback(async () => {
     try {
-      const res = await fetch('/backend/api/data-manager.php?action=stats', { credentials: 'same-origin' });
+      const res = await apiRequest('/backend/api/data-manager.php?action=stats');
       const json = await res.json();
       if (json.success) {
         const totalRows = Object.values(json.counts || {}).reduce((s, c) => s + (c || 0), 0);
@@ -585,7 +580,7 @@ function DevTransactionsSection() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/backend/api/worldfirst.php?action=history');
+      const res = await apiRequest('/backend/api/worldfirst.php?action=history');
       const data = await res.json();
       if (data && data.success && Array.isArray(data.transactions)) {
         setTransactions(data.transactions);
@@ -604,7 +599,7 @@ function DevTransactionsSection() {
     if (!window.confirm(`Auto-subscription ${txnId} cancel karein? Recurring debit stop ho jayegi.`)) return;
     setCancellingId(txnId);
     try {
-      const res = await fetch('/backend/api/worldfirst.php?action=cancel_subscription', {
+      const res = await apiRequest('/backend/api/worldfirst.php?action=cancel_subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ txn_id: txnId })
@@ -894,8 +889,8 @@ function AnalyticsSection() {
       : new Date(Date.now() - Number(range) * 86400000).toISOString().slice(0, 10);
     try {
       const [statsRes, eventsRes] = await Promise.all([
-        fetch(`/backend/api/analytics.php?action=stats&from=${from}&to=${to}&type=${typeFilter}`, { credentials: 'same-origin' }),
-        fetch(`/backend/api/analytics.php?action=events&from=${from}&to=${to}&type=${logType}&limit=300&search=${encodeURIComponent(search)}`, { credentials: 'same-origin' }),
+        apiRequest(`/backend/api/analytics.php?action=stats&from=${from}&to=${to}&type=${typeFilter}`),
+        apiRequest(`/backend/api/analytics.php?action=events&from=${from}&to=${to}&type=${logType}&limit=300&search=${encodeURIComponent(search)}`),
       ]);
       const statsJson = await statsRes.json();
       const eventsJson = await eventsRes.json();

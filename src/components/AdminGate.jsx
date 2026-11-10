@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, User, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react';
+import { Shield, Lock, User, Eye, EyeOff, AlertCircle, LogIn, KeyRound } from 'lucide-react';
 import AdminPanel from './AdminPanel.jsx';
+import { apiRequest, setCsrfToken, onForcePasswordChange } from '../services/apiClient';
 
 // ── Auth API (server-side PHP session) ─────────────────────────────────────────
 const API = '/backend/api/auth.php';
 const SESSION_KEY = 'monarch_admin_session';
 
 async function apiPost(body) {
-  const res = await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'same-origin',
-    body: JSON.stringify(body),
-  });
-  const json = await res.json().catch(() => ({}));
-  return { ok: res.ok, data: json };
+  return apiRequest(API, { method: 'POST', body });
 }
 
 async function apiGet(action) {
-  const res = await fetch(`${API}?action=${action}`, { credentials: 'same-origin' });
-  const json = await res.json().catch(() => ({}));
-  return { ok: res.ok, data: json };
+  return apiRequest(`${API}?action=${action}`, { method: 'GET' });
 }
 
 function persistSession(user) {
@@ -109,6 +101,7 @@ function AdminLoginForm({ onLoginSuccess }) {
     const { ok, data } = await apiPost({ action: 'login', username: username.trim(), password: password.trim() });
 
     if (ok && data.success && data.user) {
+      setCsrfToken(data.csrf_token);
       persistSession(data.user);
       onLoginSuccess(data.user);
     } else {
@@ -288,15 +281,116 @@ function SessionBar({ user, onLogout }) {
   );
 }
 
+// ── Forced Password Rotation ──────────────────────────────────────────────────
+// Seeded accounts ship with a well-known default password, so the backend
+// blocks every other action until the account owner picks a new one.
+function PasswordChangeRequired({ user, onDone }) {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [show, setShow] = useState(false);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (next.length < 8) { setError('New password kam az kam 8 characters ka ho.'); return; }
+    if (next !== confirm) { setError('Dono naye passwords match nahi kar rahe.'); return; }
+    if (next === current) { setError('Naya password purane se different hona chahiye.'); return; }
+
+    setBusy(true);
+    const { ok, data } = await apiPost({ action: 'change_password', current, new: next });
+    setBusy(false);
+    if (ok && data.success) {
+      setCsrfToken(data.csrf_token);
+      onDone(data.user);
+    } else {
+      setError(data.error || 'Password change nahi ho saka.');
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: S.bg, display: 'flex', alignItems: 'center',
+      justifyContent: 'center', padding: '1rem', fontFamily: "'Inter', 'Segoe UI', sans-serif",
+    }}>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        * { box-sizing: border-box; }
+      `}</style>
+      <div style={{
+        width: '100%', maxWidth: 440, animation: 'fadeIn 0.5s ease',
+        background: S.card, border: `1px solid ${S.border}`, borderRadius: 20,
+        padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{
+            width: 60, height: 60, borderRadius: 18, margin: '0 auto 0.9rem',
+            background: `${S.amber}22`, border: `1px solid ${S.amber}55`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <KeyRound size={26} color={S.amber} />
+          </div>
+          <h1 style={{ color: S.text, fontSize: '1.25rem', fontWeight: 800, margin: '0 0 0.3rem' }}>
+            Set a new password
+          </h1>
+          <p style={{ color: S.muted, fontSize: '0.82rem', margin: 0, lineHeight: 1.55 }}>
+            {user?.username ? <><strong style={{ color: S.text }}>{user.username}</strong> ka default password abhi use ho raha hai. </> : null}
+            Panel istemal karne se pehle apna naya password set karein (kam az kam 8 characters).
+          </p>
+        </div>
+
+        <form onSubmit={submit}>
+          <InputField label="Current password" type={show ? 'text' : 'password'} value={current}
+            onChange={e => { setCurrent(e.target.value); setError(''); }} icon={Lock} />
+          <InputField label="New password" type={show ? 'text' : 'password'} value={next}
+            onChange={e => { setNext(e.target.value); setError(''); }} icon={KeyRound} />
+          <InputField label="Confirm new password" type={show ? 'text' : 'password'} value={confirm}
+            onChange={e => { setConfirm(e.target.value); setError(''); }} icon={KeyRound} />
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: S.muted, fontSize: '0.76rem', margin: '0 0 1rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={show} onChange={e => setShow(e.target.checked)} />
+            Password dikhayein
+          </label>
+
+          {error && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.9rem', color: S.red, fontSize: '0.76rem' }}>
+              <AlertCircle size={13} color={S.red} /> {error}
+            </div>
+          )}
+
+          <button type="submit" disabled={busy} style={{
+            width: '100%', padding: '0.9rem', borderRadius: 12, border: 'none',
+            background: busy ? `${S.accent}55` : `linear-gradient(135deg, ${S.accent}, #3da89a)`,
+            color: '#0a0d14', fontWeight: 800, fontSize: '0.92rem', cursor: busy ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+          }}>
+            <KeyRound size={16} /> {busy ? 'Saving...' : 'Set password & continue'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Gated Export ──────────────────────────────────────────────────────────
 export default function AdminGate({ onSession }) {
   const [session, setSession] = useState(null);
   const [ready, setReady] = useState(false);
+  const [mustChange, setMustChange] = useState(false);
 
   const applySession = (user) => {
     setSession(user);
+    setMustChange(!!user?.must_change_password);
     if (onSession) onSession(user);
   };
+
+  // Global handler: any API call can push the user into the rotation screen.
+  useEffect(() => {
+    onForcePasswordChange(() => setMustChange(true));
+    return () => onForcePasswordChange(null);
+  }, []);
 
   useEffect(() => {
     // Verify with server session (source of truth)
@@ -305,6 +399,7 @@ export default function AdminGate({ onSession }) {
       const { ok, data } = await apiGet('session');
       if (cancelled) return;
       if (ok && data.authenticated && data.user) {
+        setCsrfToken(data.csrf_token);
         persistSession(data.user);
         applySession(data.user);
       } else {
@@ -319,8 +414,10 @@ export default function AdminGate({ onSession }) {
 
   const handleLogout = async () => {
     await apiPost({ action: 'logout' });
+    setCsrfToken(null);
     clearSession();
     setSession(null);
+    setMustChange(false);
     if (onSession) onSession(null);
   };
 
@@ -336,6 +433,10 @@ export default function AdminGate({ onSession }) {
 
   if (!session) {
     return <AdminLoginForm onLoginSuccess={applySession} />;
+  }
+
+  if (mustChange) {
+    return <PasswordChangeRequired user={session} onDone={applySession} />;
   }
 
   return (

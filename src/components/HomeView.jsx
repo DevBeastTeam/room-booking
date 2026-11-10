@@ -35,7 +35,7 @@ const HERO_SLIDES = [
     priceBadge: '1 - 4 Bed Floor Plans',
   },
   {
-    image: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/58-web-or-mls-campus%20dr-2104-902.jpg',
+    image: 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/58-web-or-mls-campus%20dr-2104-904.jpg',
     tagline: '✦ RESORT-INSPIRED OUTDOOR LIVING',
     title: 'Community Splash Park & Sun Courtyard',
     subtitle: 'Cool off under the Texas sun, host weekend family gatherings at our grilling pavilions, and relax in landscaped green grounds.',

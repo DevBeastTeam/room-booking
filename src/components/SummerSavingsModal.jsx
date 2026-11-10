@@ -148,30 +148,147 @@ export default function SummerSavingsModal({ onNavigateFloorPlans }) {
 
             {/* Modal Body */}
             <div style={{ padding: '1.5rem' }}>
+              {/* ── In-house promo banner ──────────────────────────────────────
+                  Previously this slot loaded a third-party RentCafe asset for a
+                  different property, which carried the old "MONARCH PASS"
+                  wordmark and offered terms we do not actually publish.
+                  It is now rendered in-house so the branding and the offer
+                  always match the site. */}
               <div
+                role="img"
+                aria-label="Monar Pass summer savings: rent from $898 per month, up to 4 weeks free on select lease terms, $250 holding deposit, pet friendly."
                 style={{
-                  borderRadius: '12px',
+                  position: 'relative',
+                  borderRadius: '14px',
                   overflow: 'hidden',
                   marginBottom: '1.5rem',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                  backgroundColor: 'rgba(8, 10, 18, 0.8)',
-                  border: '1px solid rgba(201, 169, 110, 0.2)',
-                  padding: '0.5rem',
+                  padding: '1.75rem 1.5rem',
+                  textAlign: 'left',
+                  background:
+                    'linear-gradient(145deg, #1b1710 0%, #0d1017 45%, #101722 100%)',
+                  border: '1px solid rgba(201, 169, 110, 0.35)',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+                  isolation: 'isolate',
                 }}
               >
-                <img
-                  src="https://cdngeneralcf.rentcafe.com/dmslivecafe/2/58193/Buchanan Pop Ups (4).png"
-                  alt="Monar Pass Summer Savings Promo"
+                {/* Decorative glow + hairline frame */}
+                <div
+                  aria-hidden="true"
                   style={{
-                    width: '100%',
-                    height: 'auto',
-                    maxHeight: '360px',
-                    objectFit: 'contain',
-                    display: 'block',
-                    borderRadius: '8px',
+                    position: 'absolute',
+                    top: '-60%',
+                    right: '-18%',
+                    width: '240px',
+                    height: '240px',
+                    borderRadius: '50%',
+                    background:
+                      'radial-gradient(circle, rgba(201,169,110,0.30) 0%, rgba(201,169,110,0) 70%)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
                   }}
-                  loading="eager"
                 />
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    inset: '8px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(201, 169, 110, 0.16)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                  }}
+                />
+
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  {/* Eyebrow */}
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontSize: '0.62rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.16em',
+                      textTransform: 'uppercase',
+                      color: '#e3c78d',
+                      background: 'rgba(201, 169, 110, 0.13)',
+                      border: '1px solid rgba(201, 169, 110, 0.32)',
+                      borderRadius: '999px',
+                      padding: '0.28rem 0.7rem',
+                      marginBottom: '0.9rem',
+                    }}
+                  >
+                    <Sparkles size={11} />
+                    Summer Specials
+                  </div>
+
+                  {/* Headline */}
+                  <div
+                    style={{
+                      fontFamily: '"Cormorant Garamond", Georgia, serif',
+                      fontSize: '2.05rem',
+                      lineHeight: 1.1,
+                      fontWeight: 700,
+                      color: '#f4efe6',
+                      marginBottom: '0.35rem',
+                    }}
+                  >
+                    Up to <span style={{ color: '#d9b877' }}>4 Weeks Free</span>
+                  </div>
+                  <p
+                    style={{
+                      margin: '0 0 1.15rem',
+                      fontSize: '0.8rem',
+                      lineHeight: 1.6,
+                      color: '#9fb0c6',
+                      maxWidth: '30ch',
+                    }}
+                  >
+                    On select 12-month lease terms at Monar Pass Apartments.
+                    Availability is limited.
+                  </p>
+
+                  {/* Offer strip */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                      gap: '0.5rem',
+                      borderTop: '1px solid rgba(201, 169, 110, 0.18)',
+                      paddingTop: '0.9rem',
+                    }}
+                  >
+                    {[
+                      { k: 'Rent from', v: '$898' },
+                      { k: 'Deposit', v: '$250' },
+                      { k: 'Pet friendly', v: 'Yes' },
+                    ].map((s) => (
+                      <div key={s.k}>
+                        <div
+                          style={{
+                            fontSize: '1.05rem',
+                            fontWeight: 700,
+                            color: '#f4efe6',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {s.v}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '0.62rem',
+                            letterSpacing: '0.09em',
+                            textTransform: 'uppercase',
+                            color: '#7e8ea6',
+                            marginTop: '0.2rem',
+                          }}
+                        >
+                          {s.k}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Action Buttons */}

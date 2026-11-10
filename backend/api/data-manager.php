@@ -51,19 +51,21 @@ const DATA_MANAGER_ALLOWED_TABLES = [
     'documents', 'notifications', 'transactions'
 ];
 
-// Ensure all tables exist
+// Tables are created by `npm run migrate` (backend/migrations/migrate.php).
+// We no longer execute the whole schema file on every request — that was slow
+// and it silently swallowed errors.
 function ensureTablesExist($pdo) {
-    $schemaFile = dirname(__DIR__) . '/migrations/001_initial_schema.sql';
-    if (file_exists($schemaFile)) {
-        try {
-            $sql = file_get_contents($schemaFile);
-            $pdo->exec($sql);
-        } catch (Exception $e) {
-            // Ignore if already created
-        }
+    static $checked = false;
+    if ($checked) return true;
+    $checked = true;
+    try {
+        $stmt = $pdo->query("SHOW TABLES LIKE 'floor_plans'");
+        return (bool)$stmt->fetch();
+    } catch (Exception $e) {
+        error_log('data-manager: table check failed - ' . $e->getMessage());
+        return false;
     }
 }
-ensureTablesExist($pdo);
 
 /** Valid table names (strict allowlist) ya 400 error ke saath band */
 function data_manager_require_allowed_tables($tables) {
@@ -277,7 +279,7 @@ function seedModule($pdo, $table) {
             $defaultSettings = [
                 'siteName' => 'Monar Pass Apartments',
                 'tagline' => 'Spacious 1-4 Bedroom Apartments in Fort Worth',
-                'logoUrl' => 'https://resource.rentcafe.com/image/upload/q_auto,f_auto,c_limit,w_325,h_60/s3/2/58193/pn_monarchpass_logo_pms%20web.png',
+                'logoUrl' => '/logo.svg',
                 'heroImageUrl' => 'https://resource.rentcafe.com/image/upload/q_auto,f_auto/s3/2/58193/54-web-or-mls-4500%20Campus%20Dr%201005-S2104-020.jpg',
                 'phone' => '+1 817-857-8782',
                 'secondaryPhone' => '+1 817-531-1750',
@@ -428,6 +430,8 @@ if ($action === 'clear') {
 
     $cleared = [];
     try {
+        // TRUNCATE resets AUTO_INCREMENT and cannot run inside a transaction,
+        // so the FK guard is toggled directly around it.
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
         foreach ($requestedTables as $table) {
             $pdo->exec("TRUNCATE TABLE `{$table}`");
@@ -531,9 +535,12 @@ if ($action === 'import') {
     }
 
     $imported = [];
+    // NOTE: in MySQL, SET FOREIGN_KEY_CHECKS=0 performs an implicit COMMIT, which
+    // would silently void the transaction (and the rollback). It is therefore
+    // toggled OUTSIDE the transaction and restored afterwards.
+    $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
     $pdo->beginTransaction();
     try {
-        $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
         foreach ($tablesPayload as $table => $rows) {
             // Clear existing rows for this imported table
             $pdo->exec("DELETE FROM `{$table}`");
@@ -550,8 +557,8 @@ if ($action === 'import') {
             }
             $imported[$table] = count($rows);
         }
-        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
         $pdo->commit();
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
 
         echo json_encode([
             'success' => true,
@@ -559,8 +566,10 @@ if ($action === 'import') {
             'imported' => $imported
         ]);
     } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
-        $pdo->rollBack();
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }

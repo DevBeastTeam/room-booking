@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" width="260" height="64" role="img" aria-label="Monar Pass — Luxury Residences, Fort Worth">
+  <defs>
+    <linearGradient id="mpGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e6cd94"/>
+      <stop offset="45%" stop-color="#c9a96e"/>
+      <stop offset="100%" stop-color="#9a7b44"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Monogram tile -->
+  <rect width="64" height="64" rx="14" fill="#0d1017"/>
+  <rect x="1" y="1" width="62" height="62" rx="13.5" fill="none" stroke="url(#mpGold)" stroke-opacity="0.55" stroke-width="1.5"/>
+  <path fill="url(#mpGold)" d="M14 45V19h5.6l7.4 15.6L34.4 19H40v26h-5.1V28.3l-5.9 12.4h-4L19.1 28.3V45z"/>
+  <rect x="14" y="48.5" width="26" height="2" rx="1" fill="url(#mpGold)" fill-opacity="0.85"/>
+
+  <!-- Wordmark -->
+  <g transform="translate(80 0)">
+    <text x="0" y="30"
+          font-family="'Cormorant Garamond', 'Playfair Display', Georgia, serif"
+          font-size="25" font-weight="700" letter-spacing="3.2"
+          fill="#f4efe6">MONAR PASS</text>
+    <text x="1" y="45"
+          font-family="'DM Sans', 'Segoe UI', sans-serif"
+          font-size="8.5" font-weight="500" letter-spacing="2.6"
+          fill="#8d9bb0">LUXURY RESIDENCES · FORT WORTH</text>
+  </g>
+</svg>

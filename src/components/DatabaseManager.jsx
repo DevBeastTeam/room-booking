@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiRequest } from '../services/apiClient';
 import {
   Database, Trash2, Download, Upload, RefreshCw, CheckSquare,
   Square, Zap, AlertTriangle, CheckCircle, XCircle, BarChart2,
@@ -206,7 +207,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
   // Fetch live row counts from DB
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API}?action=stats`, { credentials: 'same-origin' });
+      const res = await apiRequest(`${API}?action=stats`);
       const json = await res.json();
       if (json.success) setCounts(json.counts);
     } catch {
@@ -218,7 +219,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${API}?action=stats`, { credentials: 'same-origin' });
+        const res = await apiRequest(`${API}?action=stats`);
         const json = await res.json();
         if (!cancelled && json.success) setCounts(json.counts);
       } catch {
@@ -245,13 +246,10 @@ export default function DatabaseManager({ onBack, embedded = false }) {
         setConfirm(null);
         setLoading('seed');
         try {
-          const res = await fetch(`${API}?action=seed`, {
+          const { data: json } = await apiRequest(`${API}?action=seed`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify({ tables: selected }),
+            body: { tables: selected },
           });
-          const json = await res.json();
           if (json.success) {
             showToast(`✅ ${selected.length} table(s) seed ho gaye!`, 'success');
             fetchStats();
@@ -274,13 +272,10 @@ export default function DatabaseManager({ onBack, embedded = false }) {
         setConfirm(null);
         setLoading('clear');
         try {
-          const res = await fetch(`${API}?action=clear`, {
+          const { data: json } = await apiRequest(`${API}?action=clear`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify({ tables: selected }),
-          });
-          const json = await res.json();
+            body: { tables: selected },
+      });
           if (json.success) {
             showToast(`🗑️ ${selected.length} table(s) clear ho gaye`, 'info');
             fetchStats();
@@ -298,13 +293,10 @@ export default function DatabaseManager({ onBack, embedded = false }) {
     if (!selected.length) { showToast('Pehle kuch tables select karein', 'warning'); return; }
     setLoading('export');
     try {
-      const res = await fetch(`${API}?action=export`, {
+      const { data: json } = await apiRequest(`${API}?action=export`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ tables: selected }),
+        body: { tables: selected },
       });
-      const json = await res.json();
       if (json.success) {
         const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' });
         const url  = URL.createObjectURL(blob);
@@ -329,13 +321,10 @@ export default function DatabaseManager({ onBack, embedded = false }) {
 
     setLoading('import');
     try {
-      const res = await fetch(`${API}?action=import`, {
+      const { data: json } = await apiRequest(`${API}?action=import`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ data: parsed }),
+        body: { data: parsed },
       });
-      const json = await res.json();
       if (json.success) {
         showToast(`✅ Import complete! ${Object.keys(json.imported || {}).length} table(s) restore hue`, 'success');
         setImportText('');
