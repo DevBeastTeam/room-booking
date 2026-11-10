@@ -81,7 +81,7 @@ export async function apiRequest(url, options = {}) {
       headers,
       credentials: options.credentials || 'same-origin',
     });
-  } catch (err) {
+  } catch {
     return { ok: false, status: 0, data: { success: false, error: 'Network error. Please check your connection.' } };
   }
 

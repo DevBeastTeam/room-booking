@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { apiRequest } from '../services/apiClient';
 import {
   Home, Users, FileText, Wrench, DollarSign, BarChart2, Settings,
   LogOut, CheckCircle, XCircle, Clock,
@@ -27,6 +28,7 @@ import {
   sendAdminReply,
   markSessionRead,
   deleteSession,
+  closeSession,
   getTotalUnread,
   formatTs,
 } from '../services/chatService';
@@ -88,15 +90,13 @@ function fallbackCopy(text) {
 // Session cookie same-origin fetch ke sath automatically jati hai.
 async function syncToBackend(url, method, body) {
   try {
-    const res = await fetch(url, {
+    // apiRequest attaches the CSRF token to mutating requests.
+    const { ok, status, data } = await apiRequest(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body || undefined,
     });
-    const data = await res.json().catch(() => null);
-    if (!res.ok || !data || data.success !== true) {
-      console.debug('Admin backend sync note:', url, res.status, data);
+    if (!ok || !data || data.success !== true) {
+      console.debug('Admin backend sync note:', url, status, data);
       return false;
     }
     return true;
@@ -1131,7 +1131,7 @@ function EmailLogsSection() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/backend/api/email-logs.php', { credentials: 'same-origin' })
+    apiRequest('/backend/api/email-logs.php')
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled && data?.success && Array.isArray(data.data) && data.data.length > 0) {
@@ -1194,7 +1194,7 @@ function AdminActivitySection() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/backend/api/auth.php?action=activity', { credentials: 'same-origin' });
+      const res = await apiRequest('/backend/api/auth.php?action=activity');
       const json = await res.json();
       if (json.success) setData(json);
     } catch { /* ignore */ }
@@ -1205,7 +1205,7 @@ function AdminActivitySection() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/backend/api/auth.php?action=activity', { credentials: 'same-origin' });
+        const res = await apiRequest('/backend/api/auth.php?action=activity');
         const json = await res.json();
         if (!cancelled) {
           if (json.success) setData(json);
@@ -1350,25 +1350,37 @@ function AdminActivitySection() {
 
 // ── Live Chat Section ──────────────────────────────────────────────────────────
 function LiveChatSection() {
-  const [sessions, setSessions] = useState(() => getAllSessions());
+  const [sessions, setSessions] = useState({});
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [search, setSearch] = useState('');
   const messagesEndRef = useRef(null);
+  const selectedRef = useRef(null);
+  const mountedRef = useRef(true);
 
-  const loadSessions = () => {
-    setSessions(getAllSessions());
-  };
+  // Load every session from the server and refresh the open conversation.
+  const refresh = useCallback(async () => {
+    const key = selectedRef.current;
+    let messages = null;
+    if (key) messages = await markSessionRead(key);
+    const list = await getAllSessions();
+    if (!mountedRef.current) return;
+    const next = { ...list };
+    if (key && next[key] && messages) {
+      next[key] = { ...next[key], messages, unread: 0 };
+    }
+    setSessions(next);
+  }, []);
 
   useEffect(() => {
-    const interval = setInterval(loadSessions, 3000);
-    const onUpdate = () => loadSessions();
-    window.addEventListener('chat-sessions-updated', onUpdate);
+    mountedRef.current = true;
+    refresh();
+    const interval = setInterval(refresh, 5000);
     return () => {
+      mountedRef.current = false;
       clearInterval(interval);
-      window.removeEventListener('chat-sessions-updated', onUpdate);
     };
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1377,10 +1389,11 @@ function LiveChatSection() {
   const sessionList = Object.values(sessions)
     .filter(s => {
       if (!search.trim()) return true;
+      const q = search.toLowerCase();
       return (
-        s.displayName?.toLowerCase().includes(search.toLowerCase()) ||
-        s.email?.toLowerCase().includes(search.toLowerCase()) ||
-        s.userId?.toLowerCase().includes(search.toLowerCase())
+        (s.displayName || '').toLowerCase().includes(q) ||
+        (s.email || '').toLowerCase().includes(q) ||
+        (s.userId || '').toLowerCase().includes(q)
       );
     })
     .sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
@@ -1388,25 +1401,62 @@ function LiveChatSection() {
   const totalUnread = Object.values(sessions).reduce((sum, s) => sum + (s.unread || 0), 0);
   const selectedSession = selectedUserId ? sessions[selectedUserId] : null;
 
-  const handleSelectSession = (userId) => {
+  const lastPreview = (s) => {
+    const text = s?.last_message || (s?.messages?.length ? s.messages[s.messages.length - 1].text : '');
+    if (!text) return 'No messages yet';
+    return text.length > 38 ? `${text.slice(0, 38)}...` : text;
+  };
+
+  const handleSelectSession = async (userId) => {
+    selectedRef.current = userId;
     setSelectedUserId(userId);
-    markSessionRead(userId);
-    loadSessions();
+    const messages = await markSessionRead(userId);
+    if (!mountedRef.current) return;
+    setSessions((prev) => (
+      prev[userId]
+        ? { ...prev, [userId]: { ...prev[userId], messages: messages || prev[userId].messages, unread: 0 } }
+        : prev
+    ));
   };
 
-  const handleSendReply = (e) => {
+  const handleSendReply = async (e) => {
     e.preventDefault();
-    if (!replyText.trim() || !selectedUserId) return;
-    sendAdminReply(selectedUserId, replyText.trim());
+    const text = replyText.trim();
+    if (!text || !selectedUserId) return;
     setReplyText('');
-    loadSessions();
+    const stored = await sendAdminReply(selectedUserId, text);
+    if (!mountedRef.current) return;
+    if (stored) {
+      setSessions((prev) => (
+        prev[selectedUserId]
+          ? { ...prev, [selectedUserId]: { ...prev[selectedUserId], messages: [...(prev[selectedUserId].messages || []), stored] } }
+          : prev
+      ));
+    } else {
+      setReplyText(text); // delivery failed — let the admin retry
+    }
   };
 
-  const handleDelete = (userId) => {
+  const handleToggleClosed = async (userId) => {
+    const current = sessions[userId];
+    const shouldClose = current?.status !== 'closed';
+    const ok = await closeSession(userId, shouldClose);
+    if (!mountedRef.current || !ok) return;
+    setSessions((prev) => (
+      prev[userId]
+        ? { ...prev, [userId]: { ...prev[userId], status: shouldClose ? 'closed' : 'open' } }
+        : prev
+    ));
+  };
+
+  const handleDelete = async (userId) => {
     if (!window.confirm('Delete this chat session?')) return;
-    deleteSession(userId);
-    if (selectedUserId === userId) setSelectedUserId(null);
-    loadSessions();
+    await deleteSession(userId);
+    if (selectedRef.current === userId) {
+      selectedRef.current = null;
+      setSelectedUserId(null);
+    }
+    refresh();
   };
 
   return (
@@ -1419,7 +1469,7 @@ function LiveChatSection() {
               {totalUnread} unread
             </span>
           )}
-          <button onClick={loadSessions} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', backgroundColor: `${A.accent}22`, color: A.accentLt, border: `1px solid ${A.accent}55`, borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={refresh} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', backgroundColor: `${A.accent}22`, color: A.accentLt, border: `1px solid ${A.accent}55`, borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}>
             <RefreshCw size={13} /> Refresh
           </button>
         </div>
@@ -1456,7 +1506,7 @@ function LiveChatSection() {
                   </div>
                   <div style={{ color: A.muted, fontSize: '0.7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.email || s.userId}</div>
                   <div style={{ color: A.muted, fontSize: '0.67rem', marginTop: '0.15rem', fontStyle: 'italic' }}>
-                    {s.messages?.length > 0 ? s.messages[s.messages.length - 1].text.slice(0, 38) + '...' : 'No messages yet'}
+                    {s.status === 'closed' ? '[closed] ' : ''}{lastPreview(s)}
                   </div>
                 </div>
               </button>
@@ -1486,6 +1536,10 @@ function LiveChatSection() {
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <span style={{ color: A.muted, fontSize: '0.72rem' }}>{selectedSession.messages?.length || 0} messages</span>
+                  <button onClick={() => handleToggleClosed(selectedSession.userId)} title={selectedSession.status === 'closed' ? 'Reopen conversation' : 'Close conversation'}
+                    style={{ padding: '0.35rem 0.55rem', backgroundColor: `${A.accent}22`, color: A.accentLt, border: `1px solid ${A.accent}44`, borderRadius: 6, cursor: 'pointer' }}>
+                    {selectedSession.status === 'closed' ? <CheckCircle size={13} /> : <XCircle size={13} />}
+                  </button>
                   <button onClick={() => handleDelete(selectedSession.userId)} title="Delete conversation"
                     style={{ padding: '0.35rem 0.55rem', backgroundColor: `${A.danger}22`, color: A.danger, border: `1px solid ${A.danger}44`, borderRadius: 6, cursor: 'pointer' }}>
                     <Trash2 size={13} />

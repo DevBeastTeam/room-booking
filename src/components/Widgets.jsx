@@ -39,15 +39,7 @@ export default function Widgets({ onOpenScheduleTour }) {
     if (typeof window === 'undefined') return { userId: '', displayName: 'Guest', email: '', isLoggedIn: false };
     try { return getUserInfo(); } catch { return { userId: '', displayName: 'Guest', email: '', isLoggedIn: false }; }
   });
-  const [chatMessages, setChatMessages] = useState(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const info = getUserInfo();
-      ensureSession(info.userId, info.displayName, info.email);
-      const session = getSession(info.userId);
-      return session?.messages || [];
-    } catch { return []; }
-  });
+  const [chatMessages, setChatMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [editName, setEditName] = useState(() => {
@@ -62,6 +54,30 @@ export default function Widgets({ onOpenScheduleTour }) {
     try { return getUserInfo().email || ''; } catch { return ''; }
   });
   const messagesEndRef = useRef(null);
+  const chatMountedRef = useRef(true);
+
+  // Merge server messages with the not-yet-confirmed local (optimistic) ones.
+  const mergeMessages = (serverMessages, localMessages) => {
+    const server = Array.isArray(serverMessages) ? serverMessages : [];
+    const seen = new Set(server.map((m) => `${m.sender}|${m.text}`));
+    const extras = (Array.isArray(localMessages) ? localMessages : [])
+      .filter((m) => m.pending && !seen.has(`${m.sender}|${m.text}`));
+    return [...server, ...extras];
+  };
+
+  // Load the conversation from the server (creates the session on first use).
+  const loadConversation = async () => {
+    const info = getUserInfo();
+    const session = await ensureSession(info.userId, info.displayName, info.email);
+    if (!chatMountedRef.current || !session) return null;
+    setChatUser((prev) => ({
+      ...prev,
+      displayName: session.displayName || prev.displayName,
+      email: session.email || prev.email,
+    }));
+    setChatMessages((prev) => mergeMessages(session.messages || [], prev));
+    return session;
+  };
 
   // Sync user info and load conversation
   const syncChatState = () => {
@@ -69,28 +85,31 @@ export default function Widgets({ onOpenScheduleTour }) {
     setChatUser(info);
     setEditName(info.displayName.startsWith('Guest') ? '' : info.displayName);
     setEditEmail(info.email || '');
-    ensureSession(info.userId, info.displayName, info.email);
-    const session = getSession(info.userId);
-    if (session && session.messages) {
-      setChatMessages(session.messages);
-    }
+    loadConversation();
   };
 
-  // Real-time listener and polling for admin replies
+  // Track mounted state so async responses never touch an unmounted widget.
   useEffect(() => {
-    if (activeModal !== 'chat' || !chatUser.userId) return;
-    const fetchLatest = () => {
-      const s = getSession(chatUser.userId);
-      if (s && s.messages) {
-        setChatMessages(s.messages);
-      }
+    chatMountedRef.current = true;
+    return () => { chatMountedRef.current = false; };
+  }, []);
+
+  // Poll the server for admin replies while the widget is open.
+  useEffect(() => {
+    if (activeModal !== 'chat') return;
+    let cancelled = false;
+    const fetchLatest = async () => {
+      const info = getUserInfo();
+      let session = await getSession(info.userId);
+      if (!session) session = await ensureSession(info.userId, info.displayName, info.email);
+      if (cancelled || !chatMountedRef.current || !session) return;
+      setChatMessages((prev) => mergeMessages(session.messages || [], prev));
     };
-    const interval = setInterval(fetchLatest, 2000);
-    const onUpdate = () => fetchLatest();
-    window.addEventListener('chat-sessions-updated', onUpdate);
+    fetchLatest();
+    const interval = setInterval(fetchLatest, 4000);
     return () => {
+      cancelled = true;
       clearInterval(interval);
-      window.removeEventListener('chat-sessions-updated', onUpdate);
     };
   }, [activeModal, chatUser.userId]);
 
@@ -101,27 +120,32 @@ export default function Widgets({ onOpenScheduleTour }) {
     }
   }, [chatMessages, activeModal]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
     const msg = inputMessage.trim();
+    if (!msg) return;
+    setInputMessage('');
     const info = getUserInfo();
     const uid = chatUser.userId || info.userId;
-    sendUserMessage(uid, msg, chatUser.displayName || info.displayName, chatUser.email || info.email);
-    setInputMessage('');
-    const s = getSession(uid);
-    if (s && s.messages) setChatMessages(s.messages);
+    // Optimistic echo — the server copy replaces it once it arrives.
+    setChatMessages((prev) => [...prev, { sender: 'user', text: msg, ts: Date.now(), pending: true }]);
+    const stored = await sendUserMessage(uid, msg, chatUser.displayName || info.displayName, chatUser.email || info.email);
+    if (!chatMountedRef.current) return;
+    setChatMessages((prev) => prev.map((m) => (
+      m.pending && m.text === msg
+        ? { ...m, ts: stored?.ts || m.ts, pending: false, failed: !stored }
+        : m
+    )));
   };
 
-  const handleSaveCustomerInfo = (e) => {
+  const handleSaveCustomerInfo = async (e) => {
     e.preventDefault();
     if (!editName.trim() && !editEmail.trim()) return;
     setUserInfo(editName.trim(), editEmail.trim());
     const updated = getUserInfo();
     setChatUser(updated);
     setIsEditingInfo(false);
-    const s = getSession(updated.userId);
-    if (s && s.messages) setChatMessages(s.messages);
+    loadConversation();
   };
 
 
@@ -679,8 +703,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                 }}>
                   {m.text}
                 </div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted, #64748b)', marginTop: '2px', padding: '0 4px' }}>
-                  {m.sender === 'admin' ? '🏢 Leasing Staff · ' : ''}{formatTs(m.ts)}
+                <div style={{ fontSize: '0.65rem', color: m.failed ? '#f87171' : 'var(--text-muted, #64748b)', marginTop: '2px', padding: '0 4px' }}>
+                  {m.sender === 'admin' ? '🏢 Leasing Staff · ' : ''}{formatTs(m.ts)}{m.failed ? ' · not sent' : ''}
                 </div>
               </div>
             ))}
@@ -1142,7 +1166,7 @@ export default function Widgets({ onOpenScheduleTour }) {
             {/* Direct Call Button */}
             <div style={{ marginBottom: '1.5rem' }}>
               <a
-                href="tel:+18559844406"
+                href="tel:+18178578782"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -1160,7 +1184,7 @@ export default function Widgets({ onOpenScheduleTour }) {
                 }}
               >
                 <Phone size={20} style={{ color: 'var(--primary-color, #c9a96e)' }} />
-                <span>+1 (855) 984-4406</span>
+                <span>+1 (817) 857-8782</span>
               </a>
             </div>
 

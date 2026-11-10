@@ -78,7 +78,7 @@ cd ..
 
 ---
 
-### ⚙️ Step 4: Database Credentials Set Karein (`.env`)
+### ⚙️ Step 4: Database Credentials + Security Set Karein (`.env`)
 
 1. Hostinger File Manager mein jayein:
    - File Path: `public_html/backend/config/.env`
@@ -89,8 +89,22 @@ cd ..
    DB_NAME=u123456789_roombooking   # Step 2 wala exact DB Name
    DB_USER=u123456789_admin         # Step 2 wala exact DB Username
    DB_PASS=AapKaDatabasePassword    # Step 2 wala exact Password
+
+   SITE_URL=https://yourdomain.com
+
+   # ── Security (ZAROORI) ──────────────────────────────────────────────
+   ADMIN_CRED_KEY=<32+ character ka random string>
+   ADMIN_SUPER_PASSWORD=<ek mazboot aur unique password>
+   ADMIN_ALLOW_DATE_PASSWORD=false
+   AUTH_FORCE_PASSWORD_CHANGE=true
+   AUTH_MAX_LOGIN_ATTEMPTS=8
+   AUTH_LOCKOUT_MINUTES=15
    ```
 3. Click **Save & Close**.
+
+> **⚠️ `ADMIN_SUPER_PASSWORD` set karna na bhoolein.** Iske baghair super admin login hi
+> nahi hoga (date-based password default OFF hai). Random password generate karne ke liye
+> server par: `php -r "echo bin2hex(random_bytes(16)), PHP_EOL;"`
 
 ---
 
@@ -115,33 +129,59 @@ cd ..
    ```text
    https://yourdomain.com/admin
    ```
-   - **Username:** `admin` (ya `manager`)
-   - **Password:** default `admin@2026` / `manager123` — super admin (`/dev`) se reset/change kar sakte hain
+   - **Username:** `admin@gmail.com` ya `manager@gmail.com`
+   - **Password:** pehli baar default `12345678` — login ke baad panel **forcibly** naya
+     password set karwayega (8+ characters). Set karne ke baad har admin ko apna password
+     rotate karna hoga.
    - Super admin har admin ke liye decide karta hai ke usay kaun kaun si **sidebar tabs** dikhein (Floor Plans, Units, Applications, etc.)
 
 3. **Super Admin / Developer Panel:**
    ```text
    https://yourdomain.com/dev
    ```
-   - **Username:** `dev`
-   - **Password:** aaj ki tareekh (day of month) — e.g. aaj 12 tareekh hai to `12`, kal `13`. Roz badalta hai.
+   - **Username:** `dev` (ya `dev@gmail.com`)
+   - **Password:** `.env` mein set kiya hua `ADMIN_SUPER_PASSWORD`
+     (legacy "aaj ki tareekh" wala password sirf tab chalega jab
+     `ADMIN_ALLOW_DATE_PASSWORD=true` ho — production mein OFF rakhein)
    - Super admin dekh sakta hai: saare admin accounts, unke credentials, tab permissions, activity logs, **Database Manager** (seed/clear/export/import)
    - Super admin kar sakta hai: naya admin banana, enable/disable karna, password reset, tab permissions on/off
 
-> **⚠️ Production Security:** Deploy se pehle `backend/config/.env` mein `ADMIN_CRED_KEY` ko lambi random string se change karein (isi key se admin passwords encrypt hoti hain). Dev panel ka password date-based hai — ise kahin publicly display na karein.
+4. **Resident Portal:**
+   ```text
+   https://yourdomain.com/dashboard
+   ```
+   - Resident account `backend/migrations/seed_residents.php` se banta hai
+     (default unit `2104`, password `Resident@2026` — pehli login par change karna hoga).
 
-3. **Database Check:**
+5. **Database Check:**
    ```text
    https://yourdomain.com/database
    ```
-   *(Yeh page MySQL live connection status confirm kar dega).*
+   *(Yeh page MySQL live connection status confirm kar dega — sirf super admin.)*
 
-4. **Database Manager Access:** `/database` page sirf un logins ko dikhega jinke paas
-   dev super admin se "Database Manager" tab permission on hai (server-side bhi enforce hota hai).
+6. **Database Manager Access:** `/database` page sirf super admin ko dikhta hai
+   (server-side bhi enforce hota hai).
+
+---
+
+### 🔒 Production Security Checklist
+
+- [ ] `ADMIN_CRED_KEY` — 32+ random characters (admin password encryption key)
+- [ ] `ADMIN_SUPER_PASSWORD` — strong, unique, sirf aap ke paas
+- [ ] `ADMIN_ALLOW_DATE_PASSWORD=false` — date-based super admin login band
+- [ ] `WORLDFIRST_WEBHOOK_SECRET` — set hua hai ( warna webhooks 401 se reject honge)
+- [ ] `WORLDFIRST_PRIVATE_KEY` — live payments ke liye zaroori (request signing)
+- [ ] `WORLDFIRST_ENV=live` — sirf tab jab real gateway credentials set hon
+- [ ] `backend/config/.env` browser se open na ho — verify:
+      `curl -I https://yourdomain.com/backend/config/.env` → **403** aana chahiye
+- [ ] `https://yourdomain.com/backend/data/admins.json` → **403** aana chahiye
 
 ---
 
 ### 🚨 Quick Troubleshooting
 
 - **404 on API / Form Submit:** File Manager mein check karein ke `public_html/.htaccess` mojood hai.
+- **403 on `.env` / `data/*.json`:** Ye **sahi** behaviour hai — sensitive files web se block hote hain.
+- **Super admin login fail:** `.env` mein `ADMIN_SUPER_PASSWORD` set hai ya nahi check karein.
+- **"Security token missing or invalid" error:** page reload karein — CSRF token refresh ho jayega.
 - **Database Error:** `.env` mein Hostinger ka poora DB name check karein jisme prefix hota hai (e.g. `u123456789_name`).

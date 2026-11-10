@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  submitMaintenanceTicketDB,
-  fetchWorldFirstTransactions,
-  cancelWorldFirstSubscription
-} from '../services/siteDataService';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Home, CreditCard, FileText, Bell, LogOut,
   CheckCircle, AlertCircle, Download, Plus, X, Star,
   Calendar, Package, Car, Archive, Layers,
-  BarChart2, MessageSquare, Repeat, RefreshCw
+  BarChart2, MessageSquare, Repeat, RefreshCw,
+  CheckCircle2, Wallet, ShieldCheck, ChevronRight
 } from 'lucide-react';
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
@@ -30,48 +26,67 @@ const C = {
   purple: '#a855f7',
 };
 
-// ── Mock resident data ─────────────────────────────────────────────────────────
-const RESIDENT = {
-  name: 'Sarah Johnson',
-  email: 'sarah.johnson@email.com',
-  unit: '2104',
-  floorPlan: 'Two Bedroom',
-  beds: 2, baths: 1, sqft: 769,
-  rent: 967, // 909 + fees
-  leaseStart: '2026-02-01',
-  leaseEnd: '2027-01-31',
-  leaseTerm: 12,
-  moveInDate: '2025-02-01',
-  status: 'Good Standing',
-  deposit: 250,
-};
+const RESIDENT_API = '/backend/api/resident.php';
+const WF_API = '/backend/api/worldfirst.php';
 
+// ── API helpers (called directly — no dependency on other agents' files) ───────
+async function residentApi(action, { method = 'GET', body = null, csrfToken = null } = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+  try {
+    const res = await fetch(`${RESIDENT_API}?action=${encodeURIComponent(action)}`, {
+      method,
+      headers,
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : null,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok && data && data.success !== false, status: res.status, data };
+  } catch {
+    return { ok: false, status: 0, data: { error: 'Network error. Please check your connection.' } };
+  }
+}
 
-const MAINTENANCE_REQUESTS = [
-  { id: 'MR-001', title: 'AC not cooling properly', category: 'HVAC', priority: 'High',   status: 'in-progress', date: 'Sep 15, 2026', notes: 'Technician scheduled for Sep 20' },
-  { id: 'MR-002', title: 'Kitchen faucet dripping',  category: 'Plumbing', priority: 'Medium', status: 'completed',  date: 'Aug 28, 2026', notes: 'Fixed — faucet replaced' },
-  { id: 'MR-003', title: 'Bathroom light flickering', category: 'Electrical', priority: 'Low', status: 'pending',    date: 'Sep 18, 2026', notes: 'Awaiting assignment' },
-];
+async function worldFirstApi(action, { method = 'GET', body = null } = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  try {
+    const res = await fetch(`${WF_API}?action=${encodeURIComponent(action)}`, {
+      method,
+      headers,
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : null,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok && data && data.success !== false, status: res.status, data };
+  } catch {
+    return { ok: false, status: 0, data: { error: 'Payment gateway is unreachable right now.' } };
+  }
+}
 
-const ADDONS_ACTIVE = [
-  { id: 'carport',    name: 'Reserved Covered Carport', price: 35,  icon: Car,     active: true  },
-  { id: 'storage',    name: 'Extra Storage Locker',     price: 45,  icon: Archive, active: false },
-  { id: 'washer',     name: 'In-Unit Washer & Dryer',   price: 40,  icon: Layers,  active: true  },
-];
+/** Persist the per-transaction verify token so it survives the gateway redirect. */
+function storeVerifyToken(txnId, token) {
+  try {
+    const map = JSON.parse(sessionStorage.getItem('mp_wf_tokens') || '{}');
+    map[txnId] = token;
+    sessionStorage.setItem('mp_wf_tokens', JSON.stringify(map));
+  } catch { /* storage unavailable — verification falls back to gateway status */ }
+}
 
-const DOCUMENTS = [
-  { name: 'Lease Agreement 2025–2026.pdf', size: '1.2 MB', date: 'Feb 1, 2025'  },
-  { name: 'Move-In Inspection Report.pdf', size: '0.8 MB', date: 'Feb 1, 2025'  },
-  { name: 'Community Rules & Regulations.pdf', size: '0.5 MB', date: 'Jan 15, 2025' },
-  { name: 'Renter Insurance Policy.pdf', size: '2.1 MB', date: 'Feb 5, 2025'  },
-];
+function readVerifyToken(txnId) {
+  try {
+    const map = JSON.parse(sessionStorage.getItem('mp_wf_tokens') || '{}');
+    return map[txnId] || null;
+  } catch {
+    return null;
+  }
+}
 
-const NOTIFICATIONS = [
-  { id: 1, type: 'info',    msg: 'Your rent for October is due in 12 days.',           time: '2h ago'   },
-  { id: 2, type: 'success', msg: 'Maintenance request MR-002 has been completed.',      time: '3d ago'   },
-  { id: 3, type: 'warning', msg: 'Community pool will be closed Oct 1–5 for cleaning.', time: '5d ago'   },
-  { id: 4, type: 'info',    msg: 'Your lease renewal offer is ready to review.',        time: '1w ago'   },
-];
+// ── Add-on icon mapping ───────────────────────────────────────────────────────
+const ADDON_ICONS = { Car, Archive, Layers, Package };
+function addonIcon(name) {
+  if (!name) return Package;
+  return ADDON_ICONS[name] || Package;
+}
 
 // ── Helper components ──────────────────────────────────────────────────────────
 
@@ -119,6 +134,9 @@ function Badge({ status }) {
     completed:   { bg: '#14532d', color: '#4ade80', label: 'Completed'   },
     active:      { bg: '#134e4a', color: '#2dd4bf', label: 'Active'      },
     inactive:    { bg: '#1e293b', color: '#64748b', label: 'Inactive'    },
+    cancelled:   { bg: '#1e293b', color: '#64748b', label: 'Cancelled'   },
+    failed:      { bg: '#7f1d1d', color: '#f87171', label: 'Failed'      },
+    refunded:    { bg: '#1e293b', color: '#94a3b8', label: 'Refunded'    },
   };
   const s = map[status] || map.pending;
   return (
@@ -128,28 +146,73 @@ function Badge({ status }) {
   );
 }
 
+function Notice({ type = 'info', text }) {
+  if (!text) return null;
+  const palette = {
+    success: { color: C.success, bg: 'rgba(34,197,94,0.10)', border: '#22c55e55', Icon: CheckCircle2 },
+    error:   { color: C.danger,  bg: 'rgba(239,68,68,0.10)', border: '#ef444455', Icon: AlertCircle },
+    info:    { color: C.info,    bg: 'rgba(59,130,246,0.10)', border: '#3b82f655', Icon: ShieldCheck },
+  }[type] || { color: C.info, bg: 'rgba(59,130,246,0.10)', border: '#3b82f655', Icon: ShieldCheck };
+  const { Icon } = palette;
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
+      padding: '0.75rem 1rem', borderRadius: 10, marginBottom: '1rem',
+      fontSize: '0.84rem', color: palette.color, backgroundColor: palette.bg,
+      border: `1px solid ${palette.border}`,
+    }}>
+      <Icon size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function EmptyState({ icon: Icon = FileText, title, subtitle }) {
+  return (
+    <div style={{
+      padding: '2rem 1.4rem', textAlign: 'center', color: C.muted, fontSize: '0.82rem',
+      background: C.card, borderRadius: 12, border: `1px solid ${C.border}`,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+    }}>
+      <Icon size={22} color={C.border} />
+      <div style={{ color: C.text, fontWeight: 600, fontSize: '0.88rem' }}>{title}</div>
+      {subtitle && <div>{subtitle}</div>}
+    </div>
+  );
+}
+
 // ── Section: Overview ──────────────────────────────────────────────────────────
-function OverviewSection() {
-  const daysLeft = Math.ceil((new Date(RESIDENT.leaseEnd) - new Date()) / (1000 * 60 * 60 * 24));
+function OverviewSection({ resident, lease }) {
+  const leaseEnd = lease?.end;
+  const daysLeft = useMemo(() => {
+    if (!leaseEnd) return null;
+    const diff = Math.ceil((new Date(leaseEnd) - new Date()) / (1000 * 60 * 60 * 24));
+    return diff;
+  }, [leaseEnd]);
+
+  const rent = resident?.rent ?? lease?.rent_breakdown?.total ?? 0;
+
   return (
     <div>
       <SectionTitle>Overview</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <StatCard icon={Home}       label="Your Unit"       value={`#${RESIDENT.unit}`}      sub={RESIDENT.floorPlan}           color={C.accent}   />
-        <StatCard icon={CreditCard} label="Monthly Rent"    value={`$${RESIDENT.rent}`}      sub="Due on 1st of each month"     color={C.info}     />
-        <StatCard icon={Calendar}   label="Lease Expires"   value={`${daysLeft}d`}           sub={RESIDENT.leaseEnd}            color={C.warning}  />
-        <StatCard icon={Star}       label="Account Status"  value="Good"                     sub={RESIDENT.status}              color={C.success}  />
+        <StatCard icon={Home}       label="Your Unit"      value={`#${resident?.unit_number ?? '—'}`} sub={resident?.floor_plan ?? '—'} color={C.accent}  />
+        <StatCard icon={CreditCard} label="Monthly Rent"   value={`$${Number(rent).toFixed(0)}`} sub="Due on 1st of each month" color={C.info}    />
+        <StatCard icon={Calendar}   label="Lease Expires"  value={daysLeft !== null ? `${daysLeft}d` : '—'} sub={leaseEnd || '—'} color={C.warning} />
+        <StatCard icon={Star}       label="Account Status" value={(resident?.status || '—').split(' ')[0]} sub={resident?.status || ''} color={C.success} />
       </div>
 
       {/* Lease progress bar */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.4rem 1.6rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.4rem 1.6rem', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', gap: '1rem', flexWrap: 'wrap' }}>
           <span style={{ color: C.text, fontWeight: 600, fontSize: '0.9rem' }}>Lease Progress</span>
-          <span style={{ color: C.muted, fontSize: '0.8rem' }}>{RESIDENT.leaseStart} → {RESIDENT.leaseEnd}</span>
+          <span style={{ color: C.muted, fontSize: '0.8rem' }}>{lease?.start || '—'} → {lease?.end || '—'}</span>
         </div>
         {(() => {
-          const start = new Date(RESIDENT.leaseStart), end = new Date(RESIDENT.leaseEnd), now = new Date();
-          const pct = Math.min(100, Math.round(((now - start) / (end - start)) * 100));
+          const start = new Date(lease?.start);
+          const end = new Date(lease?.end);
+          const valid = lease?.start && lease?.end && !isNaN(start) && !isNaN(end) && end > start;
+          const pct = valid ? Math.min(100, Math.max(0, Math.round(((new Date() - start) / (end - start)) * 100))) : 0;
           return (
             <>
               <div style={{ height: 10, backgroundColor: C.border, borderRadius: 10, overflow: 'hidden' }}>
@@ -164,41 +227,76 @@ function OverviewSection() {
           );
         })()}
       </div>
+
+      {/* Recent activity */}
+      <ActivityPanel activity={resident?._activity} />
+    </div>
+  );
+}
+
+// ── Section: Recent activity ──────────────────────────────────────────────────
+function ActivityPanel({ activity }) {
+  if (!activity || activity.length === 0) return null;
+  const kindIcon = { payment: Wallet, lease: FileText, maintenance: MessageSquare, addon: Package, document: Download, notice: Bell };
+  return (
+    <div>
+      <SectionTitle>Recent Activity</SectionTitle>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        {activity.slice(0, 6).map((a, i) => {
+          const Icon = kindIcon[a.kind] || Bell;
+          return (
+            <div key={a.id ?? i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.85rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 9, backgroundColor: C.accentGlow, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon size={16} color={C.accent} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ color: C.text, fontSize: '0.86rem', fontWeight: 600 }}>{a.title}</div>
+                <div style={{ color: C.muted, fontSize: '0.75rem' }}>{a.detail || a.kind}</div>
+              </div>
+              <div style={{ color: C.muted, fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
+                {a.occurred_at ? new Date(a.occurred_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
 // ── Section: My Lease ──────────────────────────────────────────────────────────
-function LeaseSection() {
+function LeaseSection({ resident, lease }) {
   const [renewalRequested, setRenewalRequested] = useState(false);
+  const breakdown = lease?.rent_breakdown || { base: 0, fees: 0, total: resident?.rent || 0 };
+
   const rows = [
-    ['Floor Plan',    RESIDENT.floorPlan],
-    ['Unit Number',   `#${RESIDENT.unit}`],
-    ['Bedrooms',      `${RESIDENT.beds} Bed / ${RESIDENT.baths} Bath`],
-    ['Square Feet',   `${RESIDENT.sqft} sq. ft.`],
-    ['Base Rent',     `$909.00 / month`],
-    ['Mandatory Fees','$58.00 / month'],
-    ['Total Monthly', `$${RESIDENT.rent}.00 / month`],
-    ['Lease Term',    `${RESIDENT.leaseTerm} Months`],
-    ['Move-in Date',  RESIDENT.moveInDate],
-    ['Lease Start',   RESIDENT.leaseStart],
-    ['Lease End',     RESIDENT.leaseEnd],
-    ['Security Deposit', `$${RESIDENT.deposit}.00`],
+    ['Floor Plan',      resident?.floor_plan || '—'],
+    ['Unit Number',     `#${resident?.unit_number ?? '—'}`],
+    ['Bedrooms',        `${resident?.beds ?? '—'} Bed / ${resident?.baths ?? '—'} Bath`],
+    ['Square Feet',     `${resident?.sqft ?? '—'} sq. ft.`],
+    ['Base Rent',       `$${Number(breakdown.base || 0).toFixed(2)} / month`],
+    ['Mandatory Fees',  `$${Number(breakdown.fees || 0).toFixed(2)} / month`],
+    ['Total Monthly',   `$${Number(breakdown.total || resident?.rent || 0).toFixed(2)} / month`],
+    ['Lease Term',      lease?.term ? `${lease.term} Months` : '—'],
+    ['Move-in Date',    resident?.move_in_date || '—'],
+    ['Lease Start',     lease?.start || '—'],
+    ['Lease End',       lease?.end || '—'],
+    ['Security Deposit', `$${Number(resident?.deposit || 0).toFixed(2)}`],
   ];
 
   const handleDownloadLease = () => {
     const summary = [
       'Monar Pass Apartments - Lease Summary',
       '========================================',
-      `Resident: ${RESIDENT.name}`,
-      `Unit: #${RESIDENT.unit} (${RESIDENT.floorPlan})`,
-      `Lease Term: ${RESIDENT.leaseTerm} months`,
-      `Lease Start: ${RESIDENT.leaseStart}`,
-      `Lease End: ${RESIDENT.leaseEnd}`,
-      `Base Rent: $909.00 / month`,
-      'Mandatory Fees: $58.00 / month',
-      `Total Monthly: $${RESIDENT.rent}.00 / month`,
-      `Security Deposit: $${RESIDENT.deposit}.00`,
+      `Resident: ${resident?.name || ''}`,
+      `Unit: #${resident?.unit_number || ''} (${resident?.floor_plan || ''})`,
+      `Lease Term: ${lease?.term || '—'} months`,
+      `Lease Start: ${lease?.start || '—'}`,
+      `Lease End: ${lease?.end || '—'}`,
+      `Base Rent: $${Number(breakdown.base || 0).toFixed(2)} / month`,
+      `Mandatory Fees: $${Number(breakdown.fees || 0).toFixed(2)} / month`,
+      `Total Monthly: $${Number(breakdown.total || resident?.rent || 0).toFixed(2)} / month`,
+      `Security Deposit: $${Number(resident?.deposit || 0).toFixed(2)}`,
       '',
       'This text summary was generated from the resident portal.',
     ].join('\n');
@@ -206,7 +304,7 @@ function LeaseSection() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Lease-Agreement-Unit-${RESIDENT.unit}.txt`;
+    a.download = `Lease-Agreement-Unit-${resident?.unit_number || ''}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -216,9 +314,9 @@ function LeaseSection() {
       <SectionTitle>My Lease</SectionTitle>
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
         {rows.map(([k, v], i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1.4rem', borderBottom: i < rows.length - 1 ? `1px solid ${C.border}` : 'none', backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)' }}>
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1.4rem', borderBottom: i < rows.length - 1 ? `1px solid ${C.border}` : 'none', backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)', gap: '1rem' }}>
             <span style={{ color: C.muted, fontSize: '0.85rem' }}>{k}</span>
-            <span style={{ color: C.text, fontWeight: 600, fontSize: '0.9rem' }}>{v}</span>
+            <span style={{ color: C.text, fontWeight: 600, fontSize: '0.9rem', textAlign: 'right' }}>{v}</span>
           </div>
         ))}
       </div>
@@ -242,28 +340,72 @@ function LeaseSection() {
 }
 
 // ── Section: Payments ──────────────────────────────────────────────────────────
-function PaymentsSection() {
-  const [liveTxns, setLiveTxns] = useState([]);
-  const [loading, setLoading] = useState(true);
+function PaymentsSection({ resident, payments, onRefresh, csrfToken, loading }) {
   const [cancelling, setCancelling] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [msg, setMsg] = useState(null);
 
-  const loadPayments = useCallback(async () => {
-    setLoading(true);
-    const res = await fetchWorldFirstTransactions({ email: RESIDENT.email });
-    if (res && res.success && Array.isArray(res.transactions)) {
-      setLiveTxns(res.transactions);
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadPayments();
-  }, [loadPayments]);
-
-  const activeSub = liveTxns.find(
+  const txns = Array.isArray(payments) ? payments : [];
+  const activeSub = txns.find(
     (t) => t.payment_mode === 'subscription' && t.subscription_status === 'active'
   );
+
+  /**
+   * Real WorldFirst payment flow.
+   * NOTE: the amount is resolved SERVER-SIDE (never sent from the browser) and
+   * the API returns a per-transaction `verify_token` that MUST be sent back
+   * to `verify_payment` — without it the gateway rejects the confirmation.
+   */
+  const startPayment = async (paymentMode) => {
+    if (!resident) return;
+    setMsg(null);
+    setPaying(true);
+    const { ok, data } = await worldFirstApi('create_payment', {
+      method: 'POST',
+      body: {
+        item_type: 'rent_payment',
+        item_name: 'Monthly Apartment Rent',
+        unit_number: resident.unit_number,
+        customer_name: resident.name,
+        customer_email: resident.email,
+        customer_phone: resident.phone || '',
+        payment_mode: paymentMode,
+        subscription_interval: paymentMode === 'subscription' ? 'monthly' : null,
+      },
+    });
+    setPaying(false);
+
+    if (!ok) {
+      setMsg({ type: 'error', text: data?.error || 'Failed to start the payment. Please try again.' });
+      return;
+    }
+
+    if (data.verify_token && data.txn_id) {
+      storeVerifyToken(data.txn_id, data.verify_token);
+    }
+
+    // Live gateway → hand the resident over to WorldFirst checkout.
+    if (data.live_api && data.checkout_url) {
+      window.location.href = data.checkout_url;
+      return;
+    }
+
+    // Sandbox → confirm straight away using the token we just received.
+    if (data.txn_id) {
+      const token = data.verify_token;
+      const verified = await worldFirstApi('verify_payment', {
+        method: 'POST',
+        body: { txn_id: data.txn_id, verify_token: token },
+      });
+      if (verified.ok && verified.data?.verified) {
+        setMsg({ type: 'success', text: `Payment ${data.txn_id} confirmed — $${Number(data.amount || 0).toFixed(2)} received. Thank you!` });
+        onRefresh?.();
+      } else {
+        setMsg({ type: 'info', text: verified.data?.error || 'Payment initiated. It may take a moment to confirm.' });
+        onRefresh?.();
+      }
+    }
+  };
 
   const handleCancelAutoPay = async () => {
     if (!activeSub) return;
@@ -271,13 +413,17 @@ function PaymentsSection() {
       return;
     }
     setCancelling(true);
-    const res = await cancelWorldFirstSubscription(activeSub.txn_id);
+    const { ok, data } = await residentApi('cancel_autopay', {
+      method: 'POST',
+      csrfToken,
+      body: {},
+    });
     setCancelling(false);
-    if (res && res.success) {
+    if (ok) {
       setMsg({ type: 'success', text: 'Auto-Pay subscription cancelled. You can make one-time payments anytime.' });
-      loadPayments();
+      onRefresh?.();
     } else {
-      setMsg({ type: 'error', text: res?.error || 'Failed to cancel Auto-Pay.' });
+      setMsg({ type: 'error', text: data?.error || 'Failed to cancel Auto-Pay.' });
     }
   };
 
@@ -290,83 +436,43 @@ function PaymentsSection() {
             Powered by WorldFirst Pay Solution. Track payments and manage auto-debit agreements.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
-            onClick={loadPayments}
+            onClick={onRefresh}
             disabled={loading}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              backgroundColor: C.card,
-              border: `1px solid ${C.border}`,
-              color: C.text,
-              borderRadius: 8,
-              padding: '0.45rem 0.85rem',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer'
+              display: 'flex', alignItems: 'center', gap: '0.35rem',
+              backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.text,
+              borderRadius: 8, padding: '0.45rem 0.85rem', fontSize: '0.78rem',
+              fontWeight: 600, cursor: 'pointer',
             }}
           >
             <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Refresh
           </button>
           <button
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
-                detail: {
-                  item: 'rent_payment',
-                  amount: RESIDENT.rent || 909,
-                  unit: RESIDENT.unit || '2104',
-                  customer: { name: RESIDENT.name, email: RESIDENT.email, phone: RESIDENT.phone }
-                }
-              }));
-            }}
+            onClick={() => startPayment('subscription')}
+            disabled={paying}
             style={{
-              padding: '0.45rem 1rem',
-              backgroundColor: C.accent,
-              color: '#0f1117',
-              borderRadius: 8,
-              fontWeight: 700,
-              fontSize: '0.82rem',
-              cursor: 'pointer',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem'
+              padding: '0.45rem 1rem', backgroundColor: C.accent, color: '#0f1117',
+              borderRadius: 8, fontWeight: 700, fontSize: '0.82rem', cursor: paying ? 'wait' : 'pointer',
+              border: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: paying ? 0.7 : 1,
             }}
           >
-            <CreditCard size={14} /> Pay Rent / Start Auto-Pay →
+            <CreditCard size={14} /> {paying ? 'Starting…' : 'Pay Rent / Start Auto-Pay →'}
           </button>
         </div>
       </div>
 
-      {msg && (
-        <div style={{
-          padding: '0.75rem 1rem',
-          borderRadius: 8,
-          marginBottom: '1rem',
-          fontSize: '0.82rem',
-          backgroundColor: msg.type === 'success' ? '#22c55e18' : '#ef444418',
-          border: `1px solid ${msg.type === 'success' ? '#22c55e44' : '#ef444444'}`,
-          color: msg.type === 'success' ? C.success : C.danger
-        }}>
-          {msg.text}
-        </div>
-      )}
+      {msg && <Notice type={msg.type} text={msg.text} />}
 
       {/* Active Auto-Subscription Card */}
       {activeSub ? (
         <div style={{
           background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(201, 169, 110, 0.06))',
           border: '1px solid rgba(56, 189, 248, 0.3)',
-          borderRadius: 14,
-          padding: '1.25rem 1.5rem',
-          marginBottom: '1.25rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem'
+          borderRadius: 14, padding: '1.25rem 1.5rem', marginBottom: '1.25rem',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexWrap: 'wrap', gap: '1rem',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <div style={{ width: 42, height: 42, borderRadius: 10, backgroundColor: 'rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -391,14 +497,9 @@ function PaymentsSection() {
             onClick={handleCancelAutoPay}
             disabled={cancelling}
             style={{
-              padding: '0.4rem 0.85rem',
-              backgroundColor: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: C.danger,
-              borderRadius: 7,
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer'
+              padding: '0.4rem 0.85rem', backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)', color: C.danger,
+              borderRadius: 7, fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
             }}
           >
             {cancelling ? 'Cancelling…' : 'Cancel Auto-Pay'}
@@ -406,41 +507,22 @@ function PaymentsSection() {
         </div>
       ) : (
         <div style={{
-          background: C.card,
-          border: `1px solid ${C.border}`,
-          borderRadius: 12,
-          padding: '1rem 1.25rem',
-          marginBottom: '1.25rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '0.75rem'
+          background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
+          padding: '1rem 1.25rem', marginBottom: '1.25rem',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexWrap: 'wrap', gap: '0.75rem',
         }}>
           <div>
             <div style={{ color: C.text, fontWeight: 600, fontSize: '0.85rem' }}>No Active Auto-Pay Agreement</div>
             <div style={{ color: C.muted, fontSize: '0.75rem' }}>Enable automated monthly debits to avoid late rent fees.</div>
           </div>
           <button
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('open-worldfirst-checkout', {
-                detail: {
-                  item: 'rent_payment',
-                  amount: RESIDENT.rent || 909,
-                  unit: RESIDENT.unit || '2104',
-                  customer: { name: RESIDENT.name, email: RESIDENT.email, phone: RESIDENT.phone }
-                }
-              }));
-            }}
+            onClick={() => startPayment('subscription')}
+            disabled={paying}
             style={{
-              padding: '0.4rem 0.85rem',
-              backgroundColor: `${C.accent}20`,
-              border: `1px solid ${C.accent}50`,
-              color: C.accent,
-              borderRadius: 7,
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer'
+              padding: '0.4rem 0.85rem', backgroundColor: `${C.accent}20`, border: `1px solid ${C.accent}50`,
+              color: C.accent, borderRadius: 7, fontSize: '0.78rem', fontWeight: 700,
+              cursor: paying ? 'wait' : 'pointer', opacity: paying ? 0.7 : 1,
             }}
           >
             Enable Auto-Pay
@@ -448,7 +530,7 @@ function PaymentsSection() {
         </div>
       )}
 
-      {/* WorldFirst Live Payments Table */}
+      {/* WorldFirst payments table */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', marginBottom: '1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr auto', gap: 0, padding: '0.75rem 1.4rem', borderBottom: `1px solid ${C.border}`, backgroundColor: 'rgba(255,255,255,0.03)' }}>
           {['Transaction', 'Purpose / Item', 'Plan / Mode', 'Amount', 'Status'].map(h => (
@@ -456,17 +538,15 @@ function PaymentsSection() {
           ))}
         </div>
 
-        {liveTxns.length > 0 ? (
-          liveTxns.map((p, i) => (
+        {txns.length > 0 ? (
+          txns.map((p, i) => (
             <div
-              key={p.txn_id || p.id}
+              key={p.txn_id || p.id || i}
               style={{
-                display: 'grid',
-                gridTemplateColumns: '1.2fr 1fr 1fr 1fr auto',
-                gap: 0,
-                padding: '0.9rem 1.4rem',
-                borderBottom: i < liveTxns.length - 1 ? `1px solid ${C.border}` : 'none',
-                alignItems: 'center'
+                display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr auto',
+                gap: 0, padding: '0.9rem 1.4rem',
+                borderBottom: i < txns.length - 1 ? `1px solid ${C.border}` : 'none',
+                alignItems: 'center',
               }}
             >
               <div>
@@ -490,12 +570,12 @@ function PaymentsSection() {
                 <span style={{ color: C.accent, fontSize: '0.92rem', fontWeight: 800 }}>${(parseFloat(p.amount) || 0).toFixed(2)}</span>
                 <span style={{ color: C.muted, fontSize: '0.68rem', marginLeft: '0.25rem' }}>{p.currency || 'USD'}</span>
               </div>
-              <Badge status={p.status || 'completed'} />
+              <Badge status={p.status || 'pending'} />
             </div>
           ))
         ) : (
           <div style={{ padding: '2rem 1.4rem', textAlign: 'center', color: C.muted, fontSize: '0.82rem' }}>
-            {loading ? 'WorldFirst payment history loading…' : 'No previous payments recorded.'}
+            {loading ? 'Payment history loading…' : 'No previous payments recorded.'}
           </div>
         )}
       </div>
@@ -504,12 +584,14 @@ function PaymentsSection() {
 }
 
 // ── Section: Maintenance ───────────────────────────────────────────────────────
-function MaintenanceSection() {
+function MaintenanceSection({ maintenance, onRefresh, csrfToken }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', category: 'Plumbing', priority: 'Medium', desc: '' });
   const [submitMsg, setSubmitMsg] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const priorityColor = { High: C.danger, Medium: C.warning, Low: C.success };
+  const priorityColor = { High: C.danger, Emergency: C.danger, Medium: C.warning, Low: C.success };
+  const tickets = Array.isArray(maintenance) ? maintenance : [];
 
   const handleSubmitRequest = async () => {
     if (!form.title.trim() || !form.desc.trim()) {
@@ -517,29 +599,31 @@ function MaintenanceSection() {
       return;
     }
     setSubmitMsg(null);
-    try {
-      const res = await submitMaintenanceTicketDB({
-        title: form.title,
+    setSubmitting(true);
+    const { ok, data } = await residentApi('submit_maintenance', {
+      method: 'POST',
+      csrfToken,
+      body: {
+        title: form.title.trim(),
         category: form.category,
         priority: form.priority,
-        unit: RESIDENT.unit,
-        tenant: RESIDENT.name,
-        notes: form.desc,
-      });
-      if (res && res.success) {
-        setSubmitMsg({ type: 'success', text: 'Request submitted successfully.' });
-        setForm({ title: '', category: 'Plumbing', priority: 'Medium', desc: '' });
-      } else {
-        setSubmitMsg({ type: 'error', text: 'Failed to submit request. Please try again.' });
-      }
-    } catch {
-      setSubmitMsg({ type: 'error', text: 'Failed to submit request. Please try again.' });
+        notes: form.desc.trim(),
+      },
+    });
+    setSubmitting(false);
+    if (ok) {
+      setSubmitMsg({ type: 'success', text: `Request ${data?.ticket?.id || ''} submitted successfully.` });
+      setForm({ title: '', category: 'Plumbing', priority: 'Medium', desc: '' });
+      setShowForm(false);
+      onRefresh?.();
+    } else {
+      setSubmitMsg({ type: 'error', text: data?.error || 'Failed to submit request. Please try again.' });
     }
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ width: 4, height: 22, backgroundColor: C.accent, borderRadius: 4 }} />
           <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: C.text, margin: 0 }}>Maintenance Requests</h2>
@@ -552,7 +636,7 @@ function MaintenanceSection() {
       {showForm && (
         <div style={{ background: C.card, border: `1px solid ${C.accent}44`, borderRadius: 14, padding: '1.4rem', marginBottom: '1.25rem' }}>
           <h3 style={{ color: C.text, fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem' }}>Submit New Request</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
             {[['Issue Title', 'title', 'text', 'e.g. Leaking faucet'], ['Category', 'category', 'select', ''], ['Priority', 'priority', 'select', '']].map(([label, key, type, ph]) => (
               <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 <label style={{ color: C.muted, fontSize: '0.78rem', fontWeight: 600 }}>{label}</label>
@@ -560,7 +644,7 @@ function MaintenanceSection() {
                   <select value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
                     style={{ padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem' }}>
                     {key === 'category'
-                      ? ['Plumbing', 'Electrical', 'HVAC', 'Appliance', 'General'].map(o => <option key={o}>{o}</option>)
+                      ? ['Plumbing', 'Electrical', 'HVAC', 'Appliance', 'Exterior', 'General'].map(o => <option key={o}>{o}</option>)
                       : ['Low', 'Medium', 'High'].map(o => <option key={o}>{o}</option>)}
                   </select>
                 ) : (
@@ -576,7 +660,9 @@ function MaintenanceSection() {
               style={{ width: '100%', padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem', resize: 'vertical', boxSizing: 'border-box' }} />
           </div>
           <div style={{ display: 'flex', gap: '0.6rem' }}>
-            <button onClick={handleSubmitRequest} style={{ padding: '0.6rem 1.2rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.83rem', cursor: 'pointer', border: 'none' }}>Submit Request</button>
+            <button onClick={handleSubmitRequest} disabled={submitting} style={{ padding: '0.6rem 1.2rem', backgroundColor: C.accent, color: '#0f1117', borderRadius: 8, fontWeight: 700, fontSize: '0.83rem', cursor: submitting ? 'wait' : 'pointer', border: 'none', opacity: submitting ? 0.7 : 1 }}>
+              {submitting ? 'Submitting…' : 'Submit Request'}
+            </button>
             <button onClick={() => setShowForm(false)} style={{ padding: '0.6rem 1rem', backgroundColor: 'transparent', color: C.muted, borderRadius: 8, fontWeight: 600, fontSize: '0.83rem', cursor: 'pointer', border: `1px solid ${C.border}` }}>Cancel</button>
           </div>
         </div>
@@ -589,68 +675,109 @@ function MaintenanceSection() {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {MAINTENANCE_REQUESTS.map(req => (
+        {tickets.length > 0 ? tickets.map(req => (
           <div key={req.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1.1rem 1.4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
                   <span style={{ color: C.muted, fontSize: '0.75rem', fontWeight: 700 }}>{req.id}</span>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: priorityColor[req.priority] }} />
-                  <span style={{ color: priorityColor[req.priority], fontSize: '0.72rem', fontWeight: 700 }}>{req.priority} Priority</span>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: priorityColor[req.priority] || C.warning }} />
+                  <span style={{ color: priorityColor[req.priority] || C.warning, fontSize: '0.72rem', fontWeight: 700 }}>{req.priority} Priority</span>
                 </div>
                 <div style={{ color: C.text, fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.2rem' }}>{req.title}</div>
                 <div style={{ color: C.muted, fontSize: '0.8rem' }}>{req.category} · {req.date}</div>
-                <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.3rem', fontStyle: 'italic' }}>{req.notes}</div>
+                {req.notes && <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.3rem', fontStyle: 'italic' }}>{req.notes}</div>}
               </div>
               <Badge status={req.status} />
             </div>
           </div>
-        ))}
+        )) : (
+          <EmptyState icon={MessageSquare} title="No maintenance requests" subtitle="Use “New Request” to report an issue in your apartment." />
+        )}
       </div>
     </div>
   );
 }
 
 // ── Section: Add-ons ───────────────────────────────────────────────────────────
-function AddOnsSection() {
-  const [addons, setAddons] = useState(ADDONS_ACTIVE);
+function AddOnsSection({ addons, onRefresh, csrfToken }) {
+  const [busyKey, setBusyKey] = useState(null);
+  const [msg, setMsg] = useState(null);
+  const list = Array.isArray(addons) ? addons : [];
+
+  const handleToggle = async (addon) => {
+    setBusyKey(addon.id);
+    setMsg(null);
+    const next = !addon.active;
+    const { ok, data } = await residentApi('toggle_addon', {
+      method: 'POST',
+      csrfToken,
+      body: { addon_key: addon.id, active: next },
+    });
+    setBusyKey(null);
+    if (ok) {
+      setMsg({ type: 'success', text: data?.message || `${addon.name} updated.` });
+      onRefresh?.();
+    } else {
+      setMsg({ type: 'error', text: data?.error || 'Could not update the add-on.' });
+    }
+  };
+
   return (
     <div>
       <SectionTitle>My Add-ons & Amenities</SectionTitle>
+      {msg && <Notice type={msg.type} text={msg.text} />}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }}>
-        {addons.map(a => (
-          <div key={a.id} style={{ background: C.card, border: `1px solid ${a.active ? C.accent + '55' : C.border}`, borderRadius: 14, padding: '1.2rem 1.4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-              <div style={{ width: 42, height: 42, borderRadius: 10, backgroundColor: a.active ? C.accentGlow : C.border + '40', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <a.icon size={20} color={a.active ? C.accent : C.muted} />
-              </div>
-              <div>
-                <div style={{ color: C.text, fontWeight: 600, fontSize: '0.88rem' }}>{a.name}</div>
-                <div style={{ color: C.accent, fontSize: '0.8rem', fontWeight: 700 }}>${a.price}/mo</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.4rem' }}>
-              <Badge status={a.active ? 'active' : 'inactive'} />
-              <button onClick={() => setAddons(prev => prev.map(x => x.id === a.id ? { ...x, active: !x.active } : x))}
-                style={{ padding: '0.3rem 0.7rem', backgroundColor: a.active ? '#7f1d1d' : C.accent, color: a.active ? '#f87171' : '#0f1117', borderRadius: 6, fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer', border: 'none' }}>
-                {a.active ? 'Remove' : 'Add'}
-              </button>
-            </div>
+        {list.length === 0 ? (
+          <div style={{ gridColumn: '1 / -1' }}>
+            <EmptyState icon={Package} title="No add-ons available" subtitle="Add-ons published by the leasing office will appear here." />
           </div>
-        ))}
+        ) : list.map(a => {
+          const Icon = addonIcon(a.icon);
+          const busy = busyKey === a.id;
+          return (
+            <div key={a.id} style={{ background: C.card, border: `1px solid ${a.active ? C.accent + '55' : C.border}`, borderRadius: 14, padding: '1.2rem 1.4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 10, backgroundColor: a.active ? C.accentGlow : C.border + '40', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={20} color={a.active ? C.accent : C.muted} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ color: C.text, fontWeight: 600, fontSize: '0.88rem' }}>{a.name}</div>
+                  <div style={{ color: C.accent, fontSize: '0.8rem', fontWeight: 700 }}>${a.price}/mo</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.4rem', flexShrink: 0 }}>
+                <Badge status={a.active ? 'active' : 'inactive'} />
+                <button
+                  onClick={() => handleToggle(a)}
+                  disabled={busy}
+                  style={{ padding: '0.3rem 0.7rem', backgroundColor: a.active ? '#7f1d1d' : C.accent, color: a.active ? '#f87171' : '#0f1117', borderRadius: 6, fontWeight: 700, fontSize: '0.72rem', cursor: busy ? 'wait' : 'pointer', border: 'none', opacity: busy ? 0.6 : 1 }}
+                >
+                  {busy ? '…' : a.active ? 'Remove' : 'Add'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 // ── Section: Documents ─────────────────────────────────────────────────────────
-function DocumentsSection() {
+function DocumentsSection({ resident, documents }) {
+  const docs = Array.isArray(documents) ? documents : [];
+
   const handleDownload = (doc) => {
+    if (doc.file_url && doc.file_url !== '#' && /^https?:\/\//i.test(doc.file_url)) {
+      window.open(doc.file_url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     const content = [
       'Monar Pass Apartments - Resident Portal',
       `Document: ${doc.name}`,
-      `Unit: #${RESIDENT.unit}  Resident: ${RESIDENT.name}`,
-      `Size: ${doc.size}  Date: ${doc.date}`,
+      `Unit: #${resident?.unit_number ?? ''}  Resident: ${resident?.name ?? ''}`,
+      `Size: ${doc.size || '—'}  Date: ${doc.date || '—'}`,
       '',
       'This file was generated from the resident portal.',
     ].join('\n');
@@ -658,26 +785,29 @@ function DocumentsSection() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = doc.name;
+    a.download = doc.name || 'document.txt';
     a.click();
     URL.revokeObjectURL(url);
   };
+
   return (
     <div>
       <SectionTitle>My Documents</SectionTitle>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-        {DOCUMENTS.map((doc, i) => (
-          <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.9rem 1.3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-              <div style={{ width: 38, height: 38, borderRadius: 8, backgroundColor: `${C.info}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {docs.length === 0 ? (
+          <EmptyState icon={FileText} title="No documents yet" subtitle="Lease agreements and inspection reports will appear here." />
+        ) : docs.map((doc, i) => (
+          <div key={doc.id ?? i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.9rem 1.3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 8, backgroundColor: `${C.info}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <FileText size={18} color={C.info} />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <div style={{ color: C.text, fontWeight: 600, fontSize: '0.87rem' }}>{doc.name}</div>
-                <div style={{ color: C.muted, fontSize: '0.75rem' }}>{doc.size} · {doc.date}</div>
+                <div style={{ color: C.muted, fontSize: '0.75rem' }}>{doc.size || '—'} · {doc.date || '—'}{doc.category ? ` · ${doc.category}` : ''}</div>
               </div>
             </div>
-            <button onClick={() => handleDownload(doc)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.45rem 0.85rem', backgroundColor: `${C.info}22`, color: C.info, borderRadius: 7, fontWeight: 700, fontSize: '0.77rem', cursor: 'pointer', border: `1px solid ${C.info}44` }}>
+            <button onClick={() => handleDownload(doc)} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.45rem 0.85rem', backgroundColor: `${C.info}22`, color: C.info, borderRadius: 7, fontWeight: 700, fontSize: '0.77rem', cursor: 'pointer', border: `1px solid ${C.info}44`, flexShrink: 0 }}>
               <Download size={13} /> Download
             </button>
           </div>
@@ -688,9 +818,12 @@ function DocumentsSection() {
 }
 
 // ── Section: Notifications ─────────────────────────────────────────────────────
-function NotificationsSection() {
-  const [notes, setNotes] = useState(NOTIFICATIONS);
-  const iconMap = { info: { Icon: Bell, color: C.info }, success: { Icon: CheckCircle, color: C.success }, warning: { Icon: AlertCircle, color: C.warning } };
+function NotificationsSection({ notifications }) {
+  const [dismissed, setDismissed] = useState([]);
+  const iconMap = { info: { Icon: Bell, color: C.info }, success: { Icon: CheckCircle, color: C.success }, warning: { Icon: AlertCircle, color: C.warning }, danger: { Icon: AlertCircle, color: C.danger } };
+
+  const notes = (Array.isArray(notifications) ? notifications : []).filter(n => !dismissed.includes(n.id));
+
   return (
     <div>
       <SectionTitle>Notifications</SectionTitle>
@@ -703,23 +836,20 @@ function NotificationsSection() {
               <div style={{ flex: 1, color: C.text, fontSize: '0.87rem' }}>{n.msg}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ color: C.muted, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{n.time}</span>
-                <button onClick={() => {
-                  if (typeof fetch !== 'undefined') {
-                    fetch('/backend/api/notifications.php', {
-                      method: 'DELETE',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ id: n.id }),
-                    }).catch(err => console.debug('Notification dismiss sync note:', err));
-                  }
-                  setNotes(prev => prev.filter(x => x.id !== n.id));
-                }} style={{ color: C.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '2px' }}>
+                <button
+                  onClick={() => setDismissed(prev => [...prev, n.id])}
+                  aria-label="Dismiss notification"
+                  style={{ color: C.muted, cursor: 'pointer', background: 'none', border: 'none', padding: '2px' }}
+                >
                   <X size={14} />
                 </button>
               </div>
             </div>
           );
         })}
-        {notes.length === 0 && <div style={{ color: C.muted, textAlign: 'center', padding: '2rem', background: C.card, borderRadius: 12, border: `1px solid ${C.border}` }}>No notifications</div>}
+        {notes.length === 0 && (
+          <EmptyState icon={Bell} title="No notifications" subtitle="Community updates and billing reminders will show up here." />
+        )}
       </div>
     </div>
   );
@@ -727,49 +857,166 @@ function NotificationsSection() {
 
 // ── Sidebar nav items ──────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { id: 'overview',      label: 'Overview',        Icon: BarChart2      },
-  { id: 'lease',         label: 'My Lease',         Icon: FileText       },
-  { id: 'payments',      label: 'Payments',         Icon: CreditCard     },
-  { id: 'maintenance',   label: 'Maintenance',      Icon: MessageSquare  },
-  { id: 'addons',        label: 'Add-ons',          Icon: Package        },
-  { id: 'documents',     label: 'Documents',        Icon: Download       },
-  { id: 'notifications', label: 'Notifications',    Icon: Bell           },
+  { id: 'overview',      label: 'Overview',     Icon: BarChart2     },
+  { id: 'lease',         label: 'My Lease',     Icon: FileText      },
+  { id: 'payments',      label: 'Payments',     Icon: CreditCard    },
+  { id: 'maintenance',   label: 'Maintenance',  Icon: MessageSquare },
+  { id: 'addons',        label: 'Add-ons',      Icon: Package       },
+  { id: 'documents',     label: 'Documents',    Icon: Download      },
+  { id: 'notifications', label: 'Notifications',Icon: Bell          },
 ];
 
 // ── Main export ────────────────────────────────────────────────────────────────
-export default function UserDashboard({ onBack }) {
+export default function UserDashboard({ resident, csrfToken, onLogout, onSessionExpired, onBack }) {
   const handleBack = onBack || (() => { window.location.href = '/'; });
   const [activeSection, setActiveSection] = useState('overview');
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [signedOut, setSignedOut] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ── Responsive ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 860);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // ── Load the real dashboard data ────────────────────────────────────────────
+  const loadOverview = useCallback(async (isActive = () => true) => {
+    setLoading(true);
+    const { ok, status, data } = await residentApi('overview');
+    if (!isActive()) return;
+    setLoading(false);
+    if (!ok) {
+      if (status === 401) {
+        setSignedOut(true);
+      } else {
+        setError(data?.error || 'Could not load your dashboard right now.');
+      }
+      return;
+    }
+    setError('');
+    setSignedOut(false);
+    setOverview(data);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    loadOverview(() => active);
+    return () => { active = false; };
+  }, [loadOverview]);
+
+  // ── Handle the payment gateway redirect (?payment=success&txn_id=…) ─────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const paymentState = params.get('payment');
+    const txnId = params.get('txn_id');
+    if (!paymentState || !txnId) return;
+
+    const verify = async () => {
+      const token = readVerifyToken(txnId);
+      const { ok, data } = await worldFirstApi('verify_payment', {
+        method: 'POST',
+        body: { txn_id: txnId, verify_token: token || '' },
+      });
+      if (ok && data?.verified) {
+        setError('');
+        window.dispatchEvent(new CustomEvent('mp-payment-verified', { detail: data }));
+        loadOverview();
+      }
+      // Clean the URL so a refresh does not re-verify.
+      window.history.replaceState({}, '', window.location.pathname);
+    };
+    verify();
+  }, [loadOverview]);
+
+  // ── Friendly "not logged in" state ──────────────────────────────────────────
+  if (signedOut) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.25rem', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+        <div style={{ width: '100%', maxWidth: 420, background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '2rem', textAlign: 'center' }}>
+          <div style={{ width: 54, height: 54, borderRadius: '50%', background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+            <ShieldCheck size={26} color={C.danger} />
+          </div>
+          <h2 style={{ color: C.text, fontSize: '1.2rem', fontWeight: 800, margin: '0 0 0.5rem' }}>You are signed out</h2>
+          <p style={{ color: C.muted, fontSize: '0.87rem', margin: '0 0 1.5rem' }}>
+            Your resident session has expired. Please sign in again to view your lease, payments and maintenance requests.
+          </p>
+          <button
+            onClick={() => (onSessionExpired ? onSessionExpired() : window.location.reload())}
+            style={{ padding: '0.75rem 1.6rem', backgroundColor: C.accent, color: '#0f1117', border: 'none', borderRadius: 10, fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer' }}
+          >
+            Sign in again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const data = overview || {};
+  const profile = data.resident || resident || {};
+  const lease = data.lease || {};
+  const activity = data.activity || [];
 
   const sectionMap = {
-    overview:      <OverviewSection />,
-    lease:         <LeaseSection />,
-    payments:      <PaymentsSection />,
-    maintenance:   <MaintenanceSection />,
-    addons:        <AddOnsSection />,
-    documents:     <DocumentsSection />,
-    notifications: <NotificationsSection />,
+    overview:      <OverviewSection resident={{ ...profile, _activity: activity }} lease={lease} />,
+    lease:         <LeaseSection resident={profile} lease={lease} />,
+    payments:      <PaymentsSection resident={profile} payments={data.payments} onRefresh={loadOverview} csrfToken={csrfToken} loading={loading} />,
+    maintenance:   <MaintenanceSection maintenance={data.maintenance} onRefresh={loadOverview} csrfToken={csrfToken} />,
+    addons:        <AddOnsSection addons={data.addons} onRefresh={loadOverview} csrfToken={csrfToken} />,
+    documents:     <DocumentsSection resident={profile} documents={data.documents} />,
+    notifications: <NotificationsSection notifications={data.notifications} />,
   };
 
+  const initials = (profile.name || 'R')
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: C.bg, display: 'flex', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight: '100vh', backgroundColor: C.bg, display: 'flex', flexDirection: isMobile ? 'column' : 'row', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
       {/* ── Sidebar ── */}
-      <aside style={{ width: 240, backgroundColor: C.sidebar, borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <aside style={{
+        width: isMobile ? '100%' : 240,
+        backgroundColor: C.sidebar,
+        borderRight: isMobile ? 'none' : `1px solid ${C.border}`,
+        borderBottom: isMobile ? `1px solid ${C.border}` : 'none',
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'column',
+        flexShrink: 0,
+      }}>
         {/* Profile */}
-        <div style={{ padding: '1.75rem 1.4rem 1.4rem', borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ width: 52, height: 52, borderRadius: '50%', background: `linear-gradient(135deg, ${C.accent}, ${C.info})`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.85rem', fontSize: '1.2rem', fontWeight: 800, color: '#0f1117' }}>
-            {RESIDENT.name.split(' ').map(n => n[0]).join('')}
+        <div style={{ padding: isMobile ? '1.1rem 1.2rem' : '1.75rem 1.4rem 1.4rem', borderBottom: `1px solid ${C.border}`, display: isMobile ? 'flex' : 'block', alignItems: isMobile ? 'center' : 'initial', gap: '0.9rem' }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: '50%', background: `linear-gradient(135deg, ${C.accent}, ${C.info})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: isMobile ? '0' : '0.85rem', fontSize: '1.1rem', fontWeight: 800, color: '#0f1117', flexShrink: 0,
+          }}>
+            {initials}
           </div>
-          <div style={{ color: C.text, fontWeight: 700, fontSize: '0.95rem' }}>{RESIDENT.name}</div>
-          <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.1rem' }}>Unit #{RESIDENT.unit}</div>
-          <div style={{ marginTop: '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', backgroundColor: '#14532d', padding: '0.2rem 0.6rem', borderRadius: 20 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#4ade80' }} />
-            <span style={{ color: '#4ade80', fontSize: '0.7rem', fontWeight: 700 }}>Good Standing</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: C.text, fontWeight: 700, fontSize: '0.95rem' }}>{profile.name || 'Resident'}</div>
+            <div style={{ color: C.muted, fontSize: '0.78rem', marginTop: '0.1rem' }}>Unit #{profile.unit_number || '—'}</div>
+            <div style={{ marginTop: isMobile ? '0.35rem' : '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', backgroundColor: '#14532d', padding: '0.2rem 0.6rem', borderRadius: 20 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#4ade80' }} />
+              <span style={{ color: '#4ade80', fontSize: '0.7rem', fontWeight: 700 }}>{profile.status || 'Good Standing'}</span>
+            </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+        <nav style={{
+          flex: 1, padding: isMobile ? '0.6rem 0.75rem' : '1rem 0.75rem',
+          display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: '0.2rem',
+          overflowX: isMobile ? 'auto' : 'visible',
+        }}>
           {NAV_ITEMS.map(({ id, label, Icon }) => {
             const active = activeSection === id;
             return (
@@ -778,7 +1025,8 @@ export default function UserDashboard({ onBack }) {
                 padding: '0.7rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none',
                 backgroundColor: active ? C.accentGlow : 'transparent',
                 color: active ? C.accent : C.muted,
-                fontWeight: active ? 700 : 500, fontSize: '0.875rem', width: '100%', textAlign: 'left',
+                fontWeight: active ? 700 : 500, fontSize: '0.875rem',
+                width: isMobile ? 'auto' : '100%', textAlign: 'left', flexShrink: 0,
                 transition: 'all 0.15s',
               }}
                 onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = C.text; } }}
@@ -793,20 +1041,23 @@ export default function UserDashboard({ onBack }) {
         </nav>
 
         {/* Bottom actions */}
-        <div style={{ padding: '1rem 0.75rem', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-          <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: '100%', textAlign: 'left' }}>
-            <LogOut size={17} /> Back to Website
+        <div style={{ padding: isMobile ? '0.6rem 0.75rem 1rem' : '1rem 0.75rem', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: '0.3rem' }}>
+          <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: isMobile ? 'auto' : '100%', textAlign: 'left' }}>
+            <ChevronRight size={17} /> Back to Website
+          </button>
+          <button onClick={onLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: isMobile ? 'auto' : '100%', textAlign: 'left' }}>
+            <LogOut size={17} /> Sign out
           </button>
         </div>
       </aside>
 
       {/* ── Main content ── */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '2.5rem 2.5rem' }}>
+      <main style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '1.25rem 1rem 2.5rem' : '2.5rem 2.5rem' }}>
         {/* Top bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ color: C.text, fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>
-              Welcome back, {RESIDENT.name.split(' ')[0]}! 👋
+            <h1 style={{ color: C.text, fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: 800, margin: 0 }}>
+              Welcome back, {(profile.name || 'Resident').split(' ')[0]}! 👋
             </h1>
             <p style={{ color: C.muted, fontSize: '0.875rem', margin: '0.3rem 0 0' }}>
               Monar Pass Apartments · Resident Portal
@@ -819,6 +1070,13 @@ export default function UserDashboard({ onBack }) {
             </div>
           </div>
         </div>
+
+        {error && <Notice type="error" text={error} />}
+        {loading && !overview && (
+          <div style={{ color: C.muted, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+            <RefreshCw size={14} className="animate-spin" /> Loading your dashboard…
+          </div>
+        )}
 
         {/* Active section */}
         <div className="animate-fade-in" key={activeSection}>

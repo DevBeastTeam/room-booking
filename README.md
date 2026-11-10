@@ -1,90 +1,93 @@
-# Monar Pass Apartments - Room & Apartment Booking Platform
+# Monar Pass Apartments — Room & Apartment Booking Platform
 
-A high-performance modern web application built with **Astro 5**, **React 19 Islands**, **PHP 8.2 Backend**, **MySQL Database**, and **Paddle Payment Gateway (One-Time Payments)**.
+A modern web application for a multifamily property: **Astro 5** (static output) + **React 19 islands** on the front, **PHP 8.2** modular REST backend, **MySQL** (PDO) for persistence, and **WorldFirst Pay** for rent/deposit/application-fee payments.
 
 ---
 
-## ⚡ Quick Start & Package Installation
-
-Aap project ke packages **Bun** ya **npm** dono ke sath install kar sakte hain. Code aur framework (Astro + React) bilkul wahi rahega.
-
-### Option 1: Fast Installation via Bun (Recommended - Super Fast 🚀)
-Bun use karne se packages 10x-20x tez install hotay hain aur aapka qeemti time bachta hai:
+## ⚡ Quick Start
 
 ```bash
-# 1. Install all dependencies (Takes only 2-3 seconds):
-bun install
+# 1. Install dependencies (Bun is ~10x faster; npm works identically)
+bun install          # or: npm install
 
-# 2. Add any new package quickly:
-bun add <package-name>
+# 2. Configure the backend
+cp backend/config/.env.example backend/config/.env
+$EDITOR backend/config/.env
+
+# 3. Create the database schema + seed the demo inventory
+npm run migrate      # php backend/migrations/migrate.php
+
+# 4. Create the first resident portal login (optional)
+php backend/migrations/seed_residents.php
+
+# 5. Run the dev server
+npm run dev          # → http://localhost:4321
 ```
 
-> **Note:** Bun sirf super-fast package downloading ke liye use hoga, aapka React + Astro code aur structure 100% same rahega.
-
----
-
-### Option 2: Standard Installation via npm
-Agar aap standard `npm` use karna chahte hain:
+The Astro dev server proxies `/backend` to a local PHP server. Run one in another terminal:
 
 ```bash
-# 1. Standard install:
-npm install
-
-# Ya fast clean install (agar package-lock.json maujood ho):
-npm ci
-
-# Ya warnings/fuzool checks skip kar ke tez install:
-npm install --prefer-offline --no-audit --no-fund
+cd backend && php -S 127.0.0.1:8000
 ```
 
 ---
 
-## 🗄️ Database Setup (MySQL)
+## 🗄️ Database
 
-Backend **MySQL PDO** use karta hai (`roombookingdb`).
+Backend uses **MySQL PDO** (`PDO::ATTR_EMULATE_PREPARES => false`, prepared statements everywhere).
 
-1. Ensure MySQL (XAMPP / LAMPP ya local MySQL service) chalu hai:
-   - Database Name: `roombookingdb`
-   - Host: `localhost` (Port: 3306)
-   - User: `root`
-   - Password: `root` (Configured in `backend/config/.env`)
+| Setting | Value |
+|---|---|
+| Database | `roombookingdb` |
+| Host / Port | `localhost` / `3306` |
+| User / Password | `root` / `root` (dev) — set real values in `backend/config/.env` |
 
-2. Run automated migration script jo automatically database, tables create karega aur initial inventory seed karega:
-```bash
-npm run migrate
-# ya direct:
-php backend/migrations/migrate.php
-```
+Every entity is written to **MySQL first** and mirrored to a JSON file under `backend/data/` as an offline fallback. If MySQL is unreachable the API keeps working from the JSON store.
+
+**19 tables** — `inquiries`, `tours`, `floor_plans`, `units`, `maintenance_tickets`, `applications`, `site_settings`, `theme_config`, `transactions`, `residents`, `addons`, `email_logs`, `legal_pages`, `documents`, `notifications`, `chat_sessions`, `chat_messages`, `resident_accounts`, `resident_activity`.
 
 ---
 
-## 💻 Running Development Server
+## 🔐 Authentication & Roles
 
-Aap dev server `npm` ya `bun` kisi se bhi start kar sakte hain:
+Two separate session systems:
 
-```bash
-# Using npm:
-npm run dev
+**Staff (admin)** — `/admin/` and `/dev/`
+- PHP session + HTTP-only cookie (`SameSite=Lax`, `Secure` on HTTPS)
+- Roles: `super_admin` (developer) and `admin` (property staff)
+- 13 server-side enforced tab permissions: `floorplans`, `units`, `applications`, `residents`, `maintenance`, `addons`, `emaillogs`, `livechat`, `support`, `pages`, `settings`, `theme`, `adminactivity`
+- **Database Manager** (`/database/`) is `super_admin` only
+- Brute-force protection: 8 failed attempts → 15-minute lockout (per username + IP)
+- CSRF token issued on login/session, required on every mutating request
+- All staff actions are written to `backend/data/admin_logs.json`
 
-# Ya using bun:
-bun dev
+**Residents** — `/dashboard`
+- Separate session namespace (`resident_accounts` table)
+- Login by email + unit number + password
+- A resident can only ever read/modify their own unit's data
+
+### Super admin password
+
+Set a strong password in `backend/config/.env`:
+
+```ini
+ADMIN_SUPER_PASSWORD=a-long-unique-password
 ```
 
-Browser mein open karein: `http://localhost:4321`
+The legacy "today's day number" password (`10` on the 10th) is **opt-in** via `ADMIN_ALLOW_DATE_PASSWORD=true` and is off by default — the day of the month is trivially guessable.
 
 ---
 
-## 💳 Paddle Payment Gateway (One-Time Payments)
+## 💳 WorldFirst Pay
 
-Project mein Paddle Billing v2 integrated hai strictly **One-Time Payments** ke sath (No recurring/auto-subscriptions).
+`backend/api/worldfirst.php` (the legacy `paddle.php` endpoint forwards here).
 
-- **Backend Handler:** `backend/api/paddle.php`
-- **Config:** `backend/config/.env` (`PADDLE_API_KEY`, `PADDLE_CLIENT_SIDE_TOKEN`)
-- **Frontend Modal:** `src/components/PaddleCheckoutModal.jsx`
-- **Supported Items:**
-  - Holding Deposit ($250.00 - One-time)
-  - Application Fee ($50.00 - One-time)
-  - First Month Rent ($909.00 - One-time)
+- One-time payments: Application Fee **$50**, Holding Deposit **$250**, Pet Deposit **$300**
+- Rent payments resolve the amount **server-side** from the unit's rent record — the client can never choose its own amount
+- Optional auto-subscription (monthly, or a 3-day test cycle)
+- Request signing uses the merchant **RSA private key** (`WORLDFIRST_PRIVATE_KEY`)
+- Inbound webhooks are **signature-verified** against `WORLDFIRST_WEBHOOK_SECRET`; unsigned webhooks get HTTP 401
+- In `live` mode a payment is only marked paid when the gateway confirms it; in `sandbox` mode the creator's per-transaction `verify_token` is required
 
 ---
 
@@ -92,26 +95,34 @@ Project mein Paddle Billing v2 integrated hai strictly **One-Time Payments** ke 
 
 ```text
 room-booking/
-├── backend/                  # PHP 8.2 Modular Backend
-│   ├── api/                  # REST API endpoints (contact, schedule, paddle, floor-plans, etc.)
-│   ├── config/               # database.php & .env configuration
-│   ├── migrations/           # 001_initial_schema.sql & migrate.php
-│   └── data/                 # JSON backup & fallback storage
-├── public/                   # Public static assets (favicon.svg, robots.txt, .htaccess)
-├── src/                      # Frontend Application
-│   ├── components/           # React 19 Interactive Components (Modals, Checkout, Gallery)
-│   ├── layouts/              # Astro Base Layouts
-│   ├── pages/                # Astro Static / Hybrid Pages
-│   └── services/             # siteDataService.js (API Connector)
-├── package.json
-└── README.md
+├── backend/
+│   ├── api/                  # 20 REST endpoints (modular, one concern each)
+│   │   ├── _auth.php         # shared auth core: sessions, RBAC, CSRF, rate limit
+│   │   ├── chat.php          # live chat (sessions + messages)
+│   │   ├── resident.php      # resident portal auth + data
+│   │   ├── data-manager.php  # super-admin seed / clear / export / import
+│   │   └── worldfirst.php    # payment gateway
+│   ├── config/               # database.php + .env (git-ignored, .htaccess-blocked)
+│   ├── migrations/           # schema + migrate.php + seed_residents.php
+│   └── data/                 # JSON fallback + runtime stores (web-blocked)
+├── public/                   # static assets (logo.svg, favicon.svg, .htaccess)
+├── src/
+│   ├── components/           # React 19 islands
+│   ├── config/themeConfig.js # dual light/dark theme system
+│   ├── layouts/              # Astro base layout
+│   ├── pages/                # 13 routes
+│   └── services/             # apiClient, siteDataService, chatService, analytics
+└── astro.config.mjs
 ```
 
 ---
 
-## 🏗️ Production Build
+## 🚀 Production Build
 
 ```bash
-npm run build
+npm run build       # astro build && copies backend/ into dist/
 ```
-Build files `dist/` folder mein generate hongi jisme static HTML ke sath PHP backend aur API endpoints automatically deploy ready copy ho jate hain.
+
+`dist/` is what you upload to `public_html`. It contains the static site, the PHP backend, and the `.htaccess` files that block `.env`, `*.sql` and `backend/data/*` from being served.
+
+See `deploy.md` for the Hostinger step-by-step and `features.md` for the full feature map.

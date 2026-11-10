@@ -1,31 +1,112 @@
 // ── Chat Service ─────────────────────────────────────────────────────────────
-// Stores all chat sessions in localStorage with real-time browser events.
-// Supports both logged-in users (via email ID) and guest users (via unique guest ID).
-// Fully safe for SSR (Node.js/Astro) and client-side execution.
+// Server backed live chat. Conversations live in the backend (MySQL with a
+// JSON file fallback) so the leasing team sees every visitor chat, no matter
+// which device the visitor used.
+//
+// Visitor side  : keeps a `session_key` (server generated token) in localStorage
+//                 under `mp_chat_session_key`.
+// Admin side    : reads/writes through the shared apiClient so the CSRF token
+//                 is attached automatically.
+//
+// All network helpers are SSR safe (they no-op when there is no window).
 
-const STORAGE_KEY = 'mp_chat_sessions';
+import { apiGet, apiPost } from './apiClient';
+
+const API_BASE = '/backend/api/chat.php';
+const SESSION_KEY_STORAGE = 'mp_chat_session_key';
+const MAX_MESSAGE_LEN = 2000;
 
 function isClient() {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }
 
-function loadSessions() {
-  if (!isClient()) return {};
+// ── Low level HTTP helpers ───────────────────────────────────────────────────
+
+/** Public (visitor) endpoints — plain fetch, no admin session needed. */
+async function chatPublicRequest(method, action, body) {
+  const url = method === 'GET'
+    ? `${API_BASE}?${new URLSearchParams({ action, ...(body || {}) }).toString()}`
+    : API_BASE;
+
+  const init = {
+    method,
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  };
+  if (method !== 'GET') init.body = JSON.stringify({ action, ...(body || {}) });
+
+  let res;
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    res = await fetch(url, init);
   } catch {
-    return {};
+    return { ok: false, status: 0, data: { success: false, error: 'Network error. Please check your connection.' } };
+  }
+
+  let data = {};
+  try {
+    data = await res.json();
+  } catch {
+    data = { success: false, error: `Unexpected response (HTTP ${res.status}).` };
+  }
+  return { ok: res.ok, status: res.status, data };
+}
+
+// ── Shared in-memory admin cache ─────────────────────────────────────────────
+
+let adminSessions = {};        // session_key -> session object
+let unreadTotal = 0;           // badge counter
+let unreadRefreshTimer = null; // debounce handle for the background counter poll
+
+function dispatchChatUpdate() {
+  if (!isClient()) return;
+  try {
+    window.dispatchEvent(new CustomEvent('chat-sessions-updated', { detail: adminSessions }));
+  } catch {
+    /* ignore — the event is only a UI hint */
   }
 }
 
-function saveSessions(sessions) {
-  if (!isClient()) return;
+function recomputeUnread() {
+  unreadTotal = Object.values(adminSessions).reduce((sum, s) => sum + (Number(s?.unread) || 0), 0);
+}
+
+/** Refresh the badge counter in the background (never dispatches → no loops). */
+function scheduleUnreadRefresh() {
+  if (!isClient() || unreadRefreshTimer) return;
+  unreadRefreshTimer = setTimeout(async () => {
+    unreadRefreshTimer = null;
+    try {
+      const res = await apiGet(API_BASE, { action: 'sessions_count' });
+      if (res.ok && res.data && res.data.success) {
+        unreadTotal = Number(res.data.unread) || 0;
+      }
+    } catch {
+      /* offline — keep the last known value */
+    }
+  }, 400);
+}
+
+// ── Visitor session key helpers ──────────────────────────────────────────────
+
+function getVisitorSessionKey() {
+  if (!isClient()) return '';
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-    window.dispatchEvent(new CustomEvent('chat-sessions-updated', { detail: sessions }));
-  } catch (err) {
-    console.error('Error saving chat sessions:', err);
+    return localStorage.getItem(SESSION_KEY_STORAGE) || '';
+  } catch {
+    return '';
   }
+}
+
+function setVisitorSessionKey(key) {
+  if (!isClient() || !key) return;
+  try {
+    localStorage.setItem(SESSION_KEY_STORAGE, key);
+  } catch {
+    /* storage unavailable — the session simply won't persist across reloads */
+  }
+}
+
+function looksLikeSessionKey(value) {
+  return typeof value === 'string' && /^[a-f0-9]{16,128}$/i.test(value);
 }
 
 // ── Generate or retrieve a guest user ID ──────────────────────────────────────
@@ -58,7 +139,7 @@ export function getUserInfo() {
                 localStorage.getItem('resident_user') ||
                 localStorage.getItem('user');
     if (raw) activeUser = JSON.parse(raw);
-  } catch {}
+  } catch { /* ignore malformed cache */ }
 
   const storedEmail = localStorage.getItem('mp_chat_email') || activeUser?.email || '';
   const storedName = localStorage.getItem('mp_chat_name') || activeUser?.name || '';
@@ -90,150 +171,225 @@ export function getUserInfo() {
 // ── Update or set customer identification ─────────────────────────────────────
 export function setUserInfo(name, email) {
   if (!isClient()) return;
-  const oldInfo = getUserInfo();
   const trimmedName = (name || '').trim();
   const trimmedEmail = (email || '').trim();
 
   if (trimmedName) localStorage.setItem('mp_chat_name', trimmedName);
   if (trimmedEmail) localStorage.setItem('mp_chat_email', trimmedEmail);
 
-  let newUserId = oldInfo.userId;
   if (trimmedEmail) {
     const emailSanitized = trimmedEmail.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    newUserId = `user_${emailSanitized}`;
-    localStorage.setItem('mp_chat_uid', newUserId);
+    localStorage.setItem('mp_chat_uid', `user_${emailSanitized}`);
   }
 
-  // Migrate or merge existing session if ID changed
-  const sessions = loadSessions();
-  if (oldInfo.userId !== newUserId && sessions[oldInfo.userId]) {
-    const oldSession = sessions[oldInfo.userId];
-    sessions[newUserId] = {
-      userId: newUserId,
-      displayName: trimmedName || oldSession.displayName || trimmedEmail.split('@')[0],
-      email: trimmedEmail || oldSession.email,
-      messages: oldSession.messages || [],
-      lastTs: oldSession.lastTs || Date.now(),
-      unread: oldSession.unread || 0,
-    };
-    delete sessions[oldInfo.userId];
-    saveSessions(sessions);
-  } else if (sessions[newUserId]) {
-    if (trimmedName) sessions[newUserId].displayName = trimmedName;
-    if (trimmedEmail) sessions[newUserId].email = trimmedEmail;
-    saveSessions(sessions);
+  // Keep the server side session in sync (fire and forget).
+  const key = getVisitorSessionKey();
+  if (key) {
+    chatPublicRequest('POST', 'start', {
+      session_key: key,
+      name: trimmedName,
+      email: trimmedEmail,
+    }).catch(() => {});
+  }
+}
+
+// ── Admin: all chat sessions ─────────────────────────────────────────────────
+export async function getAllSessions() {
+  if (!isClient()) return {};
+  try {
+    const res = await apiGet(API_BASE, { action: 'sessions' });
+    if (!res.ok || !res.data || !res.data.success) return adminSessions;
+
+    const list = Array.isArray(res.data.sessions) ? res.data.sessions : [];
+    const map = {};
+    list.forEach((s) => {
+      if (s && s.session_key) map[s.session_key] = { ...s, userId: s.session_key };
+    });
+    adminSessions = map;
+    recomputeUnread();
+    return adminSessions;
+  } catch {
+    return adminSessions;
   }
 }
 
 // ── Session helpers ───────────────────────────────────────────────────────────
-export function getAllSessions() {
-  return loadSessions();
-}
+export async function getSession(userId) {
+  if (!isClient() || !userId) return null;
 
-export function getSession(userId) {
-  if (!userId) return null;
-  const sessions = loadSessions();
-  return sessions[userId] || null;
-}
+  // Admin side: already cached.
+  if (adminSessions[userId]) return adminSessions[userId];
 
-export function ensureSession(userId, displayName = 'Guest', email = '') {
-  if (!userId) return null;
-  const sessions = loadSessions();
-  if (!sessions[userId]) {
-    const greetingName = displayName && !displayName.startsWith('Guest') ? displayName : 'there';
-    sessions[userId] = {
-      userId,
-      displayName: displayName || (email ? email.split('@')[0] : 'Guest'),
-      email: email || '',
-      messages: [
-        {
-          sender: 'admin',
-          text: `Hi ${greetingName}! 👋 Welcome to Monar Pass. How can our leasing team assist you today? Feel free to ask about floor plans, pricing, tour schedules, or specials!`,
-          ts: Date.now(),
-        }
-      ],
-      lastTs: Date.now(),
+  // Visitor side: poll the server for the newest messages.
+  const key = looksLikeSessionKey(userId) ? userId : getVisitorSessionKey();
+  if (!key) return null;
+
+  try {
+    const res = await chatPublicRequest('GET', 'poll', { session_key: key });
+    if (!res.ok || !res.data || !res.data.success) return null;
+    const s = res.data.session || {};
+    const sessionKey = s.session_key || key;
+    return {
+      session_key: sessionKey,
+      userId: sessionKey,
+      displayName: s.displayName || 'Guest',
+      email: s.email || '',
+      unit: s.unit || '',
+      status: s.status || 'open',
       unread: 0,
+      lastTs: s.lastTs || 0,
+      last_message: s.last_message || '',
+      messages: Array.isArray(res.data.messages) ? res.data.messages : (s.messages || []),
     };
-    saveSessions(sessions);
-  } else {
-    let changed = false;
-    if (displayName && sessions[userId].displayName !== displayName) {
-      sessions[userId].displayName = displayName;
-      changed = true;
-    }
-    if (email && sessions[userId].email !== email) {
-      sessions[userId].email = email;
-      changed = true;
-    }
-    if (changed) saveSessions(sessions);
+  } catch {
+    return null;
   }
-  return sessions[userId];
+}
+
+// ── Visitor: make sure a server side session exists ──────────────────────────
+export async function ensureSession(userId, displayName = 'Guest', email = '') {
+  if (!isClient()) return null;
+
+  const existing = getVisitorSessionKey();
+  try {
+    const res = await chatPublicRequest('POST', 'start', {
+      session_key: existing || '',
+      name: displayName || '',
+      email: email || '',
+    });
+    if (!res.ok || !res.data || !res.data.success) return null;
+
+    const key = res.data.session_key || '';
+    if (key) setVisitorSessionKey(key);
+
+    const s = res.data.session || {};
+    return {
+      session_key: key,
+      userId: key,
+      displayName: res.data.visitor_name || s.displayName || 'Guest',
+      email: res.data.visitor_email || s.email || '',
+      unit: res.data.visitor_unit || s.unit || '',
+      status: s.status || 'open',
+      lastTs: s.lastTs || 0,
+      last_message: s.last_message || '',
+      messages: Array.isArray(res.data.messages)
+        ? res.data.messages
+        : (Array.isArray(s.messages) ? s.messages : []),
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ── Send a message (customer side) ───────────────────────────────────────────
-export function sendUserMessage(userId, text, displayName = 'Guest', email = '') {
-  if (!isClient() || !text || !text.trim() || !userId) return;
-  ensureSession(userId, displayName, email);
-  const sessions = loadSessions();
+export async function sendUserMessage(userId, text, displayName = 'Guest', email = '') {
+  if (!isClient()) return null;
+  const clean = String(text || '').trim().slice(0, MAX_MESSAGE_LEN);
+  if (!clean) return null;
 
-  if (!sessions[userId]) return;
-  if (!sessions[userId].messages) sessions[userId].messages = [];
-  sessions[userId].displayName = displayName || sessions[userId].displayName || 'Guest';
-  sessions[userId].email = email || sessions[userId].email || '';
-  sessions[userId].messages.push({
-    sender: 'user',
-    text: text.trim(),
-    ts: Date.now(),
-  });
-  sessions[userId].lastTs = Date.now();
-  sessions[userId].unread = (sessions[userId].unread || 0) + 1;
-  saveSessions(sessions);
+  const session = await ensureSession(userId, displayName, email);
+  const key = session?.session_key;
+  if (!key) return null;
+
+  try {
+    const res = await chatPublicRequest('POST', 'message', {
+      session_key: key,
+      message: clean,
+    });
+    if (!res.ok || !res.data || !res.data.success) return null;
+    return res.data.message || null;
+  } catch {
+    return null;
+  }
 }
 
 // ── Send a reply (admin side) ─────────────────────────────────────────────────
-export function sendAdminReply(userId, text) {
-  if (!isClient() || !text || !text.trim() || !userId) return;
-  ensureSession(userId);
-  const sessions = loadSessions();
-  if (!sessions[userId]) return;
-  if (!sessions[userId].messages) sessions[userId].messages = [];
-  sessions[userId].messages.push({
-    sender: 'admin',
-    text: text.trim(),
-    ts: Date.now(),
-  });
-  sessions[userId].lastTs = Date.now();
-  sessions[userId].unread = 0; // Admin has replied and read
-  saveSessions(sessions);
+export async function sendAdminReply(userId, text) {
+  if (!isClient() || !userId) return null;
+  const clean = String(text || '').trim().slice(0, MAX_MESSAGE_LEN);
+  if (!clean) return null;
+
+  try {
+    const res = await apiPost(API_BASE, { action: 'reply', session_key: userId, message: clean });
+    if (!res.ok || !res.data || !res.data.success) return null;
+
+    const stored = res.data.message || null;
+    const session = adminSessions[userId];
+    if (session) {
+      session.messages = [...(session.messages || []), stored];
+      session.last_message = clean;
+      session.lastTs = stored?.ts || Date.now();
+      session.status = 'open';
+    }
+    dispatchChatUpdate();
+    return stored;
+  } catch {
+    return null;
+  }
 }
 
 // ── Mark session as read (admin opened it) ───────────────────────────────────
-export function markSessionRead(userId) {
-  if (!isClient() || !userId) return;
-  const sessions = loadSessions();
-  if (!sessions[userId]) return;
-  if (sessions[userId].unread > 0) {
-    sessions[userId].unread = 0;
-    saveSessions(sessions);
+export async function markSessionRead(userId) {
+  if (!isClient() || !userId) return null;
+  try {
+    const res = await apiGet(API_BASE, { action: 'messages', session_key: userId });
+    if (!res.ok || !res.data || !res.data.success) return null;
+
+    const messages = Array.isArray(res.data.messages) ? res.data.messages : [];
+    const session = adminSessions[userId];
+    if (session) {
+      session.messages = messages;
+      session.unread = 0;
+      session.lastTs = res.data.session?.lastTs ?? session.lastTs;
+      session.status = res.data.session?.status ?? session.status;
+    }
+    recomputeUnread();
+    dispatchChatUpdate();
+    return messages;
+  } catch {
+    return null;
+  }
+}
+
+// ── Close / reopen a session (admin) ─────────────────────────────────────────
+export async function closeSession(userId, closed = true) {
+  if (!isClient() || !userId) return false;
+  try {
+    const res = await apiPost(API_BASE, {
+      action: 'close',
+      session_key: userId,
+      status: closed ? 'closed' : 'open',
+    });
+    if (!res.ok || !res.data || !res.data.success) return false;
+    const session = adminSessions[userId];
+    if (session) session.status = res.data.status || (closed ? 'closed' : 'open');
+    dispatchChatUpdate();
+    return true;
+  } catch {
+    return false;
   }
 }
 
 // ── Delete a session ──────────────────────────────────────────────────────────
-export function deleteSession(userId) {
-  if (!isClient() || !userId) return;
-  const sessions = loadSessions();
-  if (sessions[userId]) {
-    delete sessions[userId];
-    saveSessions(sessions);
+export async function deleteSession(userId) {
+  if (!isClient() || !userId) return false;
+  try {
+    const res = await apiPost(API_BASE, { action: 'delete', session_key: userId });
+    if (!res.ok || !res.data || !res.data.success) return false;
+    delete adminSessions[userId];
+    recomputeUnread();
+    dispatchChatUpdate();
+    return true;
+  } catch {
+    return false;
   }
 }
 
 // ── Total unread count (for admin badge) ─────────────────────────────────────
 export function getTotalUnread() {
   if (!isClient()) return 0;
-  const sessions = loadSessions();
-  return Object.values(sessions).reduce((sum, s) => sum + (s.unread || 0), 0);
+  scheduleUnreadRefresh();
+  return unreadTotal;
 }
 
 // ── Format timestamp ──────────────────────────────────────────────────────────

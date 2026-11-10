@@ -5,8 +5,14 @@
  * 
  * Supports full runtime theme switching between Dark Luxury & Light Luxury,
  * with separate color management for BOTH modes in the Admin Panel.
+ *
+ * Source of truth is the MySQL `theme_config` table (via /backend/api/theme.php).
+ * localStorage is only a cache so the very first paint is not blank; the async
+ * loader below always reconciles the cache with the database.
  * ============================================================================
  */
+
+import { apiGet, apiPost, getCsrfToken, setCsrfToken } from '../services/apiClient.js';
 
 export const DEFAULT_DARK_PALETTE = {
   mode: 'dark',
@@ -82,6 +88,172 @@ export const THEME_MODE_KEY = 'monarch_theme_mode';
 export const THEME_PALETTES_KEY = 'monarch_theme_palettes';
 export const THEME_STORAGE_KEY = 'monarch_custom_theme_config'; // backward compatibility
 
+const THEME_API_URL = '/backend/api/theme.php';
+const AUTH_SESSION_URL = '/backend/api/auth.php';
+
+// In-memory cache of the last known palettes (DB > localStorage > defaults).
+// getPalettes() stays synchronous for render paths; loadPalettesFromServer()
+// refreshes this cache from the database.
+let cachedPalettes = null;
+let serverLoadPromise = null;
+
+function defaultPalettes() {
+  return { dark: { ...DEFAULT_DARK_PALETTE }, light: { ...DEFAULT_LIGHT_PALETTE } };
+}
+
+/** Reads the palettes cached in localStorage (offline / first-paint fallback). */
+function readStoredPalettes() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(THEME_PALETTES_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      dark: { ...DEFAULT_DARK_PALETTE, ...(parsed.dark || {}) },
+      light: { ...DEFAULT_LIGHT_PALETTE, ...(parsed.light || {}) },
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Legacy DB shape → full palette pair.
+ * The `theme_config` table may contain { theme, colors: { primary, primaryDark,
+ * accent, bgDark, cardBg, cardHover, border } } (written by the data manager).
+ */
+function legacyColorsToPalettes(colors) {
+  const c = colors && typeof colors === 'object' ? colors : {};
+  const primary = c.primary || DEFAULT_DARK_PALETTE.primary;
+  const accent = c.accent || DEFAULT_DARK_PALETTE.secondary;
+  const primaryDark = c.primaryDark || adjustHexBrightness(primary, -20);
+  const bgDark = c.bgDark || DEFAULT_DARK_PALETTE.bgPage;
+  const cardBg = c.cardBg || DEFAULT_DARK_PALETTE.cardBg;
+  const cardHover = c.cardHover || DEFAULT_DARK_PALETTE.bgElevated;
+  const border = c.border || DEFAULT_DARK_PALETTE.border;
+
+  const darkTones = generateHarmoniousPalette(primary, accent, 'dark');
+  const dark = {
+    ...DEFAULT_DARK_PALETTE,
+    ...darkTones,
+    primary,
+    primaryDark,
+    secondary: accent,
+    bgPage: bgDark,
+    bgSurface: c.bgSurface || bgDark,
+    bgElevated: cardHover,
+    cardBg,
+    border,
+    glassBorder: c.glassBorder || border,
+    navBg: c.navBg || bgDark,
+    navOverlayBg: c.navOverlayBg || bgDark,
+    navText: DEFAULT_DARK_PALETTE.navText,
+    textMain: DEFAULT_DARK_PALETTE.textMain,
+    textMuted: DEFAULT_DARK_PALETTE.textMuted,
+    textLight: DEFAULT_DARK_PALETTE.textLight,
+    btnBg: primary,
+    btnText: DEFAULT_DARK_PALETTE.btnText,
+    promoBanner: primary,
+    promoButton: DEFAULT_DARK_PALETTE.promoButton,
+  };
+
+  // A light palette needs a darker primary/accent to stay readable on a pale canvas.
+  const lightPrimary = c.primaryLight || adjustHexBrightness(primary, -30);
+  const lightAccent = c.accentLight || adjustHexBrightness(accent, -25);
+  const lightTones = generateHarmoniousPalette(lightPrimary, lightAccent, 'light');
+
+  const light = {
+    ...DEFAULT_LIGHT_PALETTE,
+    ...lightTones,
+    primary: lightPrimary,
+    secondary: lightAccent,
+    bgPage: c.bgLight || DEFAULT_LIGHT_PALETTE.bgPage,
+    bgSurface: c.bgSurfaceLight || DEFAULT_LIGHT_PALETTE.bgSurface,
+    bgElevated: c.bgElevatedLight || DEFAULT_LIGHT_PALETTE.bgElevated,
+    cardBg: c.cardBgLight || DEFAULT_LIGHT_PALETTE.cardBg,
+    border: c.borderLight || lightTones.border,
+    glassBorder: c.glassBorderLight || lightTones.glassBorder,
+    navBg: DEFAULT_LIGHT_PALETTE.navBg,
+    navOverlayBg: DEFAULT_LIGHT_PALETTE.navOverlayBg,
+    navText: DEFAULT_LIGHT_PALETTE.navText,
+    textMain: DEFAULT_LIGHT_PALETTE.textMain,
+    textMuted: DEFAULT_LIGHT_PALETTE.textMuted,
+    textLight: DEFAULT_LIGHT_PALETTE.textLight,
+    btnBg: lightPrimary,
+    btnText: DEFAULT_LIGHT_PALETTE.btnText,
+    promoBanner: lightPrimary,
+    promoButton: DEFAULT_LIGHT_PALETTE.promoButton,
+  };
+
+  return { dark, light };
+}
+
+/**
+ * Normalises whatever the backend returns into a { dark, light } palette pair.
+ * Returns null when the payload carries no usable theme data.
+ */
+function normalizeServerPalettes(payload) {
+  if (!payload || typeof payload !== 'object') return null;
+
+  // theme.php returns { success:false, message:'Default theme active' } when the
+  // table has no row yet → treat it as "no theme stored".
+  if (payload.success === false && !payload.dark && !payload.light && !payload.colors) {
+    return null;
+  }
+
+  if (payload.dark || payload.light) {
+    return {
+      dark: { ...DEFAULT_DARK_PALETTE, ...(payload.dark || {}) },
+      light: { ...DEFAULT_LIGHT_PALETTE, ...(payload.light || {}) },
+    };
+  }
+
+  if (payload.colors && typeof payload.colors === 'object') {
+    return legacyColorsToPalettes(payload.colors);
+  }
+
+  return null;
+}
+
+/**
+ * Ensures a CSRF token is available before a mutating request.
+ * The token is normally set at login (AdminGate) — this is just a safety net.
+ */
+async function ensureCsrfToken() {
+  const existing = getCsrfToken();
+  if (existing) return existing;
+  try {
+    const { ok, data } = await apiGet(AUTH_SESSION_URL, { action: 'session' });
+    if (ok && data && data.csrf_token) {
+      setCsrfToken(data.csrf_token);
+      return data.csrf_token;
+    }
+  } catch {
+    /* offline — the request will simply be rejected by the backend */
+  }
+  return null;
+}
+
+/**
+ * Dispatches a custom event and replays it a couple of times.
+ * Astro islands hydrate asynchronously, so a listener may register after the
+ * server response arrived — the replay keeps those listeners in sync.
+ */
+function emitUpdate(eventName, detail) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new CustomEvent(eventName, { detail }));
+    [250, 1000].forEach(delay => {
+      setTimeout(() => {
+        try {
+          window.dispatchEvent(new CustomEvent(eventName, { detail }));
+        } catch { /* window torn down */ }
+      }, delay);
+    });
+  } catch { /* CustomEvent unavailable */ }
+}
+
 /**
  * Returns active theme mode ('dark' or 'light')
  */
@@ -119,25 +291,73 @@ export function toggleThemeMode() {
 }
 
 /**
- * Retrieves palettes for both dark and light modes
+ * Retrieves palettes for both dark and light modes.
+ *
+ * Synchronous (used inside render paths) → returns the last known palettes:
+ *   1. the cache filled by loadPalettesFromServer() (database),
+ *   2. the localStorage cache,
+ *   3. the hardcoded defaults.
+ * Call loadPalettesFromServer() to refresh the cache from the database.
  */
 export function getPalettes() {
   if (typeof window === 'undefined') {
-    return { dark: { ...DEFAULT_DARK_PALETTE }, light: { ...DEFAULT_LIGHT_PALETTE } };
+    return defaultPalettes();
   }
-  try {
-    const raw = localStorage.getItem(THEME_PALETTES_KEY);
-    if (!raw) {
-      return { dark: { ...DEFAULT_DARK_PALETTE }, light: { ...DEFAULT_LIGHT_PALETTE } };
-    }
-    const parsed = JSON.parse(raw);
+  if (cachedPalettes) {
     return {
-      dark: { ...DEFAULT_DARK_PALETTE, ...(parsed.dark || {}) },
-      light: { ...DEFAULT_LIGHT_PALETTE, ...(parsed.light || {}) },
+      dark: { ...cachedPalettes.dark },
+      light: { ...cachedPalettes.light },
     };
-  } catch {
-    return { dark: { ...DEFAULT_DARK_PALETTE }, light: { ...DEFAULT_LIGHT_PALETTE } };
   }
+  const stored = readStoredPalettes();
+  if (stored) {
+    cachedPalettes = stored;
+    return { dark: { ...stored.dark }, light: { ...stored.light } };
+  }
+  return defaultPalettes();
+}
+
+/**
+ * Loads the palettes from the database (GET /backend/api/theme.php — public),
+ * merges them with the defaults, caches them in localStorage, re-applies the
+ * theme to the DOM and notifies listeners via the 'theme-updated' event.
+ *
+ * @returns {Promise<{dark:object,light:object}|null>} the merged palettes or null
+ */
+export async function loadPalettesFromServer() {
+  if (typeof window === 'undefined') return null;
+  if (serverLoadPromise) return serverLoadPromise;
+
+  serverLoadPromise = (async () => {
+    try {
+      const { ok, data } = await apiGet(THEME_API_URL);
+      if (!ok || !data) return null;
+
+      const normalized = normalizeServerPalettes(data);
+      if (!normalized) return null;
+
+      const merged = {
+        dark: { ...DEFAULT_DARK_PALETTE, ...normalized.dark },
+        light: { ...DEFAULT_LIGHT_PALETTE, ...normalized.light },
+      };
+
+      cachedPalettes = merged;
+      try {
+        localStorage.setItem(THEME_PALETTES_KEY, JSON.stringify(merged));
+      } catch { /* storage unavailable — the in-memory cache is enough */ }
+
+      applyThemeToDOM(merged, getThemeMode());
+      emitUpdate('theme-updated', merged);
+      return merged;
+    } catch (err) {
+      console.debug('Theme load from server failed:', err);
+      return null;
+    } finally {
+      serverLoadPromise = null;
+    }
+  })();
+
+  return serverLoadPromise;
 }
 
 /**
@@ -147,10 +367,11 @@ export function savePalettes(palettes) {
   if (typeof window === 'undefined') return false;
   try {
     const merged = {
-      dark: { ...DEFAULT_DARK_PALETTE, ...(palettes.dark || {}) },
-      light: { ...DEFAULT_LIGHT_PALETTE, ...(palettes.light || {}) },
+      dark: { ...DEFAULT_DARK_PALETTE, ...((palettes && palettes.dark) || {}) },
+      light: { ...DEFAULT_LIGHT_PALETTE, ...((palettes && palettes.light) || {}) },
     };
     localStorage.setItem(THEME_PALETTES_KEY, JSON.stringify(merged));
+    cachedPalettes = merged;
     applyThemeToDOM(merged, getThemeMode());
     window.dispatchEvent(new CustomEvent('theme-updated', { detail: merged }));
     syncPalettesToBackend(merged);
@@ -161,33 +382,36 @@ export function savePalettes(palettes) {
   }
 }
 
-// Palettes MySQL (theme_config table) par bhi save karo — best effort.
-// Logged-out visitors par theme.php 401 deta hai; localStorage source of truth rehta hai.
-function syncPalettesToBackend(merged) {
+// Palettes MySQL (theme_config table) par bhi save karo.
+// GET theme.php public hai (login zaroori nahi), lekin POST ke liye admin
+// session + 'theme' permission + valid CSRF token chahiye.
+async function syncPalettesToBackend(merged) {
   try {
-    fetch('/backend/api/theme.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify(merged),
-    }).catch(() => {});
-  } catch { /* fetch unavailable */ }
+    await ensureCsrfToken();
+    const { ok, data } = await apiPost(THEME_API_URL, merged);
+    if (!ok) {
+      console.debug('Theme backend sync note:', (data && (data.error || data.message)) || 'not authorised');
+    }
+  } catch (err) {
+    console.debug('Theme backend sync error:', err);
+  }
 }
 
 /**
  * Resets both palettes back to original defaults
  */
 export function resetPalettes() {
-  if (typeof window === 'undefined') return { dark: DEFAULT_DARK_PALETTE, light: DEFAULT_LIGHT_PALETTE };
+  if (typeof window === 'undefined') return defaultPalettes();
   try {
     localStorage.removeItem(THEME_PALETTES_KEY);
-    const defaults = { dark: { ...DEFAULT_DARK_PALETTE }, light: { ...DEFAULT_LIGHT_PALETTE } };
+    const defaults = defaultPalettes();
+    cachedPalettes = defaults;
     applyThemeToDOM(defaults, getThemeMode());
     window.dispatchEvent(new CustomEvent('theme-updated', { detail: defaults }));
     syncPalettesToBackend(defaults);
     return defaults;
   } catch {
-    return { dark: DEFAULT_DARK_PALETTE, light: DEFAULT_LIGHT_PALETTE };
+    return defaultPalettes();
   }
 }
 
@@ -375,9 +599,11 @@ export function generateHarmoniousPalette(primaryHex, secondaryHex, mode = 'dark
   };
 }
 
-// Automatically apply theme on module load
+// Automatically apply theme on module load, then reconcile with the database
+// so admin palette changes actually reach the public site.
 if (typeof window !== 'undefined') {
   applyThemeToDOM();
+  loadPalettesFromServer();
 }
 
 export default THEME_CONFIG;
