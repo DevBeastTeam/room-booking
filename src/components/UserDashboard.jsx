@@ -1067,7 +1067,7 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
             <h1 style={{ color: C.text, fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: 800, margin: 0 }}>
-              Welcome back, {(profile.name || 'Resident').split(' ')[0]}! 👋
+              Welcome back, {(profile.name || 'Resident').split(' ')[0]}!
             </h1>
             <p style={{ color: C.muted, fontSize: '0.875rem', margin: '0.3rem 0 0' }}>
               Monar Pass Apartments · Resident Portal

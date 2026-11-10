@@ -705,10 +705,21 @@ export async function createWorldFirstPayment(paymentData) {
   }
 }
 
-export async function verifyWorldFirstPayment(txnId) {
+/**
+ * Confirm a payment.
+ *
+ * The backend only accepts a verification that carries the per-transaction
+ * `verify_token` that was handed out when the payment was created — without it
+ * anyone could mark any transaction as paid.
+ */
+export async function verifyWorldFirstPayment(txnId, verifyToken) {
   if (typeof fetch === 'undefined') return null;
   try {
-    const res = await fetch(`/backend/api/worldfirst.php?action=verify_payment&txn_id=${encodeURIComponent(txnId)}`);
+    const params = new URLSearchParams();
+    params.set('action', 'verify_payment');
+    params.set('txn_id', txnId);
+    if (verifyToken) params.set('verify_token', verifyToken);
+    const res = await fetch(`/backend/api/worldfirst.php?${params.toString()}`);
     return await res.json();
   } catch (err) {
     console.error('WorldFirst verify error:', err);

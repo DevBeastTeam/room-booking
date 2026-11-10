@@ -152,13 +152,21 @@ export default function WorldFirstCheckoutModal({
     setIsLoading(true);
 
     try {
-      const result = await verifyWorldFirstPayment(activeTransaction.txn_id);
+      const result = await verifyWorldFirstPayment(
+        activeTransaction.txn_id,
+        activeTransaction.verify_token
+      );
       setIsLoading(false);
       if (result && result.verified === true) {
         setVerificationResult(result);
         setIsSuccess(true);
       } else {
-        setErrorMessage(result?.message || 'Payment is still being processed by WorldFirst. Please verify in a moment.');
+        // Surface the backend's reason instead of a generic "please wait".
+        setErrorMessage(
+          result?.error
+          || result?.message
+          || 'Payment is still being processed by WorldFirst. Please verify in a moment.'
+        );
       }
     } catch {
       setIsLoading(false);
@@ -176,7 +184,7 @@ export default function WorldFirstCheckoutModal({
         backgroundColor: 'rgba(5, 7, 14, 0.88)',
         backdropFilter: 'blur(10px)',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         padding: '1rem',
         overflowY: 'auto',
@@ -186,6 +194,7 @@ export default function WorldFirstCheckoutModal({
         style={{
           width: '100%',
           maxWidth: '780px',
+          margin: 'auto',
           backgroundColor: '#0d111a',
           borderRadius: '20px',
           border: '1px solid rgba(201, 169, 110, 0.3)',

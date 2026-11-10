@@ -3,7 +3,10 @@ import {
   ChevronDown,
   ChevronRight,
   Maximize2,
-  X
+  X,
+  BedDouble,
+  ShowerHead,
+  Ruler
 } from 'lucide-react';
 
 export const ALL_FLOOR_PLANS = [
@@ -408,12 +411,31 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
               <h3 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem', fontFamily: '"Cormorant Garamond", Georgia, serif' }}>
                 {plan.name}
               </h3>
-              <div style={{ fontSize: '0.88rem', color: '#94a3b8', display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '0.35rem' }}>
-                <span>🛏️ {plan.beds} Bed</span>
-                <span>•</span>
-                <span>🚿 {plan.baths} Bath</span>
-                <span>•</span>
-                <span>📐 {plan.sqft} Sq. Ft.</span>
+              <div
+                style={{
+                  fontSize: '0.88rem',
+                  color: '#94a3b8',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  marginBottom: '0.35rem',
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <BedDouble size={15} style={{ color: '#c9a96e' }} aria-hidden="true" />
+                  {plan.beds} Bed
+                </span>
+                <span aria-hidden="true">•</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <ShowerHead size={15} style={{ color: '#c9a96e' }} aria-hidden="true" />
+                  {plan.baths} Bath
+                </span>
+                <span aria-hidden="true">•</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Ruler size={15} style={{ color: '#c9a96e' }} aria-hidden="true" />
+                  {plan.sqft} Sq. Ft.
+                </span>
               </div>
             </div>
 

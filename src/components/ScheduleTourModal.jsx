@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { X, ChevronDown, CheckCircle2 } from 'lucide-react';
+import {
+  X,
+  ChevronDown,
+  CheckCircle2,
+  Calendar,
+  BedDouble,
+  DoorOpen,
+} from 'lucide-react';
 import { addSupportInquiry } from '../services/siteDataService';
 import { trackEvent } from '../services/analytics.js';
 
@@ -154,7 +161,10 @@ export default function ScheduleTourModal({
         backdropFilter: 'blur(8px)',
         zIndex: 1000,
         display: 'flex',
-        alignItems: 'center',
+        // Flexbox centring + overflow means a modal taller than the viewport
+        // has its top cut off with no way to scroll to it. `flex-start` plus
+        // `margin:auto` on the card centres it when it fits and still scrolls.
+        alignItems: 'flex-start',
         justifyContent: 'center',
         padding: '1.25rem',
         overflowY: 'auto',
@@ -166,6 +176,9 @@ export default function ScheduleTourModal({
         style={{
           width: '100%',
           maxWidth: '540px',
+          margin: 'auto',
+          maxHeight: '92vh',
+          overflowY: 'auto',
           backgroundColor: 'var(--modal-bg, var(--bg-surface))',
           color: 'var(--text-main)',
           border: '1px solid var(--card-border)',
@@ -276,10 +289,10 @@ export default function ScheduleTourModal({
                   width: '100%',
                 }}
               >
-                <div>📅 <strong>Date:</strong> {tourDate}</div>
+                <div><Calendar size={13} style={{ verticalAlign: '-2px', marginRight: '4px', color: '#c9a96e' }} aria-hidden="true" /> <strong>Date:</strong> {tourDate}</div>
                 <div style={{ marginTop: '0.45rem' }}>⏰ <strong>Time:</strong> {tourTime}</div>
-                {bedrooms && <div style={{ marginTop: '0.45rem' }}>🛏️ <strong>Residence:</strong> {bedrooms}</div>}
-                {selectedUnit && <div style={{ marginTop: '0.45rem' }}>🚪 <strong>Unit:</strong> #{selectedUnit}</div>}
+                {bedrooms && <div style={{ marginTop: '0.45rem' }}><BedDouble size={13} style={{ verticalAlign: '-2px', marginRight: '4px', color: '#c9a96e' }} aria-hidden="true" /> <strong>Residence:</strong> {bedrooms}</div>}
+                {selectedUnit && <div style={{ marginTop: '0.45rem' }}><DoorOpen size={13} style={{ verticalAlign: '-2px', marginRight: '4px', color: '#c9a96e' }} aria-hidden="true" /> <strong>Unit:</strong> #{selectedUnit}</div>}
               </div>
 
               <p style={{ color: '#94a3b8', fontSize: '0.825rem', marginBottom: '1.5rem' }}>

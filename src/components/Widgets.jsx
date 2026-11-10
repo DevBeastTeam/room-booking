@@ -710,7 +710,7 @@ export default function Widgets({ onOpenScheduleTour }) {
                   {m.text}
                 </div>
                 <div style={{ fontSize: '0.65rem', color: m.failed ? '#f87171' : 'var(--text-muted, #64748b)', marginTop: '2px', padding: '0 4px' }}>
-                  {m.sender === 'admin' ? '🏢 Leasing Staff · ' : ''}{formatTs(m.ts)}{m.failed ? ' · not sent' : ''}
+                  {m.sender === 'admin' ? 'Leasing Staff · ' : ''}{formatTs(m.ts)}{m.failed ? ' · not sent' : ''}
                 </div>
               </div>
             ))}
