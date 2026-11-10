@@ -53,38 +53,79 @@ if [ -f "$KEY_FILE" ]; then
   SSH_OPTS+=(-i "$KEY_FILE" -o IdentitiesOnly=yes)
 fi
 
+# Password auth support: SSH_PASSWORD=<hpanel password> ./deploy-hostinger.sh
+SSH_PASS_ARGS=()
+if [ -n "${SSH_PASSWORD:-}" ]; then
+  command -v sshpass >/dev/null 2>&1 || { echo "sshpass is required for password auth"; exit 1; }
+  export SSHPASS="$SSH_PASSWORD"
+  SSH_PASS_ARGS=(-o PreferredAuthentications=password -o PubkeyAuthentication=no)
+  echo "    (using password auth as $SSH_USER)"
+else
+  echo "    (using SSH key $KEY_FILE as $SSH_USER)"
+fi
+
+ssh_cmd() { ssh "${SSH_OPTS[@]}" "${SSH_PASS_ARGS[@]}" "$SSH_USER@$SSH_HOST" "$@"; }
+scp_cmd() { scp -P "$SSH_PORT" -o StrictHostKeyChecking=no ${KEY_FILE:+-i "$KEY_FILE"} ${KEY_FILE:+-o IdentitiesOnly=yes} "${SSH_PASS_ARGS[@]}" "$@"; }
+
 echo "==> [4/6] Upload to $SSH_USER@$SSH_HOST:$REMOTE_DIR"
+# Preflight: fail fast with a clear message if SSH is not usable.
+if ! ssh_cmd "echo connected" >/dev/null 2>&1; then
+  echo
+  echo "❌ SSH se connect nahi ho saka."
+  echo "   - key add karein: hPanel → Advanced → SSH Keys → Add"
+  echo "   - ya password dein: SSH_PASSWORD='...' ./deploy/deploy-hostinger.sh"
+  echo "   - host=$SSH_HOST port=$SSH_PORT user=$SSH_USER"
+  exit 1
+fi
 # Back up the current live tree before overwriting.
-ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" \
+ssh_cmd \
   "cd '$REMOTE_DIR' && tar czf /tmp/monar_backup_\$(date +%Y%m%d_%H%M%S).tar.gz . 2>/dev/null || true"
-scp -P "$SSH_PORT" ${KEY_FILE:+-i "$KEY_FILE"} -o StrictHostKeyChecking=no \
-  "$ARCHIVE" "$SSH_USER@$SSH_HOST:/tmp/monar_deploy.zip"
-ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "
+scp_cmd "$ARCHIVE" "$SSH_USER@$SSH_HOST:/tmp/monar_deploy.zip"
+ssh_cmd "
   set -e
   cd '$REMOTE_DIR'
-  # Wipe the app files but KEEP the two directories that only exist on the server:
-  #   backend/config  -> holds the real .env (secrets, WorldFirst keys)
-  #   backend/data    -> holds admins.json, transactions, inquiries, chat, ...
-  #                     (runtime data — wiping it would reset every admin
-  #                      account and destroy the property's live data)
+  # ── Wipe the app files, but PRESERVE the two things that only live here ──
+  #    backend/config/.env  → DB + WorldFirst secrets (must never be lost)
+  #    backend/data/*.json  → admins.json, transactions, inquiries, tours, chat
+  #                          (wiping these resets every admin account and
+  #                           destroys the property's live data)
   find . -mindepth 1 -maxdepth 1 ! -name 'backend' -exec rm -rf {} +
+
   if [ -d backend ]; then
+    # Code directories: wipe completely so stale files never linger.
     find backend -mindepth 1 -maxdepth 1 ! -name 'config' ! -name 'data' -exec rm -rf {} +
-    [ -d backend/config ] && rm -f backend/config/.env
-    [ -d backend/data ] && rm -f backend/data/*.json backend/data/.cred_key
+
+    # config: keep ONLY the real .env, everything else is re-deployed.
+    if [ -f backend/config/.env ]; then
+      cp backend/config/.env /tmp/monar_env_keep
+    fi
+    find backend/config -mindepth 1 -exec rm -rf {} +
+    mkdir -p backend/config
+    if [ -f /tmp/monar_env_keep ]; then
+      mv /tmp/monar_env_keep backend/config/.env
+      chmod 600 backend/config/.env
+    fi
+
+    # data: keep the runtime JSON stores + credential key, wipe the rest.
+    mkdir -p backend/data
+    find backend/data -mindepth 1 ! -name '*.json' ! -name '.cred_key' -exec rm -rf {} +
   fi
-  unzip -oq /tmp/monar_deploy.zip -d .
+
+  unzip -oq /tmp/monar_deploy.zip -d . 2>/dev/null \
+    || python3 -c \"import zipfile;zipfile.ZipFile('/tmp/monar_deploy.zip').extractall('.')\" \
+    || php -r \"\$z=new ZipArchive;\$z->open('/tmp/monar_deploy.zip');\$z->extractTo('.');\$z->close();\"
   rm -f /tmp/monar_deploy.zip
   chown -R \$USER:\$USER . 2>/dev/null || true
   find . -type d -exec chmod 755 {} + 2>/dev/null || true
   find . -type f -exec chmod 644 {} + 2>/dev/null || true
+  chmod 600 backend/config/.env 2>/dev/null || true
   echo 'extracted'
 "
 
 echo "==> [5/6] Make sure the server .env has the security variables"
 # The new auth layer needs these. If the server's .env predates them, add them
 # now — otherwise the super admin would be locked out after the update.
-ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "
+ssh_cmd "
   set -e
   cd '$REMOTE_DIR'
   ENVF=backend/config/.env
