@@ -236,13 +236,14 @@ export default function ContactUsView({
                   <div>
                     <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Direct Leasing Phone</div>
                     <a
+                      className="footer-tap"
                       href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
                       style={{ color: '#c9a96e', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', display: 'block' }}
                     >
                       {siteSettings?.phone || '(817) 857-8782'}
                     </a>
                     <div style={{ fontSize: '0.82rem', color: '#7a7063', marginTop: '4px' }}>
-                      Main Office: <a href={`tel:${siteSettings?.secondaryPhone?.replace(/[^0-9+]/g, '') || '+18175311750'}`} style={{ color: '#dfc285', textDecoration: 'none' }}>{siteSettings?.secondaryPhone || '(817) 531-1750'}</a>
+                      Main Office: <a className="footer-tap" href={`tel:${siteSettings?.secondaryPhone?.replace(/[^0-9+]/g, '') || '+18175311750'}`} style={{ color: '#dfc285', textDecoration: 'none' }}>{siteSettings?.secondaryPhone || '(817) 531-1750'}</a>
                     </div>
                   </div>
                 </div>
@@ -278,6 +279,7 @@ export default function ContactUsView({
                   <div>
                     <div style={{ fontWeight: 700, color: '#f4efe6', fontSize: '0.95rem', marginBottom: '0.2rem' }}>Email Inquiries</div>
                     <a
+                      className="footer-tap"
                       href={`mailto:${siteSettings?.email || 'leasing@monarpass.com'}`}
                       style={{ color: '#dfc285', fontSize: '0.9rem', textDecoration: 'none' }}
                     >
@@ -592,7 +594,7 @@ export default function ContactUsView({
                       id="contact-consent"
                       checked={formData.consent}
                       onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
-                      style={{ marginTop: '3px' }}
+                      style={{ marginTop: '2px', width: '24px', height: '24px', accentColor: '#c9a96e', flexShrink: 0 }}
                     />
                     <label htmlFor="contact-consent" style={{ fontSize: '0.8rem', color: '#8c8273', lineHeight: 1.5 }}>
                       I agree to receive calls and text messages from Monar Pass regarding my inquiry at the contact number provided. Message and data rates may apply.

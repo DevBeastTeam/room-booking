@@ -518,7 +518,8 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.4rem',
-                  paddingBottom: '3px',
+                  padding: '0.45rem 0',
+                  minHeight: '40px',
                   cursor: 'pointer',
                   transition: 'color 0.2s, border-color 0.2s',
                 }}

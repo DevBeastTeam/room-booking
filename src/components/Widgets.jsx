@@ -351,6 +351,7 @@ export default function Widgets({ onOpenScheduleTour }) {
           {/* Collapse / Expand Toggle Button */}
           <button
             onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
+            className="header-tap"
             aria-label="Toggle widget menu"
             style={{
               backgroundColor: 'var(--card-bg, #0c101c)',

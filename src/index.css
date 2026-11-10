@@ -1113,3 +1113,80 @@ hr.gold { border: none; border-top: 1px solid rgba(201, 169, 110, 0.15); margin:
 @media (max-width: 767px) {
   .hero-dots { bottom: 78px !important; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — devices, touch targets and the desktop navigation breakpoint
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* The desktop nav (9 links + 2 CTAs) needs more than 1024px. Below this the
+   links live in the mobile drawer and only the primary CTA stays in the bar. */
+@media (max-width: 1199px) {
+  .desktop-nav-container { display: none !important; }
+}
+
+/* ── Touch targets ───────────────────────────────────────────────────────────
+   The header and footer are built with inline styles, so their tap targets
+   were only ~20px tall. On touch devices every control gets a comfortable
+   40px hit area without changing the visual design.                         */
+@media (pointer: coarse) {
+  .header-tap,
+  .footer-tap {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
+  .header-nav-link {
+    min-height: 40px;
+  }
+  .header-tap-wrap > button,
+  .header-tap-wrap > a {
+    min-height: 40px;
+  }
+  .social-icon {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* The brand caption under the logo was 9.9px — too small to read on a phone. */
+@media (max-width: 767px) {
+  .header-logo-sub {
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em !important;
+  }
+}
+
+/* ── Staff panel touch targets ───────────────────────────────────────────────
+   The admin / dev / database tools are dense desktop UIs, but on a phone the
+   small action buttons were only ~26px tall. */
+@media (pointer: coarse) {
+  .staff-root button,
+  .admin-root button {
+    min-height: 40px;
+  }
+}
+
+/* The footer brand caption was 9.9px — unreadable on a phone or a tablet. */
+@media (max-width: 1023px) {
+  .footer-brand-sub {
+    font-size: 0.68rem !important;
+    letter-spacing: 0.08em !important;
+  }
+}
+
+/* The floating session bar overlapped the admin panel on small screens.
+   Below the tablet breakpoint it becomes a normal strip above the content. */
+@media (max-width: 1023px) {
+  .session-bar {
+    position: static !important;
+    width: 100% !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--card-border, rgba(255,255,255,0.12)) !important;
+    border-radius: 0 !important;
+    justify-content: space-between !important;
+    padding: 0.5rem 0.9rem !important;
+    background: var(--bg-elevated, #0c101c) !important;
+  }
+}

@@ -451,7 +451,7 @@ export default function HomeView({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '9px 0',
+                padding: '13px 0',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',

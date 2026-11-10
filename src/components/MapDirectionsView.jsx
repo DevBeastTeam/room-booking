@@ -302,7 +302,7 @@ export default function MapDirectionsView({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#dfc285', fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
                   <Phone size={15} style={{ color: '#c9a96e' }} />
                   <a href="tel:+18178578782" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    (817) 857-8782
+                    <span className="footer-tap">(817) 857-8782</span>
                   </a>
                 </div>
                 <div style={{ fontSize: '0.82rem', color: '#8c8273', lineHeight: 1.6 }}>

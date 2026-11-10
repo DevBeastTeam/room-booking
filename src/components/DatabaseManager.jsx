@@ -350,7 +350,7 @@ export default function DatabaseManager({ onBack, embedded = false }) {
   const noTablesSelected = !selected.length;
 
   return (
-    <div style={embedded ? { fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text } : { minHeight: '100vh', backgroundColor: D.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text }}>
+    <div className="staff-root" style={embedded ? { fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text } : { minHeight: '100vh', backgroundColor: D.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif", color: D.text }}>
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

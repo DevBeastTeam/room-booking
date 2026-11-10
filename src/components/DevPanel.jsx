@@ -238,7 +238,7 @@ export default function DevPanel({ user, onLogout }) {
   }
 
   return (
-    <div className="dev-shell">
+    <div className="dev-shell staff-root">
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes devFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

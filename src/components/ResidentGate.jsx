@@ -76,6 +76,7 @@ function Field({ icon: Icon, label, type = 'text', value, onChange, placeholder,
             type="button"
             onClick={() => setShow((s) => !s)}
             aria-label={show ? 'Hide password' : 'Show password'}
+            className="header-tap"
             style={{
               position: 'absolute', right: '0.6rem', background: 'none', border: 'none',
               color: C.muted, cursor: 'pointer', display: 'flex', padding: '4px',

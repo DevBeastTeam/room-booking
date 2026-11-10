@@ -4,7 +4,7 @@ import {
   CheckCircle, AlertCircle, Download, Plus, X, Star,
   Calendar, Package, Car, Archive, Layers,
   BarChart2, MessageSquare, Repeat, RefreshCw,
-  CheckCircle2, Wallet, ShieldCheck, ChevronRight
+  CheckCircle2, Wallet, ShieldCheck, ChevronRight, Menu
 } from 'lucide-react';
 
 // ── Colour tokens ──────────────────────────────────────────────────────────────
@@ -875,10 +875,15 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
   const [error, setError] = useState('');
   const [signedOut, setSignedOut] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
   // ── Responsive ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 860);
+    const check = () => {
+      const mobile = window.innerWidth < 860;
+      setIsMobile(mobile);
+      if (!mobile) setNavOpen(false);
+    };
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -992,18 +997,36 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: C.bg, display: 'flex', flexDirection: isMobile ? 'column' : 'row', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+      {/* Backdrop behind the off-canvas navigation on small screens */}
+      {isMobile && navOpen && (
+        <div
+          onClick={() => setNavOpen(false)}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2050 }}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <aside style={{
-        width: isMobile ? '100%' : 240,
+        width: isMobile ? 250 : 240,
+        maxWidth: isMobile ? '86vw' : undefined,
         backgroundColor: C.sidebar,
         borderRight: isMobile ? 'none' : `1px solid ${C.border}`,
-        borderBottom: isMobile ? `1px solid ${C.border}` : 'none',
+        borderBottom: isMobile ? 'none' : 'none',
         display: 'flex',
-        flexDirection: isMobile ? 'column' : 'column',
+        flexDirection: 'column',
         flexShrink: 0,
+        ...(isMobile ? {
+          position: 'fixed',
+          top: 0, left: 0, bottom: 0,
+          zIndex: 2100,
+          overflowY: 'auto',
+          transform: navOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.25s ease',
+          boxShadow: navOpen ? '0 0 45px rgba(0,0,0,0.65)' : 'none',
+        } : {}),
       }}>
         {/* Profile */}
-        <div style={{ padding: isMobile ? '1.1rem 1.2rem' : '1.75rem 1.4rem 1.4rem', borderBottom: `1px solid ${C.border}`, display: isMobile ? 'flex' : 'block', alignItems: isMobile ? 'center' : 'initial', gap: '0.9rem' }}>
+        <div style={{ padding: isMobile ? '1.1rem 1.2rem' : '1.75rem 1.4rem 1.4rem', borderBottom: `1px solid ${C.border}`, display: isMobile ? 'flex' : 'block', alignItems: isMobile ? 'center' : 'initial', gap: '0.9rem', justifyContent: isMobile ? 'space-between' : 'initial' }}>
           <div style={{
             width: 52, height: 52, borderRadius: '50%', background: `linear-gradient(135deg, ${C.accent}, ${C.info})`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1024,8 +1047,11 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
         {/* Nav */}
         <nav style={{
           flex: 1, padding: isMobile ? '0.6rem 0.75rem' : '1rem 0.75rem',
-          display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: '0.2rem',
-          overflowX: isMobile ? 'auto' : 'visible',
+          // The navigation now lives in a vertical drawer on small screens,
+          // so it is always a column. It used to scroll sideways, which left a
+          // large empty gap and pushed most of the items out of view.
+          display: 'flex', flexDirection: 'column', gap: '0.2rem',
+          overflowX: 'visible', overflowY: 'auto',
         }}>
           {NAV_ITEMS.map(({ id, label, Icon }) => {
             const active = activeSection === id;
@@ -1036,7 +1062,7 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
                 backgroundColor: active ? C.accentGlow : 'transparent',
                 color: active ? C.accent : C.muted,
                 fontWeight: active ? 700 : 500, fontSize: '0.875rem',
-                width: isMobile ? 'auto' : '100%', textAlign: 'left', flexShrink: 0,
+                width: '100%', textAlign: 'left', flexShrink: 0,
                 transition: 'all 0.15s',
               }}
                 onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = C.text; } }}
@@ -1051,11 +1077,11 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
         </nav>
 
         {/* Bottom actions */}
-        <div style={{ padding: isMobile ? '0.6rem 0.75rem 1rem' : '1rem 0.75rem', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: '0.3rem' }}>
-          <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: isMobile ? 'auto' : '100%', textAlign: 'left' }}>
+        <div style={{ padding: isMobile ? '0.6rem 0.75rem 1rem' : '1rem 0.75rem', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <button onClick={handleBack} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: '100%', textAlign: 'left' }}>
             <ChevronRight size={17} /> Back to Website
           </button>
-          <button onClick={onLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: isMobile ? 'auto' : '100%', textAlign: 'left' }}>
+          <button onClick={onLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', padding: '0.65rem 0.9rem', borderRadius: 10, cursor: 'pointer', border: 'none', backgroundColor: 'transparent', color: C.muted, fontWeight: 500, fontSize: '0.875rem', width: '100%', textAlign: 'left' }}>
             <LogOut size={17} /> Sign out
           </button>
         </div>
@@ -1065,13 +1091,28 @@ export default function UserDashboard({ resident, csrfToken, onLogout, onSession
       <main style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '1.25rem 1rem 2.5rem' : '2.5rem 2.5rem' }}>
         {/* Top bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
-          <div>
-            <h1 style={{ color: C.text, fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: 800, margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+            {isMobile && (
+              <button
+                onClick={() => setNavOpen(true)}
+                aria-label="Open resident menu"
+                style={{
+                  background: 'transparent', border: `1px solid ${C.border}`, color: C.text,
+                  borderRadius: 8, padding: '0.45rem', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', cursor: 'pointer', minWidth: 40, minHeight: 40, flexShrink: 0,
+                }}
+              >
+                <Menu size={20} />
+              </button>
+            )}
+            <div style={{ minWidth: 0 }}>
+            <h1 style={{ color: C.text, fontSize: isMobile ? '1.3rem' : '1.6rem', fontWeight: 800, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               Welcome back, {(profile.name || 'Resident').split(' ')[0]}!
             </h1>
-            <p style={{ color: C.muted, fontSize: '0.875rem', margin: '0.3rem 0 0' }}>
+            <p style={{ color: C.muted, fontSize: '0.875rem', margin: '0.3rem 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               Monar Pass Apartments · Resident Portal
             </p>
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ textAlign: 'right' }}>

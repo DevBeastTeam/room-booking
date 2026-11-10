@@ -139,7 +139,8 @@ export default function Header({
         >
           {/* Left: Quick Contact & Address */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', minWidth: 0, overflow: 'hidden' }}>
-            <a 
+            <a
+              className="header-tap"
               href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`}
               style={{
                 display: 'inline-flex',
@@ -174,6 +175,7 @@ export default function Header({
                 target="_blank" 
                 rel="noreferrer"
                 aria-label="Facebook"
+                className="social-icon"
                 style={{
                   width: '28px',
                   height: '28px',
@@ -203,6 +205,7 @@ export default function Header({
                 target="_blank" 
                 rel="noreferrer"
                 aria-label="Instagram"
+                className="social-icon"
                 style={{
                   width: '28px',
                   height: '28px',
@@ -233,6 +236,7 @@ export default function Header({
             {/* Theme Switcher Button (Dark / Light) */}
             <button
               id="btn-theme-toggle"
+              className="header-tap"
               onClick={handleToggleTheme}
               aria-label={`Switch to ${themeMode === 'dark' ? 'Light' : 'Dark'} luxury theme`}
               style={{
@@ -264,7 +268,7 @@ export default function Header({
 
 
             {/* Login Menu Dropdown */}
-            <div className="hide-on-mobile" style={{ position: 'relative' }}>
+            <div className="hide-on-mobile header-tap-wrap" style={{ position: 'relative' }}>
               <button
                 onClick={() => setIsLoginOpen(!isLoginOpen)}
                 style={{
@@ -392,6 +396,7 @@ export default function Header({
             {/* Mobile Menu Hamburger Button */}
             <button
               onClick={() => setIsNavOpen(!isNavOpen)}
+              className="header-tap"
               aria-label="Toggle navigation"
               style={{
                 backgroundColor: 'transparent',
@@ -495,7 +500,7 @@ export default function Header({
                   transition: 'color 0.3s ease',
                 }}
               >
-                Luxury Residences · Fort Worth
+                <span className="header-logo-sub">Luxury Residences · Fort Worth</span>
               </span>
             </div>
           </a>
@@ -516,6 +521,7 @@ export default function Header({
                 key={link.label}
                 id={link.id}
                 href={link.href}
+                className="header-nav-link"
                 onClick={(e) => {
                   e.preventDefault();
                   link.onClick();

@@ -68,7 +68,7 @@ export default function Footer({
                   MONAR PASS
                 </span>
                 <span style={{ fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#c9a96e' }}>
-                  Luxury Apartment Residences
+                  <span className="footer-brand-sub">Luxury Apartment Residences</span>
                 </span>
               </div>
             </div>
@@ -80,7 +80,7 @@ export default function Footer({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <MapPin size={15} style={{ color: '#c9a96e', flexShrink: 0 }} />
-                <a 
+                <a className="footer-tap" 
                   href={siteSettings?.mapsUrl || 'https://maps.app.goo.gl/E71XfBiE8dE9bAjV6'} 
                   target="_blank" 
                   rel="noreferrer" 
@@ -94,7 +94,7 @@ export default function Footer({
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 <Phone size={15} style={{ color: '#c9a96e', flexShrink: 0 }} />
-                <a 
+                <a className="footer-tap" 
                   href={`tel:${siteSettings?.phone?.replace(/[^0-9+]/g, '') || '+18178578782'}`} 
                   style={{ color: '#f4efe6', textDecoration: 'none' }}
                   onMouseEnter={e => e.currentTarget.style.color = '#c9a96e'}
@@ -120,7 +120,7 @@ export default function Footer({
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
-              <a
+              <a className="footer-tap"
                 href={siteSettings?.social?.facebook || 'https://www.facebook.com/MonarPassAPTS'}
                 target="_blank"
                 rel="noreferrer"
@@ -149,7 +149,7 @@ export default function Footer({
                 <FacebookIcon size={15} />
               </a>
 
-              <a
+              <a className="footer-tap"
                 href={siteSettings?.social?.instagram || 'https://www.instagram.com/lifeatmonarpass'}
                 target="_blank"
                 rel="noreferrer"
@@ -223,7 +223,7 @@ export default function Footer({
             marginBottom: '1.75rem',
           }}
         >
-          <a
+          <a className="footer-tap"
             href="/"
             onClick={(e) => { if (onNavigateHome) { e.preventDefault(); onNavigateHome(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -232,7 +232,7 @@ export default function Footer({
           >
             Home
           </a>
-          <a
+          <a className="footer-tap"
             href="/floor-plans"
             onClick={(e) => { if (onNavigateFloorPlans) { e.preventDefault(); onNavigateFloorPlans(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -241,7 +241,7 @@ export default function Footer({
           >
             Floor Plans
           </a>
-          <a
+          <a className="footer-tap"
             href="/amenities"
             onClick={(e) => { if (onNavigateAmenities) { e.preventDefault(); onNavigateAmenities(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -250,7 +250,7 @@ export default function Footer({
           >
             Amenities
           </a>
-          <a
+          <a className="footer-tap"
             href="/photos"
             onClick={(e) => { if (onNavigatePhotos) { e.preventDefault(); onNavigatePhotos(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -259,7 +259,7 @@ export default function Footer({
           >
             Photos
           </a>
-          <a
+          <a className="footer-tap"
             href="/virtual-tour"
             onClick={(e) => { if (onNavigateVirtualTour) { e.preventDefault(); onNavigateVirtualTour(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -268,7 +268,7 @@ export default function Footer({
           >
             Virtual Tour
           </a>
-          <a
+          <a className="footer-tap"
             href="/income-guidelines"
             onClick={(e) => { if (onNavigateGuidelines) { e.preventDefault(); onNavigateGuidelines(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -277,7 +277,7 @@ export default function Footer({
           >
             Income Guidelines
           </a>
-          <a
+          <a className="footer-tap"
             href="/map"
             onClick={(e) => { if (onNavigateMap) { e.preventDefault(); onNavigateMap(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -286,7 +286,7 @@ export default function Footer({
           >
             Map
           </a>
-          <a
+          <a className="footer-tap"
             href="/faq"
             onClick={(e) => { if (onNavigateFAQ) { e.preventDefault(); onNavigateFAQ(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -295,7 +295,7 @@ export default function Footer({
           >
             FAQ
           </a>
-          <a
+          <a className="footer-tap"
             href="/contact"
             onClick={(e) => { if (onNavigateContact) { e.preventDefault(); onNavigateContact(); } else if (onOpenContactSupport) { e.preventDefault(); onOpenContactSupport(); } }}
             style={{ transition: 'color 0.2s', cursor: 'pointer', color: '#8c8273', textDecoration: 'none' }}
@@ -304,7 +304,7 @@ export default function Footer({
           >
             Contact
           </a>
-          <a
+          <a className="footer-tap"
             href="#terms-conditions"
             onClick={(e) => {
               e.preventDefault();
@@ -317,7 +317,7 @@ export default function Footer({
           >
             Terms
           </a>
-          <a
+          <a className="footer-tap"
             href="#privacy-policy"
             onClick={(e) => {
               e.preventDefault();
@@ -330,7 +330,7 @@ export default function Footer({
           >
             Privacy
           </a>
-          <a
+          <a className="footer-tap"
             href="#accessibility"
             onClick={(e) => {
               e.preventDefault();

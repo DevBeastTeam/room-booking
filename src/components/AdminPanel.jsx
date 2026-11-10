@@ -4,6 +4,7 @@ import {
   Home, Users, FileText, Wrench, DollarSign, BarChart2, Settings,
   LogOut, CheckCircle, XCircle, Clock,
   Edit2, Trash2, Plus, X, Eye,
+  Menu,
   Package, Layers, Car, Archive, Search,
   Building, UserCheck, AlertCircle, Mail,
   Headphones, BookOpen, Sliders, Save, RotateCcw, Check,
@@ -3790,13 +3791,59 @@ export default function AdminPanel({
     };
   }, []);
 
+  // ── Responsive: below 1024px the sidebar becomes an off-canvas drawer ──────
+  const [isCompact, setIsCompact] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      const compact = window.innerWidth < 1024;
+      setIsCompact(compact);
+      if (!compact) setSidebarOpen(false);
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Close the drawer whenever the section changes.
+  useEffect(() => { setSidebarOpen(false); }, [currentSection]);
+
   const pendingCount = APPLICATIONS_DATA.filter((a) => a.status === 'pending').length;
   const newSupportCount = supportInquiries.filter((s) => s.status === 'new').length;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: A.bg, display: 'flex', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+    <div className="admin-root" style={{ minHeight: '100vh', backgroundColor: A.bg, display: 'flex', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+      {/* Backdrop behind the off-canvas sidebar on small screens */}
+      {isCompact && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2050 }}
+        />
+      )}
+
       {/* ── Sidebar ── */}
-      <aside style={{ width: 235, backgroundColor: A.sidebar, borderRight: `1px solid ${A.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <aside
+        style={{
+          width: 235,
+          backgroundColor: A.sidebar,
+          borderRight: `1px solid ${A.border}`,
+          display: 'flex',
+          flexDirection: 'column',
+          flexShrink: 0,
+          ...(isCompact ? {
+            position: 'fixed',
+            top: 0, left: 0, bottom: 0,
+            zIndex: 2100,
+            width: 240,
+            maxWidth: '86vw',
+            overflowY: 'auto',
+            transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+            transition: 'transform 0.25s ease',
+            boxShadow: sidebarOpen ? '0 0 45px rgba(0,0,0,0.65)' : 'none',
+          } : {}),
+        }}
+      >
         {/* Brand */}
         <div style={{ padding: '1.5rem 1.3rem', borderBottom: `1px solid ${A.border}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
@@ -3906,16 +3953,38 @@ export default function AdminPanel({
       </aside>
 
       {/* ── Main content ── */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '2.25rem 2.5rem' }}>
+      <main
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: isCompact ? '1.1rem 1rem 2rem' : '2.25rem 2.5rem',
+          minWidth: 0,
+        }}
+      >
         {/* Top bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: `1px solid ${A.border}` }}>
-          <div>
-            <h1 style={{ color: A.text, fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-              {ADMIN_NAV.find((n) => n.id === currentSection)?.label}
-            </h1>
-            <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0.25rem 0 0' }}>
-              {siteSettings?.siteName || 'Monar Pass Apartments'} · Admin Dashboard
-            </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1.25rem', borderBottom: `1px solid ${A.border}`, gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+            {isCompact && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open admin menu"
+                style={{
+                  background: 'transparent', border: `1px solid ${A.border}`, color: A.text,
+                  borderRadius: 8, padding: '0.45rem', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', cursor: 'pointer', minWidth: 40, minHeight: 40, flexShrink: 0,
+                }}
+              >
+                <Menu size={20} />
+              </button>
+            )}
+            <div style={{ minWidth: 0 }}>
+              <h1 style={{ color: A.text, fontSize: '1.5rem', fontWeight: 800, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {ADMIN_NAV.find((n) => n.id === currentSection)?.label}
+              </h1>
+              <p style={{ color: A.muted, fontSize: '0.82rem', margin: '0.25rem 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {siteSettings?.siteName || 'Monar Pass Apartments'} · Admin Dashboard
+              </p>
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ textAlign: 'right' }}>

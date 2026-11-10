@@ -257,7 +257,7 @@ function SessionBar({ user, onLogout }) {
   const color = roleColors[user.role] || S.accent;
 
   return (
-    <div style={{
+    <div className="session-bar" style={{
       position: 'fixed', top: 0, right: 0, zIndex: 9999,
       background: S.card, border: `1px solid ${S.border}`,
       borderRadius: '0 0 0 12px', padding: '0.5rem 1rem',
@@ -272,6 +272,7 @@ function SessionBar({ user, onLogout }) {
       </span>
       <button
         onClick={onLogout}
+        className="header-tap"
         style={{
           background: `${S.red}22`, border: `1px solid ${S.red}44`, color: S.red,
           cursor: 'pointer', borderRadius: 6, padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700,

@@ -524,7 +524,7 @@ export default function PhotoGallery({ onOpenTourModal }) {
               justifyContent: 'center',
               // The dot stays 10px wide but the button around it is a real
               // touch target instead of a 10px sliver.
-              padding: '8px 0',
+              padding: '12px 0',
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
