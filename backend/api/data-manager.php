@@ -12,11 +12,6 @@
  * ==============================================================================
  */
 
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
@@ -25,12 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
 
+auth_send_cors_headers();
+
 // Database Manager sirf super admin (dev panel) ke liye hai — client admins ko
 // yeh tab bilkul nahi dikhta aur API se bhi access nahi milta.
 $authUser = auth_require_permission();
 if ($authUser['role'] !== 'super_admin') {
     auth_json_out(false, ['error' => 'Database Manager sirf super admin ke liye hai.'], 403);
 }
+// Seed / clear / import are destructive → require a valid CSRF token.
+auth_require_csrf_if_mutating();
 
 $pdo = getDatabaseConnection();
 if (!$pdo) {

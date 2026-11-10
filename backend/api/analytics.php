@@ -14,11 +14,6 @@
  * ==============================================================================
  */
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json; charset=UTF-8');
-
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -26,6 +21,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
 
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
+
+auth_send_cors_headers();
 
 $dataFile = auth_data_dir() . '/analytics.json';
 $MAX_EVENTS = 20000; // keep last N events
@@ -65,6 +62,11 @@ $action = $_GET['action'] ?? ($_POST['action'] ?? 'track');
 
 // ── TRACK (public — public pages se hi call hota hai) ──────────────────────────
 if ($action === 'track') {
+    // Only POST may create events. A GET would otherwise record a phantom
+    // pageview every time a link prefetcher or crawler hit the endpoint.
+    if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        auth_json_out(true, ['recorded' => false, 'reason' => 'post_only']);
+    }
     $raw = file_get_contents('php://input');
     $input = json_decode($raw, true) ?: [];
 

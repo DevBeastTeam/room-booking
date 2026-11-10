@@ -14,11 +14,6 @@
  * ==============================================================================
  */
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-header('Content-Type: application/json; charset=UTF-8');
-
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -27,18 +22,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
 
+auth_send_cors_headers();
+
 $envVars = function_exists('loadEnvFile') ? loadEnvFile(dirname(__DIR__) . '/config/.env') : [];
 
 // ── Environment & Gateway Credentials ──────────────────────────────────────────
 $wfEnv = strtolower($envVars['WORLDFIRST_ENV'] ?? 'sandbox');
 $isSandbox = ($wfEnv !== 'live');
 
-$clientId     = $envVars['WORLDFIRST_CLIENT_ID'] ?? 'wf_client_sandbox_monar2026';
-$merchantId   = $envVars['WORLDFIRST_MERCHANT_ID'] ?? 'WF_US_8839210';
+$clientId     = $envVars['WORLDFIRST_CLIENT_ID'] ?? '';
+$merchantId   = $envVars['WORLDFIRST_MERCHANT_ID'] ?? '';
 $apiKey       = $envVars['WORLDFIRST_API_KEY'] ?? '';
 $privateKey   = $envVars['WORLDFIRST_PRIVATE_KEY'] ?? '';
 $publicKey    = $envVars['WORLDFIRST_PUBLIC_KEY'] ?? '';
-$webhookSecret= $envVars['WORLDFIRST_WEBHOOK_SECRET'] ?? 'wf_whsec_sdbx_98fa71e2';
+$webhookSecret= $envVars['WORLDFIRST_WEBHOOK_SECRET'] ?? '';
 $currency     = strtoupper($envVars['WORLDFIRST_CURRENCY'] ?? 'USD');
 
 // Base API URL
@@ -51,12 +48,162 @@ $rawInput = file_get_contents('php://input');
 $jsonInput = json_decode($rawInput, true) ?: [];
 $action = $_GET['action'] ?? ($jsonInput['action'] ?? ($_POST['action'] ?? 'config'));
 
-// Admin-only actions or user history with email
-if ($action === 'history') {
-    $emailFilter = trim($_GET['email'] ?? ($jsonInput['email'] ?? ''));
-    if (empty($emailFilter) && !$isSandbox) {
-        auth_require_permission();
+// ── Authoritative fee table ────────────────────────────────────────────────────
+// The client NEVER sends the amount. Prices are resolved server-side so a
+// tampered request cannot buy a $909 rent for $1.
+const WF_FEES = [
+    'application_fee' => 50.00,
+    'holding_deposit' => 250.00,
+    'pet_deposit'     => 300.00,
+];
+
+/**
+ * Resolve the server-side amount for a payment.
+ * Fixed fees come from WF_FEES; rent comes from the unit/floor-plan records.
+ */
+function wf_resolve_amount($pdo, $itemType, $unitNumber) {
+    $itemType = (string)$itemType;
+    if (isset(WF_FEES[$itemType])) {
+        return ['amount' => WF_FEES[$itemType], 'source' => 'fee_table'];
     }
+    if ($itemType === 'rent_payment') {
+        $unitNumber = trim((string)$unitNumber);
+        if ($pdo && $unitNumber !== '') {
+            try {
+                $stmt = $pdo->prepare("SELECT `rent` FROM `units` WHERE `unit_number` = :u LIMIT 1");
+                $stmt->execute([':u' => $unitNumber]);
+                $row = $stmt->fetch();
+                if ($row && (float)$row['rent'] > 0) {
+                    return ['amount' => round((float)$row['rent'], 2), 'source' => 'unit_rent'];
+                }
+            } catch (Exception $e) {
+                error_log('WorldFirst rent lookup failed: ' . $e->getMessage());
+            }
+        }
+        // Fall back to the cheapest active floor plan (12-month lease price).
+        if ($pdo) {
+            try {
+                $stmt = $pdo->query("SELECT `price_12m` FROM `floor_plans` WHERE `is_active` = 1 ORDER BY `price_12m` ASC LIMIT 1");
+                $row = $stmt->fetch();
+                if ($row && (float)$row['price_12m'] > 0) {
+                    return ['amount' => round((float)$row['price_12m'], 2), 'source' => 'floor_plan_min'];
+                }
+            } catch (Exception $e) {
+                error_log('WorldFirst floor plan lookup failed: ' . $e->getMessage());
+            }
+        }
+        return ['amount' => 0.0, 'source' => 'unresolved'];
+    }
+    return ['amount' => 0.0, 'source' => 'unresolved'];
+}
+
+/**
+ * Sign the request payload with the merchant RSA private key.
+ * WorldFirst expects an RSA-SHA256 signature over the canonical body.
+ */
+function wf_rsa_signature($payload, $privateKeyPem) {
+    $privateKeyPem = trim((string)$privateKeyPem);
+    // Allow the PEM to live in a file (multi-line env values are awkward).
+    if (strpos($privateKeyPem, 'PRIVATE KEY') === false && is_file($privateKeyPem)) {
+        $privateKeyPem = (string)@file_get_contents($privateKeyPem);
+    }
+    if ($privateKeyPem === '' || strpos($privateKeyPem, 'PRIVATE KEY') === false) {
+        return '';
+    }
+    $privateKeyPem = preg_replace('/\\\\n/', "\n", $privateKeyPem);
+    $key = openssl_pkey_get_private($privateKeyPem);
+    if ($key === false) return '';
+    $signature = '';
+    openssl_sign($payload, $signature, $key, OPENSSL_ALGO_SHA256);
+    return base64_encode($signature);
+}
+
+/**
+ * Verify an inbound WorldFirst webhook signature.
+ * Accepts the common header names; falls back to an HMAC of the raw body.
+ */
+function wf_verify_webhook_signature($rawBody, $headers, $secret) {
+    if ($secret === '') return false;
+    $candidates = [];
+    foreach (['HTTP_X_WORLD_FIRST_SIGNATURE', 'HTTP_X_SIGNATURE', 'HTTP_SIGNATURE'] as $h) {
+        if (!empty($headers[$h])) $candidates[] = $headers[$h];
+    }
+    // Some gateways send "Signature: keyId=...,signature=base64"
+    $candidates = array_merge($candidates, array_values(array_filter($headers, function ($v, $k) {
+        return stripos($k, 'signature') !== false && is_string($v) && $v !== '';
+    }, ARRAY_FILTER_USE_BOTH)));
+
+    $hmac = base64_encode(hash_hmac('sha256', $rawBody, $secret, true));
+    $hmacHex = hash_hmac('sha256', $rawBody, $secret);
+
+    foreach ($candidates as $sig) {
+        $sig = trim((string)$sig);
+        if ($sig === '') continue;
+        if (hash_equals($hmac, $sig) || hash_equals($hmacHex, $sig)) return true;
+        // Strip a "keyId=" prefix if present.
+        if (strpos($sig, 'signature=') !== false) {
+            $part = substr($sig, strpos($sig, 'signature=') + 10);
+            if (hash_equals($hmac, $part) || hash_equals($hmacHex, $part)) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Issue a per-transaction verification secret. Only the client that created a
+ * transaction can confirm it in sandbox mode.
+ */
+function wf_new_verify_token() {
+    return bin2hex(random_bytes(24));
+}
+
+function wf_token_matches($expected, $given) {
+    if (empty($expected) || empty($given)) return false;
+    return hash_equals((string)$expected, (string)$given);
+}
+
+/**
+ * Ask the WorldFirst gateway whether a payment actually succeeded.
+ *
+ * @return bool|null true = paid, false = not paid, null = could not determine
+ */
+function wf_query_gateway_status($orderId) {
+    global $baseApiUrl, $clientId, $apiKey, $privateKey;
+
+    if (empty($apiKey) || empty($orderId)) return null;
+
+    $query = ['paymentId' => $orderId];
+    $payloadJson = json_encode($query);
+    $headers = [
+        'Content-Type: application/json',
+        'client-id: ' . $clientId,
+        'Authorization: Bearer ' . $apiKey,
+    ];
+    $signature = wf_rsa_signature($payloadJson, $privateKey);
+    if ($signature !== '') {
+        $headers[] = 'Signature: ' . $signature;
+    }
+
+    $ch = curl_init($baseApiUrl . 'query');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payloadJson);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if (!$response || $httpCode < 200 || $httpCode >= 300) {
+        error_log('WorldFirst gateway query failed (HTTP ' . $httpCode . ') for order ' . $orderId);
+        return null;
+    }
+    $parsed = json_decode($response, true);
+    if (!is_array($parsed)) return null;
+
+    $status = strtolower((string)($parsed['paymentStatus'] ?? ($parsed['status'] ?? '')));
+    if ($status === '') return null;
+    return in_array($status, ['success', 'completed', 'paid', 'succeeded'], true);
 }
 
 // ── Dual Persistence: JSON file storage helpers ────────────────────────────────
@@ -120,6 +267,9 @@ function ensureTransactionsSchema($pdo) {
         if (!in_array('checkout_url', $cols)) {
             @$pdo->exec("ALTER TABLE `transactions` ADD COLUMN `checkout_url` TEXT DEFAULT NULL");
         }
+        if (!in_array('verify_token', $cols)) {
+            @$pdo->exec("ALTER TABLE `transactions` ADD COLUMN `verify_token` VARCHAR(64) DEFAULT NULL");
+        }
     } catch (Exception $e) {
         // Table may not exist yet or user lacks alter privileges — silently continue
     }
@@ -137,8 +287,7 @@ if ($action === 'config') {
         'gateway'           => 'WorldFirst Pay Solution',
         'environment'       => $wfEnv,
         'is_sandbox'        => $isSandbox,
-        'client_id'         => $clientId,
-        'merchant_id'       => $merchantId,
+        // NOTE: client_id / merchant_id are intentionally NOT exposed publicly.
         'currency'          => $currency,
         'subscription_enabled' => true,
         'subscription_intervals' => [
@@ -171,7 +320,6 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
 
     $itemType     = $data['item_type'] ?? 'holding_deposit';
     $itemName     = trim($data['item_name'] ?? 'Apartment Holding Deposit');
-    $amount       = (float) ($data['amount'] ?? 250.00);
     $unitNumber   = trim($data['unit_number'] ?? '');
     $customerName = trim($data['customer_name'] ?? 'Guest Prospect');
     $customerEmail= trim(filter_var($data['customer_email'] ?? '', FILTER_SANITIZE_EMAIL));
@@ -187,20 +335,31 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
         exit();
     }
 
-    if ($amount <= 0) {
+    // Ensure valid item_type — anything unknown is rejected, not silently swapped.
+    $allowedTypes = array_merge(array_keys(WF_FEES), ['rent_payment']);
+    if (!in_array($itemType, $allowedTypes, true)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Amount must be greater than $0.']);
+        echo json_encode(['success' => false, 'error' => 'Unknown payment item type.']);
         exit();
     }
 
-    // Ensure valid item_type
-    if (!in_array($itemType, ['application_fee', 'holding_deposit', 'rent_payment'], true)) {
-        $itemType = 'holding_deposit';
+    // ── Amount is resolved SERVER-SIDE. Any client-supplied amount is ignored.
+    $resolved = wf_resolve_amount($pdo, $itemType, $unitNumber);
+    $amount = (float)$resolved['amount'];
+    if ($amount <= 0) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'error'   => 'Payment amount could not be resolved for this item. Please contact the leasing office.',
+        ]);
+        exit();
     }
 
     $amountFormatted = number_format($amount, 2, '.', '');
     $localTxnId = 'WF-TXN-' . strtoupper(substr(uniqid(), -8));
     $orderId = 'WF-ORD-' . date('Ymd') . '-' . substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6);
+    // Per-transaction secret: only the creator can confirm a sandbox payment.
+    $verifyToken = wf_new_verify_token();
 
     // Calculate next billing date if subscription
     $nextBillingDate = null;
@@ -246,16 +405,26 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
             ];
         }
 
-        $ch = curl_init($baseApiUrl . 'create');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($orderPayload));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        $payloadJson = json_encode($orderPayload);
+        $headers = [
             'Content-Type: application/json',
             'client-id: ' . $clientId,
             'Authorization: Bearer ' . $apiKey,
-            'Signature: ' . hash_hmac('sha256', json_encode($orderPayload), $apiKey)
-        ]);
+        ];
+        // WorldFirst expects an RSA-SHA256 signature from the merchant private key.
+        $signature = wf_rsa_signature($payloadJson, $privateKey);
+        if ($signature !== '') {
+            $headers[] = 'Signature: ' . $signature;
+            $headers[] = 'X-Signature: ' . $signature;
+        } else {
+            error_log('WorldFirst: WORLDFIRST_PRIVATE_KEY missing or invalid — request sent unsigned.');
+        }
+
+        $ch = curl_init($baseApiUrl . 'create');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payloadJson);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
         $response = curl_exec($ch);
@@ -284,12 +453,12 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
                     `txn_id`, `paddle_order_id`, `payment_gateway`, `payment_mode`,
                     `subscription_interval`, `subscription_status`, `next_billing_date`,
                     `user_name`, `user_email`, `user_phone`, `item_type`, `item_name`,
-                    `unit_number`, `amount`, `currency`, `status`, `checkout_url`
+                    `unit_number`, `amount`, `currency`, `status`, `checkout_url`, `verify_token`
                 ) VALUES (
                     :txn_id, :order_id, 'worldfirst', :payment_mode,
                     :sub_interval, :sub_status, :next_billing,
                     :name, :email, :phone, :item_type, :item_name,
-                    :unit, :amount, :currency, 'pending', :checkout_url
+                    :unit, :amount, :currency, 'pending', :checkout_url, :verify_token
                 )
             ");
             $stmt->execute([
@@ -308,6 +477,7 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
                 ':amount'       => $amountFormatted,
                 ':currency'     => $currency,
                 ':checkout_url' => $checkoutUrl,
+                ':verify_token' => $verifyToken,
             ]);
             $storedInDb = true;
         } catch (Exception $e) {
@@ -335,6 +505,7 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
         'currency'              => $currency,
         'status'                => 'pending',
         'checkout_url'          => $checkoutUrl,
+        'verify_token'          => $verifyToken,
         'created_at'            => date('Y-m-d H:i:s'),
         'updated_at'            => date('Y-m-d H:i:s'),
     ];
@@ -355,6 +526,8 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
         'status'              => 'pending',
         'checkout_url'        => $checkoutUrl,
         'database_recorded'   => $storedInDb,
+        // Secret required to confirm this transaction later. Keep it client-side.
+        'verify_token'        => $verifyToken,
         'message'             => $isSandbox
             ? 'WorldFirst Sandbox payment initialized. Ready for simulation and verification.'
             : 'WorldFirst live checkout session created.'
@@ -365,12 +538,15 @@ if ($action === 'create_payment' || $action === 'create_transaction') {
 // ── 3. VERIFY PAYMENT: Confirm completion & activate subscriptions ─────────────
 if ($action === 'verify_payment' || $action === 'verify_transaction') {
     $txnId = trim($_GET['txn_id'] ?? ($jsonInput['txn_id'] ?? ($_POST['txn_id'] ?? '')));
+    $token = trim($_GET['verify_token'] ?? ($jsonInput['verify_token'] ?? ($_POST['verify_token'] ?? '')));
+
     if (empty($txnId)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Transaction ID is required']);
         exit();
     }
 
+    // ── Load the transaction (MySQL first, JSON fallback) ────────────────────
     $localRow = null;
     if ($pdo) {
         try {
@@ -382,142 +558,143 @@ if ($action === 'verify_payment' || $action === 'verify_transaction') {
         }
     }
 
-    $rowAmount = $localRow ? (float)$localRow['amount'] : null;
-    $paymentMode = $localRow['payment_mode'] ?? 'one_time';
-    $subInterval = $localRow['subscription_interval'] ?? null;
-
-    // In sandbox mode or local simulated mode, mark transaction completed
-    if ($localRow) {
-        if ($localRow['status'] === 'pending') {
-            try {
-                $subStatus = ($paymentMode === 'subscription') ? 'active' : 'none';
-                $stmt = $pdo->prepare("
-                    UPDATE `transactions` SET
-                        `status` = 'completed',
-                        `subscription_status` = :sub_status
-                    WHERE `txn_id` = :id
-                ");
-                $stmt->execute([':sub_status' => $subStatus, ':id' => $txnId]);
-            } catch (Exception $e) {
-                error_log("WorldFirst txn update error: " . $e->getMessage());
-            }
+    $jsonTxns = wf_read_json_transactions();
+    $jsonRow = null;
+    foreach ($jsonTxns as $item) {
+        if (($item['txn_id'] ?? '') === $txnId || ($item['paddle_order_id'] ?? '') === $txnId) {
+            $jsonRow = $item;
+            break;
         }
-
-        // Sync to JSON storage
-        $txns = wf_read_json_transactions();
-        foreach ($txns as $k => $item) {
-            if (($item['txn_id'] ?? '') === $txnId || ($item['paddle_order_id'] ?? '') === $txnId) {
-                $txns[$k]['status'] = 'completed';
-                if (($txns[$k]['payment_mode'] ?? $paymentMode) === 'subscription') {
-                    $txns[$k]['subscription_status'] = 'active';
-                }
-                $txns[$k]['updated_at'] = date('Y-m-d H:i:s');
-                break;
-            }
-        }
-        wf_save_json_transactions($txns);
-
+    }
+    if (!$localRow && !$jsonRow) {
+        http_response_code(404);
         echo json_encode([
-            'success'             => true,
-            'verified'            => true,
-            'status'              => 'completed',
-            'gateway'             => 'WorldFirst',
-            'is_sandbox'          => $isSandbox,
-            'txn_id'              => $txnId,
-            'amount'              => $rowAmount,
-            'currency'            => $currency,
-            'payment_mode'        => $paymentMode,
-            'subscription_interval'=> $subInterval,
-            'subscription_status' => ($paymentMode === 'subscription') ? 'active' : 'none',
-            'next_billing_date'   => $localRow['next_billing_date'] ?? null,
-            'message'             => ($paymentMode === 'subscription')
-                ? "WorldFirst auto-subscription activated successfully! Recurring cycle: {$subInterval}."
-                : 'WorldFirst payment successfully verified and completed.'
+            'success'  => false,
+            'verified' => false,
+            'status'   => 'not_found',
+            'txn_id'   => $txnId,
+            'error'    => 'Transaction record not found.'
         ]);
         exit();
     }
 
-    if ($isSandbox) {
-        // Allow mock sandbox verification in developer mode even if DB is offline
-        $simMode = $jsonInput['payment_mode'] ?? ($_POST['payment_mode'] ?? 'one_time');
-        $simInterval = $jsonInput['subscription_interval'] ?? ($_POST['subscription_interval'] ?? ($simMode === 'subscription' ? 'monthly' : null));
-        $intervalDays = ($simInterval === '3_days') ? 3 : 30;
-        $simNextBilling = ($simMode === 'subscription') ? date('Y-m-d H:i:s', strtotime("+{$intervalDays} days")) : null;
+    $rowAmount   = $localRow ? (float)$localRow['amount'] : (float)($jsonRow['amount'] ?? 0);
+    $paymentMode = $localRow['payment_mode'] ?? ($jsonRow['payment_mode'] ?? 'one_time');
+    $subInterval = $localRow['subscription_interval'] ?? ($jsonRow['subscription_interval'] ?? null);
+    $storedToken = $localRow['verify_token'] ?? ($jsonRow['verify_token'] ?? '');
+    $orderId     = $localRow['paddle_order_id'] ?? ($jsonRow['paddle_order_id'] ?? $txnId);
 
-        // Sync to JSON storage
-        $txns = wf_read_json_transactions();
-        $found = false;
-        foreach ($txns as $k => $item) {
-            if (($item['txn_id'] ?? '') === $txnId || ($item['paddle_order_id'] ?? '') === $txnId) {
-                $txns[$k]['status'] = 'completed';
-                if (($txns[$k]['payment_mode'] ?? $simMode) === 'subscription') {
-                    $txns[$k]['subscription_status'] = 'active';
-                    $txns[$k]['next_billing_date'] = $simNextBilling;
-                }
-                $txns[$k]['updated_at'] = date('Y-m-d H:i:s');
-                $found = true;
-                break;
-            }
+    // ── Authorization to confirm this transaction ────────────────────────────
+    // LIVE   → the gateway is the only authority; we query it and trust nothing else.
+    // SANDBOX → the creator's per-transaction secret, or an authenticated super admin.
+    if (!$isSandbox) {
+        $gatewayPaid = wf_query_gateway_status($orderId);
+        if ($gatewayPaid === null) {
+            http_response_code(503);
+            echo json_encode([
+                'success'  => false,
+                'verified' => false,
+                'status'   => 'unverified',
+                'txn_id'   => $txnId,
+                'error'    => 'Payment status could not be confirmed with the gateway. Please try again shortly.'
+            ]);
+            exit();
         }
-        if (!$found) {
-            $txns[] = [
-                'id'                    => time(),
-                'txn_id'                => $txnId,
-                'paddle_order_id'       => 'WF-ORD-' . date('Ymd') . '-' . substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6),
-                'payment_gateway'       => 'worldfirst',
-                'payment_mode'          => $simMode,
-                'subscription_interval' => $simInterval,
-                'subscription_status'   => ($simMode === 'subscription') ? 'active' : 'none',
-                'next_billing_date'     => $simNextBilling,
-                'user_name'             => $jsonInput['customer_name'] ?? ($_POST['customer_name'] ?? 'Guest Prospect'),
-                'user_email'            => $jsonInput['customer_email'] ?? ($_POST['customer_email'] ?? 'guest@example.com'),
-                'user_phone'            => $jsonInput['customer_phone'] ?? ($_POST['customer_phone'] ?? ''),
-                'item_type'             => $jsonInput['item_type'] ?? ($_POST['item_type'] ?? 'holding_deposit'),
-                'item_name'             => $jsonInput['item_name'] ?? ($_POST['item_name'] ?? 'Apartment Holding Deposit'),
-                'unit_number'           => $jsonInput['unit_number'] ?? ($_POST['unit_number'] ?? ''),
-                'amount'                => (float)($jsonInput['amount'] ?? ($_POST['amount'] ?? 250.00)),
-                'currency'              => $currency,
-                'status'                => 'completed',
-                'checkout_url'          => "/dashboard?payment=simulated&txn_id={$txnId}&mode={$simMode}",
-                'created_at'            => date('Y-m-d H:i:s'),
-                'updated_at'            => date('Y-m-d H:i:s'),
-            ];
+        if (!$gatewayPaid) {
+            http_response_code(402);
+            echo json_encode([
+                'success'  => false,
+                'verified' => false,
+                'status'   => $localRow['status'] ?? 'pending',
+                'txn_id'   => $txnId,
+                'error'    => 'Payment has not been received yet.'
+            ]);
+            exit();
         }
-        wf_save_json_transactions($txns);
-
-        echo json_encode([
-            'success'             => true,
-            'verified'            => true,
-            'status'              => 'completed',
-            'gateway'             => 'WorldFirst',
-            'is_sandbox'          => true,
-            'txn_id'              => $txnId,
-            'amount'              => (float)($jsonInput['amount'] ?? ($_POST['amount'] ?? 250.00)),
-            'currency'            => $currency,
-            'payment_mode'        => $simMode,
-            'subscription_interval'=> $simInterval,
-            'subscription_status' => ($simMode === 'subscription') ? 'active' : 'none',
-            'next_billing_date'   => $simNextBilling,
-            'message'             => ($simMode === 'subscription')
-                ? "WorldFirst Sandbox auto-subscription simulated and activated! Recurring cycle: {$simInterval}."
-                : 'WorldFirst Sandbox payment simulated and verified.'
-        ]);
-        exit();
+    } else {
+        $adminApproved = false;
+        $admin = auth_current_user();
+        $adminApproved = !empty($admin) && $admin['role'] === 'super_admin';
+        if (!$adminApproved && !wf_token_matches($storedToken, $token)) {
+            http_response_code(403);
+            echo json_encode([
+                'success'  => false,
+                'verified' => false,
+                'status'   => 'unauthorized',
+                'txn_id'   => $txnId,
+                'error'    => 'Verification token missing or invalid.'
+            ]);
+            exit();
+        }
     }
 
-    http_response_code(404);
+    // ── Mark the transaction as completed ────────────────────────────────────
+    $subStatus = ($paymentMode === 'subscription') ? 'active' : 'none';
+
+    if ($pdo && $localRow) {
+        try {
+            $stmt = $pdo->prepare("
+                UPDATE `transactions` SET
+                    `status` = 'completed',
+                    `subscription_status` = :sub_status
+                WHERE `txn_id` = :id OR `paddle_order_id` = :id2
+            ");
+            $stmt->execute([':sub_status' => $subStatus, ':id' => $txnId, ':id2' => $txnId]);
+        } catch (Exception $e) {
+            error_log("WorldFirst txn update error: " . $e->getMessage());
+        }
+    }
+
+    // Sync to JSON storage
+    foreach ($jsonTxns as $k => $item) {
+        if (($item['txn_id'] ?? '') === $txnId || ($item['paddle_order_id'] ?? '') === $txnId) {
+            $jsonTxns[$k]['status'] = 'completed';
+            if (($jsonTxns[$k]['payment_mode'] ?? $paymentMode) === 'subscription') {
+                $jsonTxns[$k]['subscription_status'] = 'active';
+            }
+            $jsonTxns[$k]['updated_at'] = date('Y-m-d H:i:s');
+            break;
+        }
+    }
+    wf_save_json_transactions($jsonTxns);
+
     echo json_encode([
-        'success'  => false,
-        'verified' => false,
-        'status'   => 'not_found',
-        'txn_id'   => $txnId,
-        'error'    => 'Transaction record not found.'
+        'success'             => true,
+        'verified'            => true,
+        'status'              => 'completed',
+        'gateway'             => 'WorldFirst',
+        'is_sandbox'          => $isSandbox,
+        'txn_id'              => $txnId,
+        'amount'              => $rowAmount,
+        'currency'            => $currency,
+        'payment_mode'        => $paymentMode,
+        'subscription_interval'=> $subInterval,
+        'subscription_status' => ($paymentMode === 'subscription') ? 'active' : 'none',
+        'next_billing_date'   => $localRow['next_billing_date'] ?? ($jsonRow['next_billing_date'] ?? null),
+        'message'             => ($paymentMode === 'subscription')
+            ? "WorldFirst auto-subscription activated successfully! Recurring cycle: {$subInterval}."
+            : 'WorldFirst payment successfully verified and completed.'
     ]);
     exit();
 }
 
 // ── 4. WEBHOOK: Inbound WorldFirst Server-to-Server Notifications ──────────────
 if ($action === 'webhook') {
+    // ── Signature verification ──────────────────────────────────────────────
+    // Without this, anyone could POST a fake "paid" event for any order id.
+    if ($webhookSecret === '') {
+        error_log('WorldFirst webhook rejected: WORLDFIRST_WEBHOOK_SECRET is not configured.');
+        http_response_code(503);
+        echo json_encode(['result' => ['resultStatus' => 'F', 'resultCode' => 'NOT_CONFIGURED', 'resultMessage' => 'Webhook secret not configured']]);
+        exit();
+    }
+    if (!wf_verify_webhook_signature($rawInput, $_SERVER, $webhookSecret)) {
+        error_log('WorldFirst webhook rejected: invalid signature.');
+        http_response_code(401);
+        echo json_encode(['result' => ['resultStatus' => 'F', 'resultCode' => 'INVALID_SIGNATURE', 'resultMessage' => 'Invalid signature']]);
+        exit();
+    }
+
     $payload = $jsonInput ?: $_POST;
     $eventOrderId = $payload['merchantOrderId'] ?? ($payload['orderId'] ?? null);
     $paymentStatus = strtolower($payload['paymentStatus'] ?? ($payload['status'] ?? ''));
@@ -556,6 +733,8 @@ if ($action === 'cancel_subscription') {
         echo json_encode(['success' => false, 'error' => 'Transaction ID required to cancel subscription.']);
         exit();
     }
+    // Only a logged-in staff member may stop an auto-debit mandate.
+    auth_require_permission('addons', true);
 
     if ($pdo) {
         try {
@@ -592,6 +771,9 @@ if ($action === 'cancel_subscription') {
 
 // ── 6. TRANSACTION & SUBSCRIPTION HISTORY ──────────────────────────────────────
 if ($action === 'history') {
+    // Transaction history contains prospect PII (name, email, phone, amount).
+    // It must never be readable by an anonymous visitor.
+    auth_require_permission('addons', true);
     $emailFilter = strtolower(trim($_GET['email'] ?? ($jsonInput['email'] ?? '')));
     $statusFilter = strtolower(trim($_GET['status'] ?? ($jsonInput['status'] ?? '')));
     $modeFilter = strtolower(trim($_GET['mode'] ?? ($jsonInput['mode'] ?? '')));

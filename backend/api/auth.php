@@ -18,17 +18,15 @@
  * ==============================================================================
  */
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json; charset=UTF-8');
+require_once __DIR__ . '/_auth.php';
+
+// Same-origin CORS (locked to SITE_URL) instead of the old wildcard.
+auth_send_cors_headers();
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-
-require_once __DIR__ . '/_auth.php';
 
 $raw = file_get_contents('php://input');
 $data = json_decode($raw, true) ?: [];
@@ -36,11 +34,24 @@ $action = $_GET['action'] ?? ($_POST['action'] ?? ($data['action'] ?? 'session')
 
 /** Guard: only the single super admin can use management actions */
 function auth_require_super() {
-    $u = auth_require_permission();
+    $u = auth_require_permission(null, true);
     if ($u['role'] !== 'super_admin') {
         auth_json_out(false, ['error' => 'Super admin access only.', 'code' => 'forbidden'], 403);
     }
     return $u;
+}
+
+/**
+ * Management actions must be POST + carry a valid CSRF token.
+ * Without this, a GET-based request could mutate state (and a cross-site
+ * <img src> could trigger it, since SameSite cookies only block cross-site POST).
+ */
+function auth_require_secure_mutation() {
+    $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    if ($method !== 'POST') {
+        auth_json_out(false, ['error' => 'This action requires a POST request.', 'code' => 'method_not_allowed'], 405);
+    }
+    auth_verify_csrf();
 }
 
 /** Keep plaintext password in sync (hash + reversible enc) */
@@ -58,18 +69,37 @@ if ($action === 'login') {
         auth_json_out(false, ['error' => 'Username aur password dono required hain.'], 400);
     }
 
+    // Brute-force lockout check before touching credentials.
+    $lock = auth_login_lock_status($username);
+    if ($lock['locked']) {
+        $mins = (int)ceil($lock['retry_after'] / 60);
+        auth_json_out(false, [
+            'error' => "Too many failed login attempts. Please try again in {$mins} minute(s).",
+            'code'  => 'rate_limited',
+            'retry_after' => $lock['retry_after'],
+        ], 429);
+    }
+
     $user = auth_login($username, $password);
     if (!$user) {
         $existing = auth_find_user_any($username);
         if ($existing && empty($existing['active'])) {
             auth_json_out(false, ['error' => 'This account has been disabled. Contact the super admin.'], 403);
         }
-        auth_json_out(false, ['error' => 'Invalid username or password.'], 401);
+        $lock2 = auth_login_lock_status($username);
+        $remaining = max(0, $lock2['remaining']);
+        $msg = 'Invalid username or password.';
+        if ($remaining > 0 && $remaining <= 3) {
+            $msg .= " ({$remaining} attempt(s) left before a temporary lock.)";
+        }
+        auth_json_out(false, ['error' => $msg, 'code' => 'invalid_credentials'], 401);
     }
 
     auth_json_out(true, [
         'message' => 'Login successful',
         'user'    => auth_public_user($user),
+        'csrf_token' => auth_csrf_token(),
+        'must_change_password' => !empty($user['must_change_password']),
     ]);
 }
 
@@ -85,35 +115,46 @@ if ($action === 'session') {
     auth_json_out(true, [
         'authenticated' => (bool)$u,
         'user'          => auth_public_user($u),
+        'csrf_token'    => $u ? auth_csrf_token() : null,
+        'must_change_password' => $u ? !empty($u['must_change_password']) : false,
     ]);
 }
 
 // ── 4. CHANGE OWN PASSWORD ────────────────────────────────────────────────────
 if ($action === 'change_password') {
-    $u = auth_require_permission();
+    // Allowed even while a forced rotation is pending.
+    $u = auth_require_permission(null, true);
     if ($u['role'] === 'super_admin') {
-        auth_json_out(false, ['error' => 'Super admin ka password date-based hai (aaj ki tareekh) — yahan se change nahi hota.'], 403);
+        auth_json_out(false, ['error' => 'Super admin ka password .env se ADMIN_SUPER_PASSWORD mein set hota hai.'], 403);
     }
     $current = (string)($data['current'] ?? '');
     $new = (string)($data['new'] ?? '');
 
-    if (strlen($new) < 6) {
-        auth_json_out(false, ['error' => 'New password must be at least 6 characters.'], 400);
+    if (strlen($new) < 8) {
+        auth_json_out(false, ['error' => 'New password must be at least 8 characters.'], 400);
     }
     if (!password_verify($current, $u['password_hash'] ?? '')) {
         auth_json_out(false, ['error' => 'Current password is incorrect.'], 400);
+    }
+    if (password_verify($new, $u['password_hash'] ?? '')) {
+        auth_json_out(false, ['error' => 'New password must be different from the current one.'], 400);
     }
 
     $users = auth_users();
     foreach ($users as &$user) {
         if ($user['id'] === $u['id']) {
             auth_set_password($user, $new);
+            $user['must_change_password'] = false;
         }
     }
     unset($user);
     auth_save_users($users);
+    auth_users_reset_cache();
     auth_log('change_password', $u['username']);
-    auth_json_out(true, ['message' => 'Password updated successfully']);
+    auth_json_out(true, [
+        'message' => 'Password updated successfully',
+        'user' => auth_public_user(auth_find_user($u['id'], 'id')),
+    ]);
 }
 
 // ── 5. LIST ADMINS (super admin only) ─────────────────────────────────────────
@@ -150,6 +191,7 @@ if ($action === 'admins_credentials') {
 
 // ── 7. CREATE ADMIN (super admin only) ────────────────────────────────────────
 if ($action === 'admins_create') {
+    auth_require_secure_mutation();
     auth_require_super();
 
     $username = trim($data['username'] ?? '');
@@ -197,6 +239,7 @@ if ($action === 'admins_create') {
 
 // ── 8. UPDATE ADMIN (name/email/permissions) ──────────────────────────────────
 if ($action === 'admins_update') {
+    auth_require_secure_mutation();
     auth_require_super();
     $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
@@ -230,6 +273,7 @@ if ($action === 'admins_update') {
 
 // ── 9. ENABLE / DISABLE ADMIN (super admin only) ──────────────────────────────
 if ($action === 'admins_toggle') {
+    auth_require_secure_mutation();
     auth_require_super();
     $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
@@ -267,6 +311,7 @@ if ($action === 'admins_toggle') {
 
 // ── 10. RESET ADMIN PASSWORD (super admin only) ───────────────────────────────
 if ($action === 'admins_reset_password') {
+    auth_require_secure_mutation();
     auth_require_super();
     $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $password = (string)($data['password'] ?? ($_POST['password'] ?? ''));
@@ -295,6 +340,7 @@ if ($action === 'admins_reset_password') {
 
 // ── 11. DELETE ADMIN (super admin only) ───────────────────────────────────────
 if ($action === 'admins_delete') {
+    auth_require_secure_mutation();
     auth_require_super();
     $id = $data['id'] ?? ($_GET['id'] ?? ($_POST['id'] ?? ''));
     $u = $id ? auth_find_user($id, 'id') : null;
@@ -328,7 +374,7 @@ if ($action === 'logs') {
 
 // ── 12. ADMIN ACTIVITY (koi bhi logged-in admin — logs + login times) ─────────
 if ($action === 'activity') {
-    auth_require_permission('adminactivity');
+    auth_require_permission('adminactivity', true);
     $list = array_map('auth_public_user', auth_users());
     $logs = [];
     if (file_exists(auth_log_path())) {
@@ -349,7 +395,7 @@ if ($action === 'activity') {
 // ── 13. CATALOG (labels for permission matrix) ────────────────────────────────
 if ($action === 'catalog') {
     // Login zaroori — koi bhi logged-in admin catalog dekh sakta hai
-    auth_require_permission();
+    auth_require_permission(null, true);
     auth_json_out(true, ['tabs' => AUTH_TAB_LABELS, 'tab_keys' => AUTH_TABS]);
 }
 

@@ -5,11 +5,6 @@
  * ==============================================================================
  */
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json; charset=UTF-8');
-
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -18,9 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once dirname(__DIR__) . '/config/database.php';
 require_once __DIR__ . '/_auth.php';
 
+auth_send_cors_headers();
+
 // Public site GET kar sakti hai, lekin edits 'floorplans' permission chahti hain
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     auth_require_permission('floorplans');
+    auth_require_csrf_if_mutating();
 }
 
 $pdo = getDatabaseConnection();

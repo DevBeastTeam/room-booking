@@ -88,12 +88,90 @@ function auth_log_path() {
     return auth_data_dir() . '/admin_logs.json';
 }
 
+/**
+ * Credential encryption key.
+ *
+ * Priority:
+ *   1. ADMIN_CRED_KEY from .env  (recommended — set a long random string)
+ *   2. A persistent random key stored in backend/data/.cred_key (0600)
+ *      → auto-generated so a forgotten .env can never silently fall back
+ *        to a publicly known key.
+ *
+ * The old hardcoded fallback ('monar-default-cred-key-change-in-env') is
+ * intentionally gone: anyone with the source could decrypt stored passwords.
+ */
 function auth_cred_key() {
     static $key = null;
     if ($key !== null) return $key;
+
     $envVars = loadEnvFile(dirname(__DIR__) . '/config/.env');
-    $key = $envVars['ADMIN_CRED_KEY'] ?? 'monar-default-cred-key-change-in-env';
+    $configured = trim((string)($envVars['ADMIN_CRED_KEY'] ?? ''));
+
+    if ($configured !== '' && !auth_is_default_cred_key($configured)) {
+        $key = $configured;
+        return $key;
+    }
+
+    // Fall back to a persistent, generated key file.
+    $keyFile = auth_data_dir() . '/.cred_key';
+    if (file_exists($keyFile)) {
+        $stored = trim((string)@file_get_contents($keyFile));
+        if ($stored !== '') {
+            $key = $stored;
+            return $key;
+        }
+    }
+    $key = bin2hex(random_bytes(32));
+    @file_put_contents($keyFile, $key);
+    @chmod($keyFile, 0600);
+    error_log('[auth] ADMIN_CRED_KEY missing/default — generated a persistent key at ' . $keyFile
+        . '. Set ADMIN_CRED_KEY in backend/config/.env to a stable value.');
     return $key;
+}
+
+function auth_is_default_cred_key($value) {
+    return $value === 'monar-default-cred-key-change-in-env'
+        || $value === 'monar_secret_setup_key_2026'
+        || $value === '';
+}
+
+/** Env accessor with caching (used across the API layer). */
+function auth_env($key, $default = null) {
+    static $vars = null;
+    if ($vars === null) {
+        $vars = loadEnvFile(dirname(__DIR__) . '/config/.env');
+    }
+    $val = $vars[$key] ?? null;
+    if ($val === null || $val === '') {
+        return $default;
+    }
+    return $val;
+}
+
+/** True when the value looks like an enabled flag ("1", "true", "yes", "on"). */
+function auth_env_flag($key, $default = false) {
+    $val = auth_env($key, null);
+    if ($val === null) return $default;
+    return in_array(strtolower((string)$val), ['1', 'true', 'yes', 'on'], true);
+}
+
+/**
+ * Super admin password source.
+ *
+ * - ADMIN_SUPER_PASSWORD set  → strong, stable password (recommended).
+ * - ADMIN_ALLOW_DATE_PASSWORD = 1 → the legacy "today's day number" password
+ *   is accepted as well. Off by default because the date is guessable.
+ */
+function auth_super_password() {
+    $pw = auth_env('ADMIN_SUPER_PASSWORD', null);
+    if ($pw !== null && trim((string)$pw) !== '') {
+        return (string)$pw;
+    }
+    return null;
+}
+
+function auth_date_password_enabled() {
+    return auth_env_flag('ADMIN_ALLOW_DATE_PASSWORD', false);
 }
 
 /** Reversible AES-256-GCM encrypt (for super-admin credential viewing) */
@@ -206,6 +284,9 @@ function auth_seed_users() {
         $def['password_enc']   = auth_encrypt($plain);
         $def['created_at']     = $now;
         $def['last_login']     = null;
+        // Seeded accounts use a well-known default password → force a rotation
+        // on first login instead of leaving a publicly known credential live.
+        $def['must_change_password'] = auth_env('AUTH_FORCE_PASSWORD_CHANGE', true);
         $users[] = $def;
     }
     auth_save_users($users);
@@ -276,6 +357,7 @@ function auth_public_user($u) {
         'role'       => $u['role'],
         'role_label' => AUTH_ROLES[$u['role']] ?? $u['role'],
         'active'     => (bool)($u['active'] ?? true),
+        'must_change_password' => (bool)($u['must_change_password'] ?? false),
         'permissions' => $u['role'] === 'super_admin'
             ? array_fill_keys(AUTH_TABS, true) // super admin: everything always on
             : (array)($u['permissions'] ?? []),
@@ -286,12 +368,15 @@ function auth_public_user($u) {
 
 // ── Session ────────────────────────────────────────────────────────────────────
 
-/** Developer (super admin) password = aaj ki tareekh (day of month, e.g. 17). */
+/** Developer (super admin) legacy password = aaj ki tareekh (day of month, e.g. 17). */
 function auth_dev_password() {
     return (string)(int)date('j'); // day of month without leading zero
 }
 
-/** Returns all accepted date-based variations to prevent timezone/padding lockouts */
+/**
+ * All accepted date-based password variations (day of month, padded, across a
+ * few timezones) — only honoured when ADMIN_ALLOW_DATE_PASSWORD is enabled.
+ */
 function auth_dev_valid_passwords() {
     $candidates = [];
     // 1. Current configured timezone (Asia/Karachi or APP_TIMEZONE)
@@ -312,12 +397,45 @@ function auth_dev_valid_passwords() {
     return array_values(array_unique($candidates));
 }
 
+/**
+ * Super admin login check.
+ *
+ * 1. ADMIN_SUPER_PASSWORD from .env (timing-safe compare) — recommended.
+ * 2. Legacy date-based password — ONLY when ADMIN_ALLOW_DATE_PASSWORD=1.
+ *    Off by default: the day-of-month is trivially guessable.
+ */
 function auth_is_dev_login($username, $password) {
     $u = strtolower(trim((string)$username));
     $isDevUser = ($u === 'dev' || $u === 'dev@gmail.com' || $u === 'dev@monarpass.com' || $u === 'dev@monarchpass.com');
     if (!$isDevUser) return false;
-    $valid = auth_dev_valid_passwords();
-    return in_array(trim((string)$password), $valid, true);
+
+    $pw = trim((string)$password);
+    if ($pw === '') return false;
+
+    $strong = auth_super_password();
+    if ($strong !== null) {
+        if (hash_equals($strong, $pw)) return true;
+        if (!auth_date_password_enabled()) return false;
+    } elseif (!auth_date_password_enabled()) {
+        // No strong password configured and date passwords are disabled:
+        // there is no way in — fail closed.
+        return false;
+    }
+
+    return in_array($pw, auth_dev_valid_passwords(), true);
+}
+
+/**
+ * Is a super-admin session still valid?
+ * With a strong configured password the session survives the day change;
+ * with date-based logins it expires at midnight (as before).
+ */
+function auth_dev_session_still_valid($loginDay) {
+    if (auth_super_password() !== null) {
+        return true;
+    }
+    if (!auth_date_password_enabled()) return false;
+    return in_array((string)$loginDay, auth_dev_valid_passwords(), true);
 }
 
 /** Super admin user record (single developer account) */
@@ -334,12 +452,12 @@ function auth_current_user() {
         unset($_SESSION['admin_id']);
         return null;
     }
-    // Developer (super admin) password changes daily — session invalidates on
-    // date change (midnight ke baad dobara login karna parega)
+    // Developer (super admin): with a strong configured password the session
+    // stays valid; with legacy date-based logins it expires on date change.
     if ($u['role'] === 'super_admin') {
         $loginDay = $_SESSION['dev_login_day'] ?? null;
-        if ($loginDay === null || !in_array((string)$loginDay, auth_dev_valid_passwords(), true)) {
-            unset($_SESSION['admin_id']);
+        if (!auth_dev_session_still_valid($loginDay)) {
+            unset($_SESSION['admin_id'], $_SESSION['dev_login_day']);
             return null;
         }
     }
@@ -347,10 +465,17 @@ function auth_current_user() {
 }
 
 /** Require a logged-in user; optionally require a specific tab permission. */
-function auth_require_permission($permission = null) {
+function auth_require_permission($permission = null, $allowPasswordChange = false) {
     $u = auth_current_user();
     if (!$u) {
         auth_json_out(false, ['error' => 'Not authenticated. Please log in.', 'code' => 'unauthorized'], 401);
+    }
+    // Forced password rotation: block everything except the change-password flow.
+    if (!$allowPasswordChange && !empty($u['must_change_password'])) {
+        auth_json_out(false, [
+            'error' => 'Please set a new password before continuing.',
+            'code'  => 'password_change_required',
+        ], 403);
     }
     if ($permission !== null && !auth_can($permission)) {
         auth_json_out(false, [
@@ -371,13 +496,182 @@ function auth_can($permission) {
     return !empty($perms[$permission]);
 }
 
+// ── Brute-force protection ─────────────────────────────────────────────────────
+
+function auth_attempts_path() {
+    return auth_data_dir() . '/login_attempts.json';
+}
+
+function auth_attempts_load() {
+    $path = auth_attempts_path();
+    if (!file_exists($path)) return [];
+    $data = json_decode(@file_get_contents($path), true);
+    return is_array($data) ? $data : [];
+}
+
+function auth_attempts_save(array $data) {
+    @file_put_contents(auth_attempts_path(), json_encode($data, JSON_PRETTY_PRINT));
+}
+
+/** Stable key for a login attempt: username + client IP. */
+function auth_attempt_key($username) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    return strtolower(trim((string)$username)) . '|' . $ip;
+}
+
+/**
+ * How many failed attempts are allowed before the account is temporarily
+ * locked. Overridable with AUTH_MAX_LOGIN_ATTEMPTS.
+ */
+function auth_max_login_attempts() {
+    $v = (int)auth_env('AUTH_MAX_LOGIN_ATTEMPTS', 8);
+    return $v > 0 ? $v : 8;
+}
+
+/** Lock duration in seconds. Overridable with AUTH_LOCKOUT_MINUTES. */
+function auth_lockout_seconds() {
+    $m = (int)auth_env('AUTH_LOCKOUT_MINUTES', 15);
+    return ($m > 0 ? $m : 15) * 60;
+}
+
+/**
+ * @return array{locked:bool, remaining:int, retry_after:int}
+ */
+function auth_login_lock_status($username) {
+    $key = auth_attempt_key($username);
+    $all = auth_attempts_load();
+    $rec = $all[$key] ?? null;
+    if (!$rec || empty($rec['fails'])) {
+        return ['locked' => false, 'remaining' => auth_max_login_attempts(), 'retry_after' => 0];
+    }
+    $max = auth_max_login_attempts();
+    if ((int)$rec['fails'] < $max) {
+        return ['locked' => false, 'remaining' => $max - (int)$rec['fails'], 'retry_after' => 0];
+    }
+    $lastFail = (int)($rec['last_fail'] ?? 0);
+    $elapsed = time() - $lastFail;
+    if ($elapsed >= auth_lockout_seconds()) {
+        // Lock expired — reset the counter.
+        unset($all[$key]);
+        auth_attempts_save($all);
+        return ['locked' => false, 'remaining' => $max, 'retry_after' => 0];
+    }
+    return [
+        'locked' => true,
+        'remaining' => 0,
+        'retry_after' => auth_lockout_seconds() - $elapsed,
+    ];
+}
+
+function auth_login_record_failure($username) {
+    $key = auth_attempt_key($username);
+    $all = auth_attempts_load();
+    $rec = $all[$key] ?? ['fails' => 0];
+    $rec['fails'] = (int)($rec['fails'] ?? 0) + 1;
+    $rec['last_fail'] = time();
+    $all[$key] = $rec;
+
+    // Keep the file bounded — drop entries that are old and unlocked.
+    $cutoff = time() - (auth_lockout_seconds() * 4);
+    foreach ($all as $k => $v) {
+        if ((int)($v['last_fail'] ?? 0) < $cutoff) {
+            unset($all[$k]);
+        }
+    }
+    auth_attempts_save($all);
+}
+
+function auth_login_clear_failures($username) {
+    $key = auth_attempt_key($username);
+    $all = auth_attempts_load();
+    if (isset($all[$key])) {
+        unset($all[$key]);
+        auth_attempts_save($all);
+    }
+}
+
+// ── CSRF protection ────────────────────────────────────────────────────────────
+
+/** Per-session CSRF token (sent to the frontend via auth.php?action=session). */
+function auth_csrf_token() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Verify the CSRF token for state-changing requests.
+ * The token travels in the X-CSRF-Token header.
+ */
+function auth_verify_csrf() {
+    $sent = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if ($sent === '') {
+        $body = json_decode(file_get_contents('php://input'), true);
+        if (is_array($body) && !empty($body['csrf_token'])) {
+            $sent = (string)$body['csrf_token'];
+        }
+    }
+    $expected = $_SESSION['csrf_token'] ?? '';
+    if ($expected === '' || $sent === '' || !hash_equals($expected, $sent)) {
+        auth_json_out(false, [
+            'error' => 'Security token missing or invalid. Please refresh the page and try again.',
+            'code' => 'csrf_failed',
+        ], 403);
+    }
+    return true;
+}
+
+/**
+ * Call at the top of every state-changing admin endpoint.
+ * GET/HEAD/OPTIONS are never checked (they must not mutate state).
+ */
+function auth_require_csrf_if_mutating() {
+    $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    if (in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) return;
+    auth_verify_csrf();
+}
+
+/** Same-origin CORS — locked to SITE_URL instead of the old wildcard. */
+function auth_send_cors_headers() {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $allowed = auth_env('SITE_URL', '');
+
+    header('Content-Type: application/json; charset=UTF-8');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+
+    if ($origin !== '' && $allowed !== '') {
+        $allowedList = array_filter(array_map('trim', explode(',', $allowed)));
+        if (in_array($origin, $allowedList, true)) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+            header('Access-Control-Allow-Credentials: true');
+            header('Vary: Origin');
+        }
+    } elseif ($origin === '') {
+        // Same-origin request (no Origin header) — nothing to negotiate.
+    }
+    header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token, X-Requested-With');
+    header('Access-Control-Max-Age: 600');
+}
+
 function auth_login($username, $password) {
-    // ── Developer (super admin): username 'dev' + password = aaj ki tareekh ──
+    // ── Brute-force guard: temporarily lock the username+IP after N failures
+    $lock = auth_login_lock_status($username);
+    if ($lock['locked']) {
+        auth_log('login_locked', 'Username: ' . $username);
+        return null;
+    }
+
+    // ── Developer (super admin): username 'dev' + strong password (or legacy date) ──
     if (auth_is_dev_login($username, $password)) {
         $dev = auth_dev_user();
         if ($dev && !empty($dev['active'])) {
             $_SESSION['admin_id'] = $dev['id'];
             $_SESSION['dev_login_day'] = auth_dev_password();
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            auth_login_clear_failures($username);
             // Update last login
             $users = auth_users();
             foreach ($users as &$user) {
@@ -390,6 +684,7 @@ function auth_login($username, $password) {
             auth_log('login_success', $dev['username'] . ' (super_admin)');
             return $dev;
         }
+        auth_login_record_failure($username);
         auth_log('login_failed', 'Username: ' . $username);
         return null;
     }
@@ -401,14 +696,18 @@ function auth_login($username, $password) {
         $pwdMatch = password_verify($password, $u['password_hash']) || password_verify(trim($password), $u['password_hash']);
     }
     if (!$u || !$pwdMatch) {
+        auth_login_record_failure($username);
         auth_log('login_failed', 'Username: ' . $username);
         return null;
     }
     if (empty($u['active'])) {
+        auth_login_record_failure($username);
         auth_log('login_blocked', 'Username: ' . $username . ' (account disabled)');
         return null;
     }
     $_SESSION['admin_id'] = $u['id'];
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    auth_login_clear_failures($username);
     // Update last login
     $users = auth_users();
     foreach ($users as &$user) {
@@ -425,6 +724,6 @@ function auth_login($username, $password) {
 function auth_logout() {
     $u = auth_current_user();
     if ($u) auth_log('logout', $u['username']);
-    unset($_SESSION['admin_id']);
+    unset($_SESSION['admin_id'], $_SESSION['dev_login_day'], $_SESSION['csrf_token']);
     session_destroy();
 }
