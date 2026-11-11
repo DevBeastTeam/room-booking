@@ -72,7 +72,20 @@ Uske baad: `./deploy/deploy-hostinger.sh`
 
 ---
 
-## 🅲️ Option C — Git (agar hPanel me repo already connected hai)
+## 🅲️ Option C — GitHub Actions (CI + ready-to-upload package)
+
+Har push par `.github/workflows/ci-deploy.yml` chalta hai: lint → build → PHP syntax check →
+**secret leak check** → `deploy.zip` package → artifact upload.
+
+**Aap khud package download kar sakte hain:**
+1. GitHub repo → **Actions** tab → latest run → **Artifacts** → `monar-pass-deploy-package`
+2. Usme `deploy.zip` milega → hPanel File Manager me `public_html` me upload + Extract
+
+Ya phir repo me se khud: `npm run build && cd dist && zip -qr ../deploy.zip .`
+
+---
+
+## 🅳️ Option D — Git (agar hPanel me repo already connected hai)
 
 Agar hPanel → **Advanced → Git** me yeh repo connected hai, to main ne already
 GitHub par push kar diya hai (`master` → `cbd7122`+). Bas hPanel me **Pull**

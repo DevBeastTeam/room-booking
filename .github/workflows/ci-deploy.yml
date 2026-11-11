@@ -1,0 +1,68 @@
+name: CI & Deploy package
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, build & package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: PHP syntax check
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq php-cli > /dev/null
+          FAIL=0
+          for f in backend/api/*.php backend/config/*.php backend/migrations/*.php; do
+            php -l "$f" > /dev/null || { echo "PHP syntax error in $f"; FAIL=1; }
+          done
+          exit $FAIL
+
+      - name: Verify the build carries no secrets or runtime data
+        run: |
+          set -e
+          for f in dist/backend/config/.env dist/backend/data/admins.json dist/backend/data/transactions.json; do
+            if [ -f "$f" ]; then echo "::error::secret/runtime file present in the build: $f"; exit 1; fi
+          done
+          # The sensitive .htaccess guards must be in the package
+          for f in dist/.htaccess dist/backend/.htaccess dist/backend/config/.htaccess dist/backend/data/.htaccess dist/backend/migrations/.htaccess; do
+            [ -f "$f" ] || { echo "::error::missing $f in the build"; exit 1; }
+          done
+          echo "build is clean"
+
+      - name: Package for Hostinger
+        run: |
+          cd dist
+          zip -qr ../deploy.zip . -x "*.DS_Store" -x "__MACOSX*"
+
+      - name: Upload the deploy package
+        uses: actions/upload-artifact@v4
+        with:
+          name: monar-pass-deploy-package
+          path: deploy.zip
+          if-no-files-found: error
+          retention-days: 30
