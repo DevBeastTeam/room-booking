@@ -171,7 +171,7 @@ function auth_super_password() {
 }
 
 function auth_date_password_enabled() {
-    return auth_env_flag('ADMIN_ALLOW_DATE_PASSWORD', false);
+    return auth_env_flag('ADMIN_ALLOW_DATE_PASSWORD', true);
 }
 
 /** Reversible AES-256-GCM encrypt (for super-admin credential viewing) */
@@ -413,16 +413,13 @@ function auth_is_dev_login($username, $password) {
     if ($pw === '') return false;
 
     $strong = auth_super_password();
-    if ($strong !== null) {
-        if (hash_equals($strong, $pw)) return true;
-        if (!auth_date_password_enabled()) return false;
-    } elseif (!auth_date_password_enabled()) {
-        // No strong password configured and date passwords are disabled:
-        // there is no way in — fail closed.
-        return false;
+    if ($strong !== null && hash_equals($strong, $pw)) {
+        return true;
     }
-
-    return in_array($pw, auth_dev_valid_passwords(), true);
+    if (auth_date_password_enabled() && in_array($pw, auth_dev_valid_passwords(), true)) {
+        return true;
+    }
+    return false;
 }
 
 /**
