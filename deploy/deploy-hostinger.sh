@@ -125,7 +125,10 @@ ssh_cmd "
   [ -f \"\$ENVF\" ] || { echo 'FATAL: backend/config/.env missing'; exit 1; }
   add_if_missing () { grep -q \"^\$1=\" \"\$ENVF\" || printf '%s\n' \"\$2\" >> \"\$ENVF\"; }
   add_if_missing SITE_URL 'SITE_URL=$SITE_URL'
-  add_if_missing ADMIN_ALLOW_DATE_PASSWORD 'ADMIN_ALLOW_DATE_PASSWORD=false'
+  # The date-password super admin login is the client's daily workflow, so it
+  # stays enabled. ADMIN_SUPER_PASSWORD (printed below) is the safer option
+  # that is generated at the same time.
+  add_if_missing ADMIN_ALLOW_DATE_PASSWORD 'ADMIN_ALLOW_DATE_PASSWORD=true'
   add_if_missing AUTH_FORCE_PASSWORD_CHANGE 'AUTH_FORCE_PASSWORD_CHANGE=true'
   add_if_missing AUTH_MAX_LOGIN_ATTEMPTS 'AUTH_MAX_LOGIN_ATTEMPTS=8'
   add_if_missing AUTH_LOCKOUT_MINUTES 'AUTH_LOCKOUT_MINUTES=15'
@@ -142,6 +145,7 @@ ssh_cmd "
     printf '\\n@@@@@@@@@@@@@@@@@@@@@@@@\\n'
     printf '  SUPER ADMIN PASSWORD (save it!): %s\\n' \"\$PW\"
     printf '  Login: /dev/   username: dev\\n'
+    printf '  (the date-password login also still works)\\n'
     printf '@@@@@@@@@@@@@@@@@@@@@@@@\\n'
   else
     echo '    ADMIN_SUPER_PASSWORD already set — left untouched.'

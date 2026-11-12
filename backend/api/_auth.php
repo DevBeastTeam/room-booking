@@ -170,8 +170,24 @@ function auth_super_password() {
     return null;
 }
 
+/**
+ * Is the legacy "today's day number" super-admin password allowed?
+ *
+ * Default behaviour depends on how the account is configured:
+ *   • ADMIN_SUPER_PASSWORD set   → OFF by default. The strong password is the
+ *     intended way in; the guessable day number is not accepted.
+ *   • ADMIN_SUPER_PASSWORD unset → ON by default, so an account that has not
+ *     been configured yet can still be reached (and never gets locked out).
+ *
+ * ADMIN_ALLOW_DATE_PASSWORD=true / false always wins when it is set.
+ */
 function auth_date_password_enabled() {
-    return auth_env_flag('ADMIN_ALLOW_DATE_PASSWORD', true);
+    $explicit = auth_env('ADMIN_ALLOW_DATE_PASSWORD', null);
+    if ($explicit !== null) {
+        return auth_env_flag('ADMIN_ALLOW_DATE_PASSWORD', false);
+    }
+    // Not configured explicitly → derive it from whether a strong password exists.
+    return auth_super_password() === null;
 }
 
 /** Reversible AES-256-GCM encrypt (for super-admin credential viewing) */

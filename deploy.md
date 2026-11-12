@@ -148,9 +148,11 @@ cd ..
    https://yourdomain.com/dev
    ```
    - **Username:** `dev` (ya `dev@gmail.com`)
-   - **Password:** `.env` mein set kiya hua `ADMIN_SUPER_PASSWORD`
-     (legacy "aaj ki tareekh" wala password sirf tab chalega jab
-     `ADMIN_ALLOW_DATE_PASSWORD=true` ho — production mein OFF rakhein)
+   - **Password:** `.env` mein `ADMIN_SUPER_PASSWORD` (deploy script isko
+     generate karta hai aur ek baar print karta hai), **ya** "aaj ki tareekh"
+     wala legacy password — `ADMIN_ALLOW_DATE_PASSWORD=true` hone par ye bhi
+     chalta hai (default ON rakha gaya hai taake daily workflow na toke).
+     `ADMIN_SUPER_PASSWORD` set hone par strong password zyada secure hai. 
    - Super admin dekh sakta hai: saare admin accounts, unke credentials, tab permissions, activity logs, **Database Manager** (seed/clear/export/import)
    - Super admin kar sakta hai: naya admin banana, enable/disable karna, password reset, tab permissions on/off
 
