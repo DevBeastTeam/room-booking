@@ -236,7 +236,7 @@ export default function Widgets({ onOpenScheduleTour }) {
       <button
         onClick={() => setActiveModal(activeModal === 'accessibility' ? null : 'accessibility')}
         className="accessibility-floating-btn"
-        aria-label="Open Accessibility Options"
+                    aria-label="Open Accessibility Options"
         style={{
           position: 'fixed',
           bottom: '24px',
@@ -348,11 +348,48 @@ export default function Widgets({ onOpenScheduleTour }) {
             fontFamily: 'inherit',
           }}
         >
+          {/* Persistent chat launcher — always visible, it is the primary
+              contact channel and must never be hidden behind the menu toggle. */}
+          <button
+            onClick={() => { syncChatState(); setActiveModal('chat'); }}
+            className="concierge-chat-launcher"
+                    aria-label="Chat with the leasing team"
+            style={{
+              order: 3,
+              marginTop: '0.6rem',
+              width: '54px',
+              height: '54px',
+              borderRadius: '50%',
+              background: 'var(--btn-gold-bg, linear-gradient(135deg, #dfc285 0%, #c9a96e 100%))',
+              border: 'none',
+              color: 'var(--btn-gold-text, #08090f)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(201, 169, 110, 0.4)',
+              position: 'relative',
+              transition: 'transform 0.2s ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+          >
+            <MessageSquare size={22} />
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute', top: '3px', right: '3px',
+                width: '11px', height: '11px', borderRadius: '50%',
+                background: '#22c55e', border: '2px solid var(--card-bg, #0c101c)',
+              }}
+            />
+          </button>
+
           {/* Collapse / Expand Toggle Button */}
           <button
             onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
             className="header-tap"
-            aria-label="Toggle widget menu"
+                    aria-label="Toggle widget menu"
             style={{
               backgroundColor: 'var(--card-bg, #0c101c)',
               border: '1px solid var(--card-border, rgba(201, 169, 110, 0.3))',
@@ -396,33 +433,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                 transition: 'background-color 0.3s ease, border-color 0.3s ease',
               }}
             >
-              {/* 1. Chat with us (Clean unified design, no artificial gold background) */}
-              <button
-                onClick={() => { syncChatState(); setActiveModal('chat'); }}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'var(--text-main, #f4efe6)',
-                  padding: '0.85rem 1.1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  border: 'none',
-                  borderBottom: '1px solid var(--border-color, rgba(201, 169, 110, 0.15))',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--card-inner-bg, rgba(201, 169, 110, 0.12))')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
-                  <MessageSquare size={18} style={{ color: 'var(--primary-color, #dfc285)' }} />
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-main, #f4efe6)' }}>
-                    <strong style={{ color: 'var(--primary-color, #dfc285)' }}>Chat</strong> Concierge
-                  </span>
-                </div>
-                <ChevronRight size={16} style={{ color: 'var(--text-muted, #94a3b8)' }} />
-              </button>
+              {/* The chat entry point lives in the persistent launcher below,
+                  so it is not repeated here. */}
 
               {/* 2. Book a tour */}
               <button
@@ -517,7 +529,7 @@ export default function Widgets({ onOpenScheduleTour }) {
           ) : (
             <button
               onClick={() => setIsMenuCollapsed(false)}
-              aria-label="Open widget menu"
+                    aria-label="Open widget menu"
               style={{
                 width: '54px',
                 height: '54px',
@@ -635,7 +647,8 @@ export default function Widgets({ onOpenScheduleTour }) {
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)' }}>
                 Set your name and email so our leasing team can follow up with you:
               </div>
-              <input
+          <input
+            aria-label="Your Name"
                 type="text"
                 placeholder="Your Name (e.g. John Doe)"
                 value={editName}
@@ -650,7 +663,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                   outline: 'none',
                 }}
               />
-              <input
+          <input
+            aria-label="Your Email"
                 type="email"
                 placeholder="Your Email (e.g. john@example.com)"
                 value={editEmail}
@@ -951,7 +965,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                       3. Your Information
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                      <input
+          <input
+            aria-label="First Name"
                         type="text"
                         placeholder="First Name*"
                         required
@@ -959,7 +974,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                         onChange={(e) => setTourForm({ ...tourForm, firstName: e.target.value })}
                         style={{ padding: '0.55rem 0.75rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                       />
-                      <input
+          <input
+            aria-label="Last Name"
                         type="text"
                         placeholder="Last Name*"
                         required
@@ -967,7 +983,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                         onChange={(e) => setTourForm({ ...tourForm, lastName: e.target.value })}
                         style={{ padding: '0.55rem 0.75rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                       />
-                      <input
+          <input
+            aria-label="Email Address"
                         type="email"
                         placeholder="Email Address*"
                         required
@@ -975,7 +992,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                         onChange={(e) => setTourForm({ ...tourForm, email: e.target.value })}
                         style={{ padding: '0.55rem 0.75rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                       />
-                      <input
+          <input
+            aria-label="Phone Number"
                         type="tel"
                         placeholder="Phone Number*"
                         required
@@ -1065,7 +1083,8 @@ export default function Widgets({ onOpenScheduleTour }) {
             ) : (
               <form onSubmit={handleEmailSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
-                  <input
+          <input
+            aria-label="First name"
                     type="text"
                     placeholder="First name*"
                     required
@@ -1073,7 +1092,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                     onChange={(e) => setEmailForm({ ...emailForm, firstName: e.target.value })}
                     style={{ padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                   />
-                  <input
+          <input
+            aria-label="Last name"
                     type="text"
                     placeholder="Last name*"
                     required
@@ -1082,7 +1102,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                     style={{ padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                   />
                 </div>
-                <input
+          <input
+            aria-label="Email"
                   type="email"
                   placeholder="Email*"
                   required
@@ -1090,14 +1111,16 @@ export default function Widgets({ onOpenScheduleTour }) {
                   onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
                   style={{ padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                 />
-                <input
+          <input
+            aria-label="Phone number"
                   type="tel"
                   placeholder="Phone number"
                   value={emailForm.phone}
                   onChange={(e) => setEmailForm({ ...emailForm, phone: e.target.value })}
                   style={{ padding: '0.65rem 0.85rem', borderRadius: '6px', border: '1px solid var(--input-border, var(--border-color))', backgroundColor: 'var(--input-bg, var(--card-inner-bg))', color: 'var(--text-main)', fontSize: '0.85rem' }}
                 />
-                <textarea
+          <textarea
+            aria-label="Your message"
                   placeholder="Your message*"
                   required
                   rows={4}
@@ -1224,7 +1247,8 @@ export default function Widgets({ onOpenScheduleTour }) {
                 </div>
               ) : (
                 <form onSubmit={handleTextSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
+          <input
+            aria-label="Enter phone"
                     type="tel"
                     placeholder="Enter phone"
                     required

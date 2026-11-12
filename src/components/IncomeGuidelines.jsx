@@ -449,6 +449,7 @@ export default function IncomeGuidelines({
               </span>
               <input
                 type="number"
+                aria-label="Annual household income"
                 placeholder={`e.g. ${selectedTier.ami60}`}
                 value={calcIncome}
                 onChange={(e) => setCalcIncome(e.target.value)}

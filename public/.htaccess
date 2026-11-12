@@ -67,7 +67,11 @@ DirectoryIndex index.html index.php
 
     # Clickjacking / embedding protection
     Header set X-Frame-Options "SAMEORIGIN"
-    Header set Content-Security-Policy "default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; frame-src 'self' https://www.google.com https://maps.google.com https://*.matterport.com"
+    # frame-src must list every host we actually embed:
+    #   tour.tourbuilder.com  -> the 3D virtual tour iframe
+    #   maps.google.com       -> the location map iframe
+    #   *.matterport.com      -> Matterport tours (kept for future use)
+    Header set Content-Security-Policy "default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; frame-src 'self' https://tour.tourbuilder.com https://maps.google.com https://www.google.com https://*.matterport.com; child-src 'self' https://tour.tourbuilder.com https://maps.google.com"
 
     # HSTS (only meaningful over HTTPS, which Hostinger enforces)
     Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"

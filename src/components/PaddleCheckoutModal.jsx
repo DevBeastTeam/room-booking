@@ -495,7 +495,8 @@ export default function PaddleCheckoutModal({
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Full Legal Name *
                   </label>
-                  <input
+          <input
+            aria-label="Sarah Jenkins"
                     type="text"
                     required
                     placeholder="e.g. Sarah Jenkins"
@@ -518,7 +519,8 @@ export default function PaddleCheckoutModal({
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Email Address *
                   </label>
-                  <input
+          <input
+            aria-label="sarah@example.com"
                     type="email"
                     required
                     placeholder="sarah@example.com"
@@ -543,7 +545,8 @@ export default function PaddleCheckoutModal({
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Phone Number
                   </label>
-                  <input
+          <input
+            aria-label="817-555-0199"
                     type="tel"
                     placeholder="817-555-0199"
                     value={phone}
@@ -565,7 +568,8 @@ export default function PaddleCheckoutModal({
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>
                     Target Unit # (Optional)
                   </label>
-                  <input
+          <input
+            aria-label="2104"
                     type="text"
                     placeholder="e.g. 2104"
                     value={unitNumber}

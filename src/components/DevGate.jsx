@@ -197,6 +197,8 @@ function DevLoginForm({ onLoginSuccess }) {
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
+                className="header-tap"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 style={{
                   position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
                   background: 'none', border: 'none', color: S.muted, cursor: 'pointer', padding: 6,
@@ -247,7 +249,7 @@ function DevLoginForm({ onLoginSuccess }) {
             textAlign: 'center', marginTop: '1.25rem', paddingTop: '1.1rem',
             borderTop: `1px solid ${S.border}`,
           }}>
-            <a href="/admin" style={{ color: S.muted, fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
+            <a href="/admin" className="header-tap" style={{ color: S.muted, fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
               ← Client Admin Panel
             </a>
           </div>

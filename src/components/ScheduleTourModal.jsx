@@ -346,6 +346,8 @@ export default function ScheduleTourModal({
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <input
+                    id="tour-date"
+                    aria-label="Tour date"
                     type="date"
                     value={tourDate}
                     onChange={(e) => setTourDate(e.target.value)}
@@ -363,6 +365,8 @@ export default function ScheduleTourModal({
                   />
                   <div style={{ position: 'relative' }}>
                     <select
+                      id="tour-time"
+                      aria-label="Tour time"
                       value={tourTime}
                       onChange={(e) => setTourTime(e.target.value)}
                       style={{
@@ -418,6 +422,8 @@ export default function ScheduleTourModal({
                 {/* First name & Last name */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                   <input
+                    id="tour-first-name"
+                    aria-label="First name"
                     type="text"
                     placeholder="First name *"
                     value={firstName}
@@ -435,6 +441,8 @@ export default function ScheduleTourModal({
                     }}
                   />
                   <input
+                    id="tour-last-name"
+                    aria-label="Last name"
                     type="text"
                     placeholder="Last name *"
                     value={lastName}
@@ -456,6 +464,8 @@ export default function ScheduleTourModal({
                 {/* Email */}
                 <div style={{ marginBottom: '0.75rem' }}>
                   <input
+                    id="tour-email"
+                    aria-label="Email address"
                     type="email"
                     placeholder="Email address *"
                     value={email}
@@ -477,6 +487,8 @@ export default function ScheduleTourModal({
                 {/* Phone & Move Date */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <input
+                    id="tour-phone"
+                    aria-label="Phone number"
                     type="tel"
                     placeholder="Phone number *"
                     value={phone}
@@ -494,6 +506,8 @@ export default function ScheduleTourModal({
                     }}
                   />
                   <input
+                    id="tour-target-move-date"
+                    aria-label="Target move date"
                     type="text"
                     placeholder="Target Move Date"
                     value={moveDate}
@@ -532,6 +546,8 @@ export default function ScheduleTourModal({
                   Special Requests or Questions
                 </label>
                 <textarea
+                  id="tour-notes"
+                  aria-label="Notes or questions"
                   placeholder="Share any preferred layouts, move-in flexibility, or questions..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

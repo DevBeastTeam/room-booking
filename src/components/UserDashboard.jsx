@@ -639,16 +639,16 @@ function MaintenanceSection({ maintenance, onRefresh, csrfToken }) {
           <div className="mp-auto-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
             {[['Issue Title', 'title', 'text', 'e.g. Leaking faucet'], ['Category', 'category', 'select', ''], ['Priority', 'priority', 'select', '']].map(([label, key, type, ph]) => (
               <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <label style={{ color: C.muted, fontSize: '0.78rem', fontWeight: 600 }}>{label}</label>
+                <label htmlFor={`resident-maint-${key}`} style={{ color: C.muted, fontSize: '0.78rem', fontWeight: 600 }}>{label}</label>
                 {type === 'select' ? (
-                  <select value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  <select id={`resident-maint-${key}`} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
                     style={{ padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem' }}>
                     {key === 'category'
                       ? ['Plumbing', 'Electrical', 'HVAC', 'Appliance', 'Exterior', 'General'].map(o => <option key={o}>{o}</option>)
                       : ['Low', 'Medium', 'High'].map(o => <option key={o}>{o}</option>)}
                   </select>
                 ) : (
-                  <input type={type} placeholder={ph} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  <input id={`resident-maint-${key}`} type={type} aria-label={label} placeholder={ph} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
                     style={{ padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem' }} />
                 )}
               </div>
@@ -656,7 +656,8 @@ function MaintenanceSection({ maintenance, onRefresh, csrfToken }) {
           </div>
           <div style={{ marginBottom: '0.75rem' }}>
             <label style={{ color: C.muted, fontSize: '0.78rem', fontWeight: 600, display: 'block', marginBottom: '0.35rem' }}>Description</label>
-            <textarea rows={3} placeholder="Describe the issue in detail..." value={form.desc} onChange={e => setForm({ ...form, desc: e.target.value })}
+             <textarea
+                    aria-label="Describe the issue in detail..." rows={3} placeholder="Describe the issue in detail..." value={form.desc} onChange={e => setForm({ ...form, desc: e.target.value })}
               style={{ width: '100%', padding: '0.6rem 0.8rem', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, fontSize: '0.85rem', resize: 'vertical', boxSizing: 'border-box' }} />
           </div>
           <div style={{ display: 'flex', gap: '0.6rem' }}>

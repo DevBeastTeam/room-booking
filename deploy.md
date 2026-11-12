@@ -135,6 +135,14 @@ cd ..
      rotate karna hoga.
    - Super admin har admin ke liye decide karta hai ke usay kaun kaun si **sidebar tabs** dikhein (Floor Plans, Units, Applications, etc.)
 
+   > **🔑 Credentials ka exact source** — panel ke andar, sirf super admin dekh sakta hai:
+   > `/dev/` → **Admin Accounts & Login Times** → har account ke saamne **View credentials**.
+   > Yahan likha hua password hi asli hai. Is documentation ke default passwords
+   > (`admin@2026`, `manager123`, `admin2026` wagairah) **kabhi use na karein** —
+   > wo purane the aur ab login nahi hote. Agar login fail ho to `/dev/` se
+   > **Reset password** karein, ya `.env` ke `ADMIN_SUPER_PASSWORD` se super admin
+   > login karein.
+
 3. **Super Admin / Developer Panel:**
    ```text
    https://yourdomain.com/dev
@@ -145,6 +153,10 @@ cd ..
      `ADMIN_ALLOW_DATE_PASSWORD=true` ho — production mein OFF rakhein)
    - Super admin dekh sakta hai: saare admin accounts, unke credentials, tab permissions, activity logs, **Database Manager** (seed/clear/export/import)
    - Super admin kar sakta hai: naya admin banana, enable/disable karna, password reset, tab permissions on/off
+
+   > **⚠️ Agar super admin login na ho:** `.env` mein `ADMIN_SUPER_PASSWORD` set
+   > karein, phir `deploy/deploy-hostinger.sh` dobara chalayein — script missing
+   > security variables khud add kar deta hai aur naya password print karta hai.
 
 4. **Resident Portal:**
    ```text

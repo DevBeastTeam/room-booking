@@ -300,6 +300,7 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
         {/* Filter 5: Move-in Date */}
         <div style={{ position: 'relative', flex: '1 1 160px', display: 'flex', alignItems: 'center' }}>
           <input
+            aria-label="Move-in Date"
             type="date"
             placeholder="Move-in Date"
             value={moveInFilterDate}
@@ -320,6 +321,7 @@ export default function FloorPlansGallery({ onSelectCalculate, onOpenGuidedTour 
         {/* Filter 6: Apartment Number Search */}
         <div style={{ position: 'relative', flex: '1 1 170px' }}>
           <input
+            aria-label="Apartment # Search"
             type="text"
             placeholder="Apartment # Search"
             value={apartmentNumberQuery}

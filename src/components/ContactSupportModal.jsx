@@ -152,7 +152,7 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
               handleReset();
               onClose();
             }}
-            aria-label="Close modal"
+                    aria-label="Close modal"
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(201, 169, 110, 0.25)',
@@ -277,7 +277,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                   </label>
                   <div style={{ position: 'relative' }}>
                     <User size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#c9a96e' }} />
-                    <input
+          <input
+            aria-label="Alex Morgan"
                       type="text"
                       required
                       placeholder="e.g. Alex Morgan"
@@ -304,7 +305,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                   </label>
                   <div style={{ position: 'relative' }}>
                     <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#c9a96e' }} />
-                    <input
+          <input
+            aria-label="alex@example.com"
                       type="email"
                       required
                       placeholder="alex@example.com"
@@ -334,7 +336,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                   </label>
                   <div style={{ position: 'relative' }}>
                     <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#c9a96e' }} />
-                    <input
+          <input
+            aria-label="+1 (817) 000-0000"
                       type="tel"
                       placeholder="+1 (817) 000-0000"
                       value={formData.phone}
@@ -387,7 +390,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                   Subject Line
                 </label>
-                <input
+          <input
+            aria-label="Inquiring about 2-Bedroom availability next month"
                   type="text"
                   placeholder="e.g. Inquiring about 2-Bedroom availability next month"
                   value={formData.subject}
@@ -411,7 +415,8 @@ export default function ContactSupportModal({ isOpen, onClose, siteSettings, onI
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#c9a96e', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
                   Message Details <span style={{ color: '#ef4444' }}>*</span>
                 </label>
-                <textarea
+          <textarea
+            aria-label="Tell us about your timeline, household size, or specific questions..."
                   required
                   rows={4}
                   placeholder="Tell us about your timeline, household size, or specific questions..."

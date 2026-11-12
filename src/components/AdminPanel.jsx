@@ -1485,7 +1485,8 @@ function LiveChatSection() {
           <div style={{ padding: '0.75rem', borderBottom: `1px solid ${A.border}` }}>
             <div style={{ position: 'relative' }}>
               <Search size={13} style={{ position: 'absolute', left: 8, top: 10, color: A.muted }} />
-              <input type="text" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)}
+          <input
+            aria-label="Search users..." type="text" placeholder="Search users..." value={search} onChange={e => setSearch(e.target.value)}
                 style={{ width: '100%', padding: '0.4rem 0.6rem 0.4rem 1.75rem', backgroundColor: A.card2, border: `1px solid ${A.border}`, borderRadius: 8, color: A.text, fontSize: '0.78rem', outline: 'none', boxSizing: 'border-box' }} />
             </div>
           </div>
@@ -1737,6 +1738,7 @@ function ContactSupportSection({ supportInquiries = [], setSupportInquiries }) {
         <div style={{ position: 'relative', minWidth: '240px' }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: 11, color: A.muted }} />
           <input
+            aria-label="Search inquiries or sender..."
             type="text"
             placeholder="Search inquiries or sender..."
             value={search}
@@ -1971,6 +1973,7 @@ function ContactSupportSection({ supportInquiries = [], setSupportInquiries }) {
               </div>
               <textarea
                 rows={3}
+                aria-label={`Message to send to ${selectedInquiry.email}`}
                 placeholder={`Type message to send to ${selectedInquiry.email}...`}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
@@ -2019,7 +2022,8 @@ function ContactSupportSection({ supportInquiries = [], setSupportInquiries }) {
               <div style={{ fontSize: '0.78rem', color: A.muted, fontWeight: 700, marginBottom: '0.4rem' }}>
                 Internal Admin Notes / Activity Log:
               </div>
-              <textarea
+          <textarea
+            aria-label="Add private staff notes..."
                 rows={2}
                 placeholder="Add private staff notes..."
                 value={adminNote}
@@ -3967,7 +3971,7 @@ export default function AdminPanel({
             {isCompact && (
               <button
                 onClick={() => setSidebarOpen(true)}
-                aria-label="Open admin menu"
+                    aria-label="Open admin menu"
                 style={{
                   background: 'transparent', border: `1px solid ${A.border}`, color: A.text,
                   borderRadius: 8, padding: '0.45rem', display: 'flex', alignItems: 'center',
